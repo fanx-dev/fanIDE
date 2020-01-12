@@ -1,1 +1,8 @@
-/build/
+\.orig$
+\.orig\..*$
+\.chg\..*$
+\.rej$
+\.conflict\~$
+build
+release
+*/nbproject/private
