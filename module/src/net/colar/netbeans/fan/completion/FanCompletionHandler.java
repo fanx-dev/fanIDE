@@ -177,8 +177,15 @@ public class FanCompletionHandler implements CodeCompletionHandler
     }
 
     @Override
-    public QueryType getAutoQuery(JTextComponent comp, String arg1)
+    public QueryType getAutoQuery(JTextComponent comp, String typedText)
     {
+        if (typedText.length() == 0) {
+            return QueryType.NONE;
+        }
+        
+        if (typedText.charAt(typedText.length()-1) == '.') {
+            return QueryType.COMPLETION;
+        }
         return QueryType.NONE;
     }
 
