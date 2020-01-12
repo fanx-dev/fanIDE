@@ -12,6 +12,8 @@ import java.util.concurrent.Future;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.ui.OpenProjects;
+import org.netbeans.api.project.ui.ProjectGroup;
+import org.netbeans.api.project.ui.ProjectGroupChangeListener;
 import org.netbeans.modules.project.uiapi.OpenProjectsTrampoline;
 
 /**
@@ -84,6 +86,18 @@ public class MockTrampoline implements OpenProjectsTrampoline {
     }
 
     public Future<Project[]> openProjectsAPI() {
+        return null;
+    }
+    
+    public void addProjectGroupChangeListenerAPI(ProjectGroupChangeListener listener) {
+        
+    }
+
+    public void removeProjectGroupChangeListenerAPI(ProjectGroupChangeListener listener) {
+        
+    }
+    
+    public ProjectGroup getActiveProjectGroupAPI() {
         return null;
     }
 }
