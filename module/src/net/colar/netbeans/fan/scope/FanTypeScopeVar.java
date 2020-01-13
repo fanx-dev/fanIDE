@@ -6,17 +6,17 @@ package net.colar.netbeans.fan.scope;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import net.colar.netbeans.fan.FanParserErrorKey;
-import net.colar.netbeans.fan.FanParserTask;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.parser.FanParserErrorKey;
+import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.model.FanDummyParam;
 import net.colar.netbeans.fan.indexer.model.FanDummySlot;
 import net.colar.netbeans.fan.indexer.model.FanSlot;
 import net.colar.netbeans.fan.indexer.model.FanType;
-import net.colar.netbeans.fan.parboiled.AstKind;
-import net.colar.netbeans.fan.parboiled.AstNode;
-import net.colar.netbeans.fan.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parboiled.pred.NodeKindPredicate;
+import net.colar.netbeans.fan.parser.parboiled.AstKind;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
+import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
 import net.colar.netbeans.fan.types.FanResolvedType;
 
 /**

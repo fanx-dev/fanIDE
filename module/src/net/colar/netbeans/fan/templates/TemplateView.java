@@ -2,7 +2,7 @@ package net.colar.netbeans.fan.templates;
 
 import java.text.DateFormat;
 import java.util.Date;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.jot.web.views.JOTLightweightView;
 import org.openide.filesystems.FileObject;
 

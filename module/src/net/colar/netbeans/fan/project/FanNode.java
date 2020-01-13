@@ -69,7 +69,7 @@ public class FanNode extends FilterNode
             }
             if (isPod)
             {
-                setIcon("net/colar/netbeans/fan/fan.png");
+                setIcon("net/colar/netbeans/fan/resources/fan.png");
             } else if (getName().equalsIgnoreCase("fan"))
             {
                 setIcon("net/colar/netbeans/fan/project/resources/folderFan.png");

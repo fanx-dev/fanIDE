@@ -86,7 +86,7 @@ public class FanProject implements Project, ProjectInformation
 
     public Icon getIcon()
     {
-        return new ImageIcon(ImageUtilities.loadImage("net/colar/netbeans/fan/fan.png"));
+        return new ImageIcon(ImageUtilities.loadImage("net/colar/netbeans/fan/resources/fan.png"));
     }
 
     public Project getProject()

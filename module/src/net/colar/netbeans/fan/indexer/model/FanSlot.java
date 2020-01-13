@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.indexer.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-import net.colar.netbeans.fan.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase.ModifEnum;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase.VarKind;

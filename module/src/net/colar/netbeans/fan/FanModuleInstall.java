@@ -3,6 +3,8 @@
  */
 package net.colar.netbeans.fan;
 
+import net.colar.netbeans.fan.utils.FanNBLogging;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,7 +14,7 @@ import java.util.Properties;
 import net.colar.netbeans.fan.actions.FanAction;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
-import net.colar.netbeans.fan.platform.FanPlatform;
+import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.jot.logger.JOTLogger;
 import net.jot.persistance.JOTPersistanceManager;
 import net.jot.prefs.JOTPreferences;
@@ -128,9 +130,9 @@ public class FanModuleInstall extends ModuleInstall
      */
     private File createPrefFiles(File fantomHome) throws IOException
     {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("net/colar/netbeans/fan/jot.prefs");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("net/colar/netbeans/fan/resources/jot.prefs");
         File prefFile = new File(fantomHome, "jot.prefs");
-        InputStream is2 = getClass().getClassLoader().getResourceAsStream("net/colar/netbeans/fan/db.properties");
+        InputStream is2 = getClass().getClassLoader().getResourceAsStream("net/colar/netbeans/fan/resources/db.properties");
         copyIsIntoFile(is, prefFile);
         File dbFile = new File(fantomHome, "db.properties");
         copyIsIntoFile(is2, dbFile);

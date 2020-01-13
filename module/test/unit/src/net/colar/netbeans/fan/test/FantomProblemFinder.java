@@ -7,7 +7,7 @@ package net.colar.netbeans.fan.test;
 import fanx.util.FileUtil;
 import java.io.File;
 import java.util.List;
-import net.colar.netbeans.fan.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParserTask;
 import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.parboiled.errors.ErrorUtils;

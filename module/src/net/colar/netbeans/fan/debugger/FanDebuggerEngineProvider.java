@@ -4,7 +4,7 @@
 
 package net.colar.netbeans.fan.debugger;
 
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.debugger.DebuggerEngine.Destructor;
 import org.netbeans.spi.debugger.DebuggerEngineProvider;
 

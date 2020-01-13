@@ -4,8 +4,8 @@
  */
 package net.colar.netbeans.fan.test;
 
-import net.colar.netbeans.fan.FanParserTask;
-import net.colar.netbeans.fan.parboiled.FanLexAstUtils;
+import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
 import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 

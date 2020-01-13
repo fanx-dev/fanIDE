@@ -4,12 +4,12 @@
 package net.colar.netbeans.fan.completion;
 
 import javax.swing.text.Document;
-import net.colar.netbeans.fan.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.FanTokenID;
-import net.colar.netbeans.fan.FanUtilities;
-import net.colar.netbeans.fan.parboiled.AstKind;
-import net.colar.netbeans.fan.parboiled.AstNode;
-import net.colar.netbeans.fan.parboiled.FanLexAstUtils;
+import net.colar.netbeans.fan.utils.FanUtilities;
+import net.colar.netbeans.fan.parser.parboiled.AstKind;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionHandler.QueryType;

@@ -23,7 +23,7 @@ public class FanImportProposal extends FanCompletionProposal
 		this.kind=ElementKind.PACKAGE;
 		this.element=new FanBasicElementHandle(name, kind);
 		if( ! isJava)
-			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/fan.png", false);
+			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
 		else
 			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
 	}

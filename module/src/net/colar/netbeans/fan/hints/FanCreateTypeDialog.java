@@ -12,7 +12,7 @@ package net.colar.netbeans.fan.hints;
 
 import java.io.File;
 import javax.swing.JFileChooser;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;
 import net.jot.web.views.JOTLightweightView;

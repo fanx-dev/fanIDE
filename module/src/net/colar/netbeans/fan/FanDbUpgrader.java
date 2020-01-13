@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan;
 
+import net.colar.netbeans.fan.utils.FanUtilities;
 import java.io.File;
 import net.jot.logger.JOTLogger;
 import net.jot.persistance.JOTDBUpgrader;

@@ -5,7 +5,7 @@
 package net.colar.netbeans.fan.editor;
 
 import javax.swing.text.Document;
-import net.colar.netbeans.fan.platform.FanPlatformSettings;
+import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 
 /**
  *

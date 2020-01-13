@@ -4,8 +4,8 @@
 package net.colar.netbeans.fan.scope;
 
 import java.util.ArrayList;
-import net.colar.netbeans.fan.FanUtilities;
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.utils.FanUtilities;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.types.FanResolvedType;
 
 /**

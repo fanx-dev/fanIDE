@@ -7,7 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
-import net.colar.netbeans.fan.platform.FanPlatform;
+import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.project.FanProject;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.project.JavaProjectConstants;

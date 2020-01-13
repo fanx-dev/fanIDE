@@ -6,11 +6,11 @@
 package net.colar.netbeans.fan.hints;
 
 import java.util.List;
-import net.colar.netbeans.fan.FanParserTask;
-import net.colar.netbeans.fan.parboiled.AstKind;
-import net.colar.netbeans.fan.parboiled.AstNode;
-import net.colar.netbeans.fan.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parboiled.pred.NodeKindPredicate;
+import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.parser.parboiled.AstKind;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
+import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
 import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.RuleContext;
 

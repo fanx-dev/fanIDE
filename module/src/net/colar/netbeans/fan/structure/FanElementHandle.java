@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.structure;
 
 import java.util.HashSet;
 import java.util.Set;
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.Modifier;

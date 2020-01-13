@@ -10,7 +10,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Vector;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.model.FanMethodParam;
 import net.colar.netbeans.fan.indexer.model.FanSlot;
@@ -19,7 +19,7 @@ import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import net.colar.netbeans.fan.indexer.model.FanType;
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.types.FanResolvedFuncType;
 import net.colar.netbeans.fan.types.FanResolvedType;
 

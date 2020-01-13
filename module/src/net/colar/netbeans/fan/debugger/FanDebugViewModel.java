@@ -4,7 +4,7 @@
 
 package net.colar.netbeans.fan.debugger;
 
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.debugger.jpda.JPDABreakpoint;
 import org.netbeans.api.debugger.jpda.LineBreakpoint;
 import org.netbeans.spi.viewmodel.ModelListener;

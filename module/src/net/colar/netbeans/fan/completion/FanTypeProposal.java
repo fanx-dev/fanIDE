@@ -35,7 +35,7 @@ public class FanTypeProposal extends FanCompletionProposal
 		this.anchor = anchor;
 		this.modifiers = Collections.emptySet();
 		this.kind = ElementKind.CLASS;
-		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/fan.png", false);
+		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
 		if (isJava)
 		{
 			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
@@ -63,7 +63,7 @@ public class FanTypeProposal extends FanCompletionProposal
 		this.anchor = anchor;
 		this.modifiers = Collections.emptySet();
 		this.kind = ElementKind.CLASS;
-		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/fan.png", false);
+		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
 		if (type.isJava())
 		{
 			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);

@@ -4,7 +4,7 @@
  */
 package net.colar.netbeans.fan.structure;
 
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.spi.ParserResult;
 

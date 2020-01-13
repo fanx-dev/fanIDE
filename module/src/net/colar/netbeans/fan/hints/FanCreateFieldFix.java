@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.hints;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.types.FanResolvedType;
 import org.netbeans.modules.csl.api.HintFix;
 import org.openide.windows.WindowManager;

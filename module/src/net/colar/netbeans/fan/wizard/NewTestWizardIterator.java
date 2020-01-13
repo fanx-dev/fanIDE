@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;
 import net.jot.web.views.JOTLightweightView;

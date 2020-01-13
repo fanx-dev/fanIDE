@@ -4,9 +4,9 @@
  */
 package net.colar.netbeans.fan.test.mock;
 
-import net.colar.netbeans.fan.FanParserTask;
-import net.colar.netbeans.fan.parboiled.AstKind;
-import net.colar.netbeans.fan.parboiled.RootNode;
+import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.parser.parboiled.AstKind;
+import net.colar.netbeans.fan.parser.parboiled.RootNode;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.parboiled.support.IndexRange;
 

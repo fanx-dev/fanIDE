@@ -5,7 +5,7 @@ package net.colar.netbeans.fan.debugger;
 
 import java.net.URI;
 import java.net.URL;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.project.FanProject;
 import org.netbeans.api.debugger.jpda.LineBreakpoint;
 import org.netbeans.api.project.FileOwnerQuery;

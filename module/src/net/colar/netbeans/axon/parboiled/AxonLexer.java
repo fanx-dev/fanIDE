@@ -1,7 +1,7 @@
 package net.colar.netbeans.axon.parboiled;
 
-import net.colar.netbeans.fan.parboiled.AstNode;
-import net.colar.netbeans.fan.parboiled.FantomLexerTokens;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens;
 import org.parboiled.BaseParser;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;

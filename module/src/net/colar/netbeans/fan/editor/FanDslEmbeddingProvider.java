@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.editor;
 
 import net.colar.netbeans.fan.FanLanguage;
 import net.colar.netbeans.fan.FanTokenID;
-import net.colar.netbeans.fan.parboiled.FantomLexerTokens.TokenName;
+import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;

@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import javax.swing.*;
 import net.colar.netbeans.fan.FanModuleInstall;
-import net.colar.netbeans.fan.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParserTask;
 import net.jot.prefs.JOTPropertiesPreferences;
 import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.parsing.api.Snapshot;

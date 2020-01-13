@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
-import net.colar.netbeans.fan.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.structure.FanSemanticAnalyzer;
 import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;

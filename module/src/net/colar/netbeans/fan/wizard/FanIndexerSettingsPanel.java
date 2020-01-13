@@ -12,7 +12,7 @@ package net.colar.netbeans.fan.wizard;
 
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
-import net.colar.netbeans.fan.platform.FanPlatformSettings;
+import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.jot.prefs.JOTPreferences;
 import org.openide.LifecycleManager;
 

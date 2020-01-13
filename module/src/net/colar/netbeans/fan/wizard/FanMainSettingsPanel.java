@@ -5,7 +5,7 @@
 package net.colar.netbeans.fan.wizard;
 
 import javax.swing.JFileChooser;
-import net.colar.netbeans.fan.platform.FanPlatform;
+import net.colar.netbeans.fan.fantom.FanPlatform;
 
 /*
  * Panel for Fan options.

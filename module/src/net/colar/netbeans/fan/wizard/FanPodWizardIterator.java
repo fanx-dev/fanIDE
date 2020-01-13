@@ -11,7 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.event.ChangeListener;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;

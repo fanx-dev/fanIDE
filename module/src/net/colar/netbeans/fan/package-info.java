@@ -6,7 +6,7 @@
 (
     id=FanMainSettingsController.ID,
     categoryName=FanMainSettingsController.ID,
-    iconBase="net/colar/netbeans/fan/fantom_options.png",
+    iconBase="net/colar/netbeans/fan/resources/fantom_options.png",
     position=799
 )
 package net.colar.netbeans.fan;

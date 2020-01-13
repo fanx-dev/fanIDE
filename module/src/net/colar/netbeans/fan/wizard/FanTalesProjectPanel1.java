@@ -13,7 +13,7 @@ package net.colar.netbeans.fan.wizard;
 import java.io.File;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
-import net.colar.netbeans.fan.platform.FanPlatform;
+import net.colar.netbeans.fan.fantom.FanPlatform;
 
 /**
  *

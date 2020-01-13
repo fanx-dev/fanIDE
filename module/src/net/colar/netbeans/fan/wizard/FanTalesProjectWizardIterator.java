@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.event.ChangeListener;
 import net.colar.netbeans.fan.actions.FanExecution;
-import net.colar.netbeans.fan.platform.FanPlatform;
+import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.project.FanProject;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import org.netbeans.spi.project.ui.support.ProjectChooser;

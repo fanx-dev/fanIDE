@@ -7,7 +7,7 @@ package net.colar.netbeans.fan.wizard;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
-import net.colar.netbeans.fan.platform.FanPlatformSettings;
+import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;

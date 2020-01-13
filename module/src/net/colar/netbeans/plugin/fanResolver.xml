@@ -1,0 +1,9 @@
+<!DOCTYPE MIME-resolver PUBLIC "-//NetBeans//DTD MIME Resolver 1.0//EN" "http://www.netbeans.org/dtds/mime-resolver-1_0.dtd">
+<MIME-resolver>
+    <file>
+	<ext name="fan"/>
+	<ext name="fwt"/>
+        <ext name="fog"/>
+	<resolver mime="text/x-fan"/>
+    </file>
+</MIME-resolver>

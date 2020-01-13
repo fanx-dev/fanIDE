@@ -18,7 +18,7 @@ public class FanProjectNode extends FanNode
 	public FanProjectNode(Project project, Node originalNode, FileObject file)
 	{
 		super(project, originalNode, new FanNodeChildren(project, originalNode), file);
-		setIcon("net/colar/netbeans/fan/fan.png");
+		setIcon("net/colar/netbeans/fan/resources/fan.png");
 		isRoot = true;
 	}
 

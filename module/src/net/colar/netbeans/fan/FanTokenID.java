@@ -4,9 +4,12 @@
  */
 package net.colar.netbeans.fan;
 
+import net.colar.netbeans.fan.parser.NBFanLexer;
 import java.util.Collection;
-import net.colar.netbeans.fan.parboiled.FantomLexerTokens;
-import net.colar.netbeans.fan.parboiled.FantomLexerTokens.TokenName;
+import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.parser.NBFanLexer;
+import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens;
+import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenId;
 import org.netbeans.spi.lexer.LanguageHierarchy;
@@ -100,12 +103,5 @@ public class FanTokenID implements TokenId
 	public static Language<FanTokenID> language()
 	{
 		return language;
-	}
-        
-        private static final Language<FanTokenID> axon = new AxonLanguageHierarchy().language();
-        
-	public static Language<FanTokenID> axonlanguage()
-	{
-		return axon;
 	}
 }

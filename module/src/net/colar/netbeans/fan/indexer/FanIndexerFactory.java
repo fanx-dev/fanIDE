@@ -3,7 +3,7 @@
  */
 package net.colar.netbeans.fan.indexer;
 
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.jot.logger.JOTLogger;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;

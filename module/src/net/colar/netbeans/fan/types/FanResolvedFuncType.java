@@ -5,7 +5,7 @@ package net.colar.netbeans.fan.types;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.colar.netbeans.fan.parboiled.AstNode;
+import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
  *

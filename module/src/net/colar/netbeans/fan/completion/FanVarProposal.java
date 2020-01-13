@@ -5,7 +5,7 @@ package net.colar.netbeans.fan.completion;
 
 import java.util.HashSet;
 import java.util.Vector;
-import net.colar.netbeans.fan.FanUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.model.FanMethodParam;
 import net.colar.netbeans.fan.indexer.model.FanType;
