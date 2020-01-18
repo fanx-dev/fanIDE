@@ -55,15 +55,15 @@ public abstract class FanAstScopeVarBase
 			return val;
 		}
 
-        public boolean isLocal()
-        {
-            return ! (
-                        val == VarKind.IMPLIED.value() ||
-                        val == VarKind.IMPORT.value() ||
-                        val == VarKind.IMPORT_JAVA.value() ||
-                        val==VarKind.INHERITED.value()
-                    );
-        }
+                public boolean isLocal()
+                {
+                    return ! (
+                                val == VarKind.IMPLIED.value() ||
+                                val == VarKind.IMPORT.value() ||
+                                val == VarKind.IMPORT_JAVA.value() ||
+                                val==VarKind.INHERITED.value()
+                            );
+                }
 	}
 
 	// Modifiers
@@ -206,15 +206,15 @@ public abstract class FanAstScopeVarBase
 	 */
 	public void addModifiers(String modifs)
 	{
-			String[] mStrs = modifs.split(" ");
-			for (String mStr : mStrs)
-			{
-				FanAstScopeVarBase.ModifEnum modif = parseModifier(mStr.trim());
-				if (modif != null)
-				{
-					modifiers.add(modif);
-				}
-			}
+                String[] mStrs = modifs.split(" ");
+                for (String mStr : mStrs)
+                {
+                        FanAstScopeVarBase.ModifEnum modif = parseModifier(mStr.trim());
+                        if (modif != null)
+                        {
+                                modifiers.add(modif);
+                        }
+                }
 	}
 
 	public VarKind getKind()

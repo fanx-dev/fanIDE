@@ -27,6 +27,7 @@ import org.netbeans.modules.csl.api.StructureScanner;
 import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.csl.spi.LanguageRegistration;
 import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory;
 
 /**
  * Primary Fan language definition
@@ -141,5 +142,19 @@ public class FanLanguage extends DefaultLanguageConfig
     public DeclarationFinder getDeclarationFinder()
     {
         return new FanDeclarationFinder();
+    }
+    
+    @Override
+    public String getLineCommentPrefix() {
+        return "//";
+    }
+    
+    /**
+     * A Indexer for this language, or null if none is available
+     * @return the indexer
+     */
+    @Override
+    public EmbeddingIndexerFactory getIndexerFactory() {
+        return null;
     }
 }

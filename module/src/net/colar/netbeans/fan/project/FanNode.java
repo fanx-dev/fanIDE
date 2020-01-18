@@ -72,16 +72,16 @@ public class FanNode extends FilterNode
                 setIcon("net/colar/netbeans/fan/resources/fan.png");
             } else if (getName().equalsIgnoreCase("fan"))
             {
-                setIcon("net/colar/netbeans/fan/project/resources/folderFan.png");
-                desc = "<b>Fan Sources</b>";
+//                setIcon("net/colar/netbeans/fan/project/resources/folderFan.png");
+//                desc = "<b>Fan Sources</b>";
             } else if (file.getName().equalsIgnoreCase("java"))
             {
-                setIcon("net/colar/netbeans/fan/project/resources/folderJava.png");
-                desc = "<b>Java Sources</b>";
+//                setIcon("net/colar/netbeans/fan/project/resources/folderJava.png");
+//                desc = "<b>Java Sources</b>";
             } else if (file.getName().equalsIgnoreCase("test"))
             {
-                setIcon("net/colar/netbeans/fan/project/resources/folderTest.png");
-                desc = "<b>Unit Tests</b>";
+//                setIcon("net/colar/netbeans/fan/project/resources/folderTest.png");
+//                desc = "<b>Unit Tests</b>";
             }
         } else
         {
@@ -89,7 +89,7 @@ public class FanNode extends FilterNode
             {
                 //isRunnable = true;
                 setIcon("net/colar/netbeans/fan/project/resources/fanBuild.png");
-                desc = "<b>build.fan</b>";
+//                desc = "<b>build.fan</b>";
             } else if (file.getExt().equalsIgnoreCase("fan"))
             {
                 setIcon("net/colar/netbeans/fan/project/resources/fanFile.png");

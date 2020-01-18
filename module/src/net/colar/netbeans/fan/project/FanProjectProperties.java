@@ -30,7 +30,7 @@ public class FanProjectProperties {
     public static final String DEFAULT_MAIN_METHOD = "Main.main";
     public static final String DEFAULT_BUILD_TARGET = "";
     public static final String PROJ_PROPS_PATH = "nbproject/project.properties";
-    public static final String PRIVATE_PROPS_PATH = "nbproject/private/private.properties";
+//    public static final String PRIVATE_PROPS_PATH = "nbproject/private/private.properties";
     public static final String MAIN_METHOD = "pod.main.method";
     public static final String BUILD_TARGET = "build.target";
     public static final String IS_TALES_PRJ = "is.tales.project";

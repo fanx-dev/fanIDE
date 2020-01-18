@@ -116,9 +116,9 @@ public class FanCustomizedProperties implements CustomizerProvider
 					FanProjectPropertiesPanel settingsPanel=(FanProjectPropertiesPanel)panels.get(categories[0]);
 					props.setMainMethod(settingsPanel.getMainMethod());
 					props.setBuildTarget(settingsPanel.getBuildTarget());
-          props.setArgs(settingsPanel.getArgs());
-          props.setJvmArgs(settingsPanel.getJvm());
-          props.setIsTalesProject(settingsPanel.getIsTales());
+                                        props.setArgs(settingsPanel.getArgs());
+                                        props.setJvmArgs(settingsPanel.getJvm());
+                                        props.setIsTalesProject(settingsPanel.getIsTales());
 					props.save();
 				}
 			}
