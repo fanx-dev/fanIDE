@@ -22,10 +22,6 @@ public class FanIndexerFactory extends CustomIndexerFactory {
     public static final int VERSION = 4;
     private static FanIndexer indexer = new FanIndexer();
 
-    public static FanJarsIndexer getJavaIndexer() {
-        return indexer.getJarsIndexer();
-    }
-
     public FanIndexerFactory() {
         FanUtilities.GENERIC_LOGGER.info("Fantom - Inited indexer Factory");
     }

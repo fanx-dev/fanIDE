@@ -17,10 +17,11 @@ import java.util.concurrent.*;
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
-import net.colar.netbeans.fan.indexer.model.FanMethodParam;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
+import net.colar.netbeans.fan.namespace.FanMethodParam;
+import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanType;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.CancellableRecoveringParserRunner;
@@ -79,9 +80,9 @@ public class FanParserTask extends ParserResult {
     private ParsingResult<AstNode> parsingResult;
     private AstNode astRoot;
     // Cache types resolution, for performance
-    private HashMap<String, FanType> typeCache = new HashMap<String, FanType>();
+//    private HashMap<String, FanType> typeCache = new HashMap<String, FanType>();
     // Cache slots resolution, for performance
-    private HashMap<String, List<FanSlot>> typeSlotsCache = new HashMap<String, List<FanSlot>>();
+//    private HashMap<String, List<FanSlot>> typeSlotsCache = new HashMap<String, List<FanSlot>>();
     private FantomParser parser;
     private boolean localScopeDone;
     boolean hasGlobalError = false;
@@ -617,59 +618,37 @@ public class FanParserTask extends ParserResult {
     private void addUsing(AstNode usingNode) {
         String type = FanLexAstUtils.getFirstChildText(usingNode, new NodeKindPredicate(AstKind.AST_ID), false);
         String as = FanLexAstUtils.getFirstChildText(usingNode, new NodeKindPredicate(AstKind.AST_USING_AS), true);
-        String ffi = FanLexAstUtils.getFirstChildText(usingNode, new NodeKindPredicate(AstKind.AST_USING_FFI), true);
+//        String ffi = FanLexAstUtils.getFirstChildText(usingNode, new NodeKindPredicate(AstKind.AST_USING_FFI), true);
 
         String name = as != null ? as : type;
         if (name.indexOf("::") > -1) {
             name = name.substring(name.indexOf("::") + 2);
         }
 
-        if (ffi != null && ffi.toLowerCase().equals("java")) {
-            if (type.indexOf("::") != -1) {
-                // Individual Item
-                String qname = type.replaceAll("::", "\\.");
-
-                if (findCachedQualifiedType(qname) == null) {
-                    addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Java Item: " + qname, usingNode);
-                } else {
-                    addUsingToNode(name, qname, usingNode, VarKind.IMPORT_JAVA);
-                }
-            } else {
-                // whole package
-                if (!FanType.hasPod(name)) {
-                    addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Java package: " + name, usingNode);
-                } else {
-                    Vector<FanType> items = FanType.findPodTypes(name, "");
-                    for (FanType t : items) {
-                        addUsingToNode(t.getSimpleName(), t.getQualifiedName(), usingNode, VarKind.IMPORT_JAVA);
-                    }
-                }
+        
+        if (type.indexOf("::") > 0) {
+            // Adding a specific type
+            String[] data = type.split("::");
+            if (!Namespace.get().hasPod(data[0])) {
+                addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Pod: " + data[0], usingNode);
+            } else if (Namespace.get().findByQualifiedName(type) == null) {
+                addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Type: " + type, usingNode);
             }
-        } else {
-            if (type.indexOf("::") > 0) {
-                // Adding a specific type
-                String[] data = type.split("::");
-                if (!FanType.hasPod(data[0])) {
-                    addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Pod: " + data[0], usingNode);
-                } else if (findCachedQualifiedType(type) == null) {
-                    addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Type: " + type, usingNode);
-                }
 
-                //Type t = FanPodIndexer.getInstance().getPodType(data[0], data[1]);
-                addUsingToNode(name, type, usingNode, VarKind.IMPORT);
+            //Type t = FanPodIndexer.getInstance().getPodType(data[0], data[1]);
+            addUsingToNode(name, type, usingNode, VarKind.IMPORT);
+        } else {
+            // Adding all the types of a Pod
+            if (name.equalsIgnoreCase("sys")) // sys is always avail.
+            {
+                return;
+            }
+            if (!Namespace.get().hasPod(name)) {
+                addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Pod: " + name, usingNode);
             } else {
-                // Adding all the types of a Pod
-                if (name.equalsIgnoreCase("sys")) // sys is always avail.
-                {
-                    return;
-                }
-                if (!FanType.hasPod(name)) {
-                    addError(FanParserErrorKey.UNRESOLVED_USING, "Unresolved Pod: " + name, usingNode);
-                } else {
-                    Vector<FanType> items = FanType.findPodTypes(name, "");
-                    for (FanType t : items) {
-                        addUsingToNode(t.getSimpleName(), t.getQualifiedName(), usingNode, VarKind.IMPORT);
-                    }
+                List<FanType> items = Namespace.get().findPodTypes(name);
+                for (FanType t : items) {
+                    addUsingToNode(t.getSimpleName(), t.getQualifiedName(), usingNode, VarKind.IMPORT);
                 }
             }
         }
@@ -1156,7 +1135,7 @@ public class FanParserTask extends ParserResult {
     private void introduceItVariables(AstNode node, FanResolvedType itType) {
         if (itType != null && itType.getDbType() != null) {
             itType = itType.asStaticContext(false);
-            List<FanSlot> itSlots = FanSlot.getAllSlotsForType(itType.getDbType().getQualifiedName(), true, this);
+            List<FanSlot> itSlots = itType.getDbType().getAllSlots();
             Hashtable<String, FanAstScopeVarBase> curvars = node.getAllScopeVars();
             for (FanSlot itSlot : itSlots) {
                 // itVar cannot "take over" existing variables
@@ -1241,16 +1220,16 @@ public class FanParserTask extends ParserResult {
      * @param qName
      * @return
      */
-    public FanType findCachedQualifiedType(String qName) {
-        if (!typeCache.containsKey(qName)) {
-            typeCache.put(qName, FanType.findByQualifiedName(qName));
-        }
-        return typeCache.get(qName);
-    }
-
-    public HashMap<String, List<FanSlot>> getTypeSlotCache() {
-        return typeSlotsCache;
-    }
+//    public FanType findCachedQualifiedType(String qName) {
+//        if (!typeCache.containsKey(qName)) {
+//            typeCache.put(qName, Namespace.get().findByQualifiedName(qName));
+//        }
+//        return typeCache.get(qName);
+//    }
+//
+//    public HashMap<String, List<FanSlot>> getTypeSlotCache() {
+//        return typeSlotsCache;
+//    }
 
     private FanResolvedType doTypeLitteral(AstNode node, FanResolvedType type) {
         FanResolvedType baseType = type;
@@ -1260,38 +1239,24 @@ public class FanParserTask extends ParserResult {
         if (isTypeLit) {
             type = FanResolvedType.makeFromDbType(node, "sys::Type");
         } else {// slot litteral
-            if (baseType != null && baseType.getDbType().isJava()) {
-                // Not even sure if this is suppose to work for java types, but covering it anyway
-                List<Member> members = FanIndexerFactory.getJavaIndexer().findTypeSlots(baseType.getQualifiedType());
-                for (Member m : members) {
-                    if (m.getName().equalsIgnoreCase(slotId)) {
-                        if (m instanceof Field) {
-                            type = FanResolvedType.makeFromDbType(node, "sys::Field");
-                        } else {
-                            type = FanResolvedType.makeFromDbType(node, "sys::Method");
-                        }
-                    }
+            // Fantom types
+            if (baseType == null) {
+                // local slot
+                FanAstScopeVarBase var = node.getAllScopeVars().get(slotId);
+                if (var instanceof FanMethodScopeVar) // note: method inherits from field
+                {
+                    type = FanResolvedType.makeFromDbType(node, "sys::Method");
+                } else {
+                    type = FanResolvedType.makeFromDbType(node, "sys::Field");
                 }
             } else {
-                // Fantom types
-                if (baseType == null) {
-                    // local slot
-                    FanAstScopeVarBase var = node.getAllScopeVars().get(slotId);
-                    if (var instanceof FanMethodScopeVar) // note: method inherits from field
-                    {
-                        type = FanResolvedType.makeFromDbType(node, "sys::Method");
-                    } else {
+                // Type specified slots
+                FanSlot slot = FanSlot.findByTypeAndName(baseType.getQualifiedType(), slotId);
+                if (slot != null) {
+                    if (slot.isField()) {
                         type = FanResolvedType.makeFromDbType(node, "sys::Field");
-                    }
-                } else {
-                    // Type specified slots
-                    FanSlot slot = FanSlot.findByTypeAndName(baseType.getQualifiedType(), slotId);
-                    if (slot != null) {
-                        if (slot.isField()) {
-                            type = FanResolvedType.makeFromDbType(node, "sys::Field");
-                        } else {
-                            type = FanResolvedType.makeFromDbType(node, "sys::Method");
-                        }
+                    } else {
+                        type = FanResolvedType.makeFromDbType(node, "sys::Method");
                     }
                 }
             }

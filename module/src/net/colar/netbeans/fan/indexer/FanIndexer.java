@@ -19,11 +19,15 @@ import fanx.fcode.FStore;
 import fanx.fcode.FType;
 import fanx.fcode.FTypeRef;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import net.colar.netbeans.fan.FanDbUpgrader;
@@ -32,18 +36,19 @@ import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
 //import net.colar.netbeans.fan.ast.FanAstField;
 //import net.colar.netbeans.fan.ast.FanAstMethod;
-import net.colar.netbeans.fan.indexer.model.FanDocUsing;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase.ModifEnum;
 //import net.colar.netbeans.fan.ast.FanTypeScope;
-import net.colar.netbeans.fan.indexer.model.FanDocument;
-import net.colar.netbeans.fan.indexer.model.FanMethodParam;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
-import net.colar.netbeans.fan.indexer.model.FanType;
-import net.colar.netbeans.fan.indexer.model.FanTypeInheritance;
+import net.colar.netbeans.fan.namespace.FanMethodParam;
+import net.colar.netbeans.fan.namespace.FanSlot;
+import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
 import net.colar.netbeans.fan.fantom.FanPlatform;
+import net.colar.netbeans.fan.namespace.FanConst;
+import net.colar.netbeans.fan.namespace.FanElement;
+import net.colar.netbeans.fan.namespace.FanSrcFile;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase.VarKind;
 import net.colar.netbeans.fan.scope.FanMethodScopeVar;
 import net.colar.netbeans.fan.scope.FanScopeMethodParam;
@@ -75,1026 +80,712 @@ import org.openide.util.Cancellable;
 //import org.netbeans.modules.java.source.indexing.JavaBinaryIndexer;
 
 /**
- * This indexer is backed by a DB(H2 database)
- * This class does all the Index updates(write)
- * Use FanIndexQyery to search it.
+ * This indexer is backed by a DB(H2 database) This class does all the Index
+ * updates(write) Use FanIndexQyery to search it.
  *
  * @author tcolar
  */
 public class FanIndexer extends CustomIndexer implements FileChangeListener {
-  // Can bump -up when we want to force a full-reindexing after fixes/chnages.
+    // Can bump -up when we want to force a full-reindexing after fixes/chnages.
 
-  private static Integer VERSION = 2;
-  public static final String UNRESOLVED_TYPE = "!!UNRESOLVED!!";
-  private final static Pattern CLOSURECLASS = Pattern.compile(".*?\\$\\d+\\z");
-  static JOTLoggerLocation log = new JOTLoggerLocation(FanIndexer.class);
-  private final FanIndexerThread indexerThread;
-  public static volatile boolean shutdown = false;
-  //TODO: will that work or should they all be in the same fifo stack
-  Hashtable<String, Long> fanSrcToBeIndexed = new Hashtable<String, Long>();
-  Hashtable<String, Long> fanPodsToBeIndexed = new Hashtable<String, Long>();
-  Hashtable<String, Long> toBeDeleted = new Hashtable<String, Long>();
-  private FanJarsIndexer jarsIndexer;
-  private boolean alreadyWarned;
-  private MainIndexer mainIndexer;
+    private static Integer VERSION = 2;
+    public static final String UNRESOLVED_TYPE = "!!UNRESOLVED!!";
+    private final static Pattern CLOSURECLASS = Pattern.compile(".*?\\$\\d+\\z");
+    static JOTLoggerLocation log = new JOTLoggerLocation(FanIndexer.class);
 
-  public FanIndexer() {
-    super();
-    indexerThread = new FanIndexerThread();
-    indexerThread.start();
-  }
+    private final FanIndexerThread indexerThread;
+    public static volatile boolean shutdown = false;
+    //TODO: will that work or should they all be in the same fifo stack
+    Hashtable<String, Long> fanSrcToBeIndexed = new Hashtable<String, Long>();
+    Hashtable<String, Long> fanPodsToBeIndexed = new Hashtable<String, Long>();
+    Hashtable<String, Long> toBeDeleted = new Hashtable<String, Long>();
+//  private FanJarsIndexer jarsIndexer;
+    private boolean alreadyWarned;
 
-  /**
-   * Take action if indexer version changed
-   */
-  public static void upgrade() {
-    int curVersion = JOTPreferences.getInstance().getDefaultedInt("nb.fantom.prefs.indexer.version", 0);
-
-    if (curVersion != FanIndexer.VERSION) {
-      whipeCache();
+    public FanIndexer() {
+        super();
+        indexerThread = new FanIndexerThread();
+        indexerThread.start();
     }
 
-    JOTPreferences.getInstance().setString("nb.fantom.prefs.indexer.version", "" + FanIndexer.VERSION);
-    JOTPreferences.getInstance().save();
-  }
-
-  public static synchronized void whipeCache() {
-    try {
-      // for now we just whipe-out the whole H2 DB
-      FanDbUpgrader.deleteTables("default");
-    } catch (Exception e) {
-      FanUtilities.GENERIC_LOGGER.exception("Error deleting DB files.", e);
-    }
-  }
-
-  synchronized void warnIfNecessary() {
-    if (!alreadyWarned) {
-      alreadyWarned = true;
-      NotifyDescriptor desc = new NotifyDescriptor.Message("Initial Fantom/Java API Indexing just started\nThis might take a while and use a lot of CPU (once).\nSome features such as completion will not be available until it's completed.", NotifyDescriptor.WARNING_MESSAGE);
-      DialogDisplayer.getDefault().notify(desc);
-    }
-  }
-
-  /**
-   * Rerun whole indexing (called on FAN_HOME change, see FanPlatform)
-   * @param backgroundJava
-   */
-  public void indexAll(boolean backgroundJava) {
-    if (mainIndexer == null || ! mainIndexer.isAlive()) {
-      mainIndexer = new MainIndexer(backgroundJava);
-      mainIndexer.start();
-      if (!backgroundJava) {
-        mainIndexer.waitFor();
-      }
-    }
-    else{
-      JOTLogger.info(this, "Ignoring indexAll request as indexer is already running.");
-    }
-  }
-
-  public FanJarsIndexer getJarsIndexer() {
-    return jarsIndexer;
-  }
-
-  @Override
-  protected void index(Iterable<? extends Indexable> iterable, Context context) {
-    for (Indexable indexable : iterable) {
-      requestIndexing(indexable.getURL().getPath());
-    }
-  }
-
-  public void requestDelete(String path) {
-    toBeDeleted.put(path, new Date().getTime());
-  }
-
-  /**
-   * all Fantom indexing should be requested through here (no direct call to index()
-   * for threading safety
-   * @param path
-   */
-  public void requestIndexing(String path) {
-    if (!FanPlatform.isConfigured()) {
-      return;
-    }
-    boolean isPod = path.toLowerCase().endsWith(".pod");
-
-    FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(path)));
-    if (fo.getNameExt().equalsIgnoreCase("sys.pod")) {
-      warnIfNecessary();
-    }
-    if (isPod) {
-      fanPodsToBeIndexed.put(path, new Date().getTime());
-    } else if (isAllowedIndexing(fo)) {
-      fanSrcToBeIndexed.put(path, new Date().getTime());
-    }
-  }
-
-  private void indexSrc(String path) {
-    if (!FanPlatform.isConfigured()) {
-      log.info("Platform not ready to index: " + path);
-      return;
+    synchronized void warnIfNecessary() {
+        if (!alreadyWarned) {
+            alreadyWarned = true;
+//            NotifyDescriptor desc = new NotifyDescriptor.Message("Initial Fantom/Java API Indexing just started\nThis might take a while and use a lot of CPU (once).\nSome features such as completion will not be available until it's completed.", NotifyDescriptor.WARNING_MESSAGE);
+//            DialogDisplayer.getDefault().notify(desc);
+        }
     }
 
-    if (!isAllowedIndexing(FileUtil.toFileObject(FileUtil.normalizeFile(new File(path))))) {
-      log.info("Skipping: " + path);
-      return;
+    /**
+     * Rerun whole indexing (called on FAN_HOME change, see FanPlatform)
+     *
+     * @param backgroundJava
+     */
+    public void indexAll() {
+        this.indexFantomPods();
     }
 
-    long then = new Date().getTime();
-    log.info("Indexing requested for: " + path);
-    // Get a snaphost of the source
-    File f = new File(path);
-
-    FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(f));
-    Source source = Source.create(fo);
-    Snapshot snapshot = source.createSnapshot();
-    // Parse the snaphot
-    NBFanParser parser = new NBFanParser();
-    try {
-      parser.parse(snapshot, true);
-    } catch (Throwable e) {
-      log.exception("Parsing failed for: " + path, e);
-      return;
+    @Override
+    protected void index(Iterable<? extends Indexable> iterable, Context context) {
+        for (Indexable indexable : iterable) {
+            requestIndexing(indexable.getURL().getPath());
+        }
     }
-    Result result = parser.getResult();
-    long now = new Date().getTime();
-    log.debug("Indexing - parsing done in " + (now - then) + " ms for: " + path);
-    // Index the parsed doc
-    indexSrc(path, result);
-    now = new Date().getTime();
-    log.debug("Indexing completed in " + (now - then) + " ms for: " + path);
-  }
 
-  private void indexSrc(String path, Result parserResult) {
-    log.debug("Indexing parsed result for : " + path);
+    public void requestDelete(String path) {
+        toBeDeleted.put(path, new Date().getTime());
+    }
 
-    FanParserTask fanResult = (FanParserTask) parserResult;
-    indexSrcDoc(path, fanResult.getRootScope());
-  }
+    /**
+     * all Fantom indexing should be requested through here (no direct call to
+     * index() for threading safety
+     *
+     * @param path
+     */
+    public void requestIndexing(String path) {
+        if (!FanPlatform.isConfigured()) {
+            return;
+        }
+        boolean isPod = path.toLowerCase().endsWith(".pod");
 
-  /**
-   * Index the document in the DB, using the root scope.
-   * @param doc
-   * @param indexable
-   * @param rootScope
-   */
-  private void indexSrcDoc(String path, AstNode rootScope) {
-    FanDocument doc = null;
-    try {
-      if (rootScope != null) {
-        // create / update the doument
-        doc = FanDocument.findOrCreateOne(null, path);
-        doc.setPath(path);
-        doc.setTstamp(0L);
-        doc.setIsSource(true);
-        doc.save();
+        FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(path)));
+        if (fo.getNameExt().equalsIgnoreCase("sys.pod")) {
+            warnIfNecessary();
+        }
+        if (isPod) {
+            fanPodsToBeIndexed.put(path, new Date().getTime());
+        } else if (isAllowedIndexing(fo)) {
+            fanSrcToBeIndexed.put(path, new Date().getTime());
+        }
+    }
 
-        // Update the  "using" / try to be smart as to not delete / recreate all everytime.
-        Vector<FanDocUsing> usings = FanDocUsing.findAllForDoc(null, doc.getId());
-        Vector<FanType> types = FanType.findAllForDoc(null, doc.getId());
+    private void indexSrc(String path) {
+        if (!FanPlatform.isConfigured()) {
+            log.info("Platform not ready to index: " + path);
+            return;
+        }
 
-        Collection<FanAstScopeVarBase> vars = rootScope.getLocalScopeVars().values();
-        Vector<String> addedUsings = new Vector<String>();
-        for (FanAstScopeVarBase var : vars) {
-          if (var.getKind() == FanAstScopeVarBase.VarKind.IMPORT || var.getKind() == FanAstScopeVarBase.VarKind.IMPORT_JAVA) {
-            FanResolvedType type = var.getType();
-            String sig = type.getAsTypedType();
-            int foundIdx = -1;
-            for (int i = 0; i != usings.size(); i++) {
-              FanDocUsing using = usings.get(i);
-              if (using.getType().equals(sig)) {
-                foundIdx = i;
+        if (!isAllowedIndexing(FileUtil.toFileObject(FileUtil.normalizeFile(new File(path))))) {
+            log.info("Skipping: " + path);
+            return;
+        }
+
+        long then = new Date().getTime();
+        log.info("Indexing requested for: " + path);
+        // Get a snaphost of the source
+        File f = new File(path);
+
+        FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(f));
+        Source source = Source.create(fo);
+        Snapshot snapshot = source.createSnapshot();
+        // Parse the snaphot
+        NBFanParser parser = new NBFanParser();
+        try {
+            parser.parse(snapshot, true);
+        } catch (Throwable e) {
+            log.exception("Parsing failed for: " + path, e);
+            return;
+        }
+        Result result = parser.getResult();
+        long now = new Date().getTime();
+        log.debug("Indexing - parsing done in " + (now - then) + " ms for: " + path);
+        // Index the parsed doc
+        indexSrc(path, result);
+        now = new Date().getTime();
+        log.debug("Indexing completed in " + (now - then) + " ms for: " + path);
+    }
+
+    private void indexSrc(String path, Result parserResult) {
+        log.debug("Indexing parsed result for : " + path);
+
+        FanParserTask fanResult = (FanParserTask) parserResult;
+        indexSrcDoc(path, fanResult.getRootScope());
+    }
+
+    private void setProtection(FanElement elem, ModifEnum modifiers) {
+        switch (modifiers) {
+            case PRIVATE:
+                elem.setFlag(FanConst.Private, true);
                 break;
-              }
+            case PROTECTED:
+                elem.setFlag(FanConst.Protected, true);
+                break;
+            case INTERNAL:
+                elem.setFlag(FanConst.Internal, true);
+                break;
+            case PUBLIC:
+                elem.setFlag(FanConst.Public, true);
+                break;
+        }
+    }
+    
+    private FanType findOrCreateType(List<FanType> list, String qname) {
+        for (FanType t : list) {
+            if (t.getQualifiedName().equals(qname)) {
+                return t;
             }
-            if (foundIdx != -1) {
-              // already in there, leave it alone
-              usings.remove(foundIdx);
-            } else {
-              // there can be duplicates because of the way rootscope usings works
-              if (!addedUsings.contains(sig)) {
-                addedUsings.add(sig);
-                // new one, creating it
-                FanDocUsing using = new FanDocUsing();
-                using.setDocumentId(doc.getId());
-                using.setType(sig);
-                using.save();
-              }
-            }
-          }
+        }
+        FanType t = new FanType();
+        t.setQualifiedName(qname);
+        return t;
+    }
 
-          // types
-          if (var instanceof FanTypeScopeVar) {
-            FanTypeScopeVar typeScope = (FanTypeScopeVar) var;
-            JOTSQLCondition cond = new JOTSQLCondition("qualifiedName", JOTSQLCondition.IS_EQUAL, typeScope.getQName());
-            FanType dbType = (FanType) JOTQueryBuilder.selectQuery(null, FanType.class).where(cond).findOrCreateOne();
-            if (!dbType.isNew()) {
-              for (int i = 0; i != types.size(); i++) {
-                FanType t = types.get(i);
-                if (t.getId() == dbType.getId()) {
-                  types.remove(i);
-                  break;
+    /**
+     * Index the document in the DB, using the root scope.
+     *
+     * @param doc
+     * @param indexable
+     * @param rootScope
+     */
+    private void indexSrcDoc(String path, AstNode rootScope) {
+        FanSrcFile doc = null;
+        try {
+            if (rootScope == null) {
+                return;
+            }
+            // create / update the doument
+            doc = FanSrcFile.findOrCreateOne(path);
+            doc.setPath(path);
+            doc.setTstamp(0L);
+            doc.setIsSource(true);
+
+            List<FanType> oldTypes = doc.getTypes();
+            for (FanType t : oldTypes) {
+                Namespace.get().remove(t);
+            }
+
+            Collection<FanAstScopeVarBase> vars = rootScope.getLocalScopeVars().values();
+            for (FanAstScopeVarBase var : vars) {
+                // types
+                if (!(var instanceof FanTypeScopeVar)) {
+                    continue;
                 }
-              }
-            }
-            dbType.setSrcDocId(doc.getId());
-            dbType.setKind(typeScope.getKind().value());
-            dbType.setIsAbstract(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.ABSTRACT));
-            dbType.setIsConst(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.CONST));
-            dbType.setIsFinal(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.FINAL));
-            dbType.setQualifiedName(typeScope.getQName());
-            dbType.setSimpleName(typeScope.getName());
-            dbType.setPod(rootScope.getRoot().getPod());
-            dbType.setProtection(typeScope.getProtection());
-            dbType.setIsFromSource(true);
+                FanTypeScopeVar typeScope = (FanTypeScopeVar) var;
 
-            dbType.save();
-
-            // Try to reuse existing db entries.
-            Vector<FanTypeInheritance> currentInh = FanTypeInheritance.findAllForMainType(null, typeScope.getQName());
-            for (FanResolvedType item : typeScope.getInheritedItems()) {
-              String mainType = typeScope.getQName();
-              String inhType = item.isResolved() ? item.getDbType().getQualifiedName() : item.getAsTypedType();
-              FanTypeInheritance inh = null;
-              for (int i = 0; i != currentInh.size(); i++) {
-                FanTypeInheritance cur = currentInh.get(i);
-                if (cur.getMainType().equals(mainType) && cur.getInheritedType().equals(inhType)) {
-                  inh = cur;
-                  currentInh.remove(i);
-                  break;
+                FanType dbType = Namespace.get().findByQualifiedName(typeScope.getQName());
+                if (dbType == null) {
+                    dbType = new FanType();
                 }
-              }
-              if (inh == null) {
-                // new one, creating it
-                inh = new FanTypeInheritance();
-              }
-              inh.setMainType(mainType);
-              inh.setInheritedType(inhType);
-              inh.save();
-            }
-            // old inherited types
-            for (FanTypeInheritance oldInh : currentInh) {
-              //System.out.println("inh delete " + oldInh.getInheritedType() + "::" + oldInh.getMainType());
-              oldInh.delete();
-            }
-
-            // Slots
-            // Try to reuse existing db entries.
-            Vector<FanSlot> currentSlots = FanSlot.findAllForType(dbType.getId());
-            Collection<FanAstScopeVarBase> localVars = FanLexAstUtils.getScopeNode(typeScope.getNode()).getLocalScopeVars().values();
-            for (FanAstScopeVarBase slot : localVars) {
-              if (slot.getKind() == VarKind.CTOR || slot.getKind() == VarKind.FIELD || slot.getKind() == VarKind.METHOD) {
-                JOTSQLCondition cond2 = new JOTSQLCondition("typeId", JOTSQLCondition.IS_EQUAL, dbType.getId());
-                JOTSQLCondition cond3 = new JOTSQLCondition("name", JOTSQLCondition.IS_EQUAL, slot.getName());
-                FanSlot dbSlot = (FanSlot) JOTQueryBuilder.selectQuery(null, FanSlot.class).where(cond2).where(cond3).findOrCreateOne();
-                if (!dbSlot.isNew()) {
-                  for (int i = 0; i != currentSlots.size(); i++) {
-                    FanSlot s = currentSlots.get(i);
-                    if (s.getId() == dbSlot.getId()) {
-                      currentSlots.remove(i);
-                      break;
-                    }
-                  }
+                dbType.setSrcFile(doc);
+                switch (typeScope.getKind()) {
+                    case TYPE_MIXIN:
+                        dbType.setFlag(FanConst.Mixin, true);
+                    case TYPE_ENUM:
+                        dbType.setFlag(FanConst.Enum, true);
+                    case TYPE_FACET:
+                        dbType.setFlag(FanConst.Enum, true);
                 }
-                dbSlot.setTypeId(dbType.getId());
-                dbSlot.setSlotKind(slot.getKind().value());
-                FanResolvedType slotType = slot.getType();
-                dbSlot.setReturnedType(slotType.toTypeSig(true));
-                dbSlot.setName(slot.getName());
-                dbSlot.setIsAbstract(slot.hasModifier(ModifEnum.ABSTRACT));
-                dbSlot.setIsNative(slot.hasModifier(ModifEnum.NATIVE));
-                dbSlot.setIsOverride(slot.hasModifier(ModifEnum.OVERRIDE));
-                dbSlot.setIsStatic(slot.hasModifier(ModifEnum.STATIC));
-                dbSlot.setIsVirtual(slot.hasModifier(ModifEnum.VIRTUAL));
-                dbSlot.setIsConst(slot.hasModifier(ModifEnum.CONST));
-                dbSlot.setProtection(slot.getProtection());
 
-                dbSlot.save();
+                dbType.setIsAbstract(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.ABSTRACT));
+                dbType.setIsConst(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.CONST));
+                dbType.setIsFinal(typeScope.hasModifier(FanAstScopeVarBase.ModifEnum.FINAL));
+                dbType.setQualifiedName(typeScope.getQName());
+                dbType.setSimpleName(typeScope.getName());
+                dbType.setPod(rootScope.getRoot().getPod());
+                setProtection(dbType, typeScope.getProtection());
 
-                // deal with parameters of method/ctor
-                if (slot instanceof FanMethodScopeVar) {
-                  FanMethodScopeVar method = (FanMethodScopeVar) slot;
-                  Hashtable<String, FanScopeMethodParam> parameters = method.getParameters();
+                // Try to reuse existing db entries.
+                for (FanResolvedType item : typeScope.getInheritedItems()) {
+                    String mainType = typeScope.getQName();
+                    String inhType = item.isResolved() ? item.getDbType().getQualifiedName() : item.getAsTypedType();
+                    dbType.getInheritedTypes().add(inhType);
+                }
 
-                  // Try to reuse existing db entries.
-                  Vector<FanMethodParam> currentParams = dbSlot.getAllParameters();
-                  for (String paramName : parameters.keySet()) {
-                    FanScopeMethodParam paramResult = parameters.get(paramName);
-                    JOTSQLCondition cond4 = new JOTSQLCondition("slotId", JOTSQLCondition.IS_EQUAL, dbSlot.getId());
-                    JOTSQLCondition cond5 = new JOTSQLCondition("paramIndex", JOTSQLCondition.IS_EQUAL, paramResult.getOrder());
-                    FanMethodParam dbParam = (FanMethodParam) JOTQueryBuilder.selectQuery(null, FanMethodParam.class).where(cond4).where(cond5).findOrCreateOne();
-                    if (!dbParam.isNew()) {
-                      for (int i = 0; i != currentParams.size(); i++) {
-                        FanMethodParam p = currentParams.get(i);
-                        if (p.getId() == dbParam.getId()) {
-                          currentParams.remove(i);
-                          break;
+                // Slots
+                // Try to reuse existing db entries.
+                Collection<FanAstScopeVarBase> localVars = FanLexAstUtils.getScopeNode(typeScope.getNode()).getLocalScopeVars().values();
+                for (FanAstScopeVarBase slot : localVars) {
+                    if (slot.getKind() == VarKind.CTOR || slot.getKind() == VarKind.FIELD || slot.getKind() == VarKind.METHOD) {
+                        FanResolvedType slotType = slot.getType();
+                        FanSlot dbSlot = new FanSlot(slot.getName(), slotType.toTypeSig(true), slot.getKind() != VarKind.FIELD);
+//                dbSlot.setReturnedType(slotType.toTypeSig(true));
+//                dbSlot.setName(slot.getName());
+                        dbSlot.setIsAbstract(slot.hasModifier(ModifEnum.ABSTRACT));
+                        dbSlot.setIsNative(slot.hasModifier(ModifEnum.NATIVE));
+                        dbSlot.setIsOverride(slot.hasModifier(ModifEnum.OVERRIDE));
+                        dbSlot.setIsStatic(slot.hasModifier(ModifEnum.STATIC));
+                        dbSlot.setIsVirtual(slot.hasModifier(ModifEnum.VIRTUAL));
+                        dbSlot.setIsConst(slot.hasModifier(ModifEnum.CONST));
+//                dbSlot.setProtection(slot.getProtection());
+
+                        // deal with parameters of method/ctor
+                        if (slot instanceof FanMethodScopeVar) {
+                            FanMethodScopeVar method = (FanMethodScopeVar) slot;
+                            Hashtable<String, FanScopeMethodParam> parameters = method.getParameters();
+
+                            // Try to reuse existing db entries.
+                            for (String paramName : parameters.keySet()) {
+                                FanScopeMethodParam paramResult = parameters.get(paramName);
+
+                                String pType = paramResult.getType().toTypeSig(true);
+                                FanMethodParam dbParam = new FanMethodParam(paramName, pType);
+                                dbParam.setParamIndex(paramResult.getOrder());
+                                dbParam.setHasDefault(paramResult.hasDefaultValue());
+
+                            } // end param loop
                         }
-                      }
+                        dbType.addSlot(dbSlot);
                     }
-                    dbParam.setSlotId(dbSlot.getId());
-                    dbParam.setName(paramName);
-                    String pType = pType = paramResult.getType().toTypeSig(true);
-                    dbParam.setQualifiedType(pType);
-                    dbParam.setParamIndex(paramResult.getOrder());
-                    dbParam.setHasDefault(paramResult.hasDefaultValue());
-                    dbParam.save();
+                } // end slot loop
+                Namespace.get().put(dbType);
+            } // end type if
 
-                  } // end param loop
-                  // Whatever param wasn't removed from the vector is not needed anymore.
-                  for (FanMethodParam param : currentParams) {
-                    param.delete();
-                  }
-                }
-              }
-            } // end slot loop
-            // Whatever slot wasn't removed from the vector is not needed anymore.
-            for (FanSlot s : currentSlots) {
-              s.delete();
-            }
+            // all went well, set the tstamp - mark as good
+            doc.setTstamp(System.currentTimeMillis());
 
-
-          }
-        } // end type if
-
-
-        // all went well, set the tstamp - mark as good
-        doc.setTstamp(new Date().getTime());
-        doc.save();
-
-        // remove old usings
-        for (FanDocUsing using : usings) {
-          using.delete();
-        }
-        // remove old types
-        for (FanType t : types) {
-          //System.out.println("type delete " + t.getQualifiedName());
-          t.delete();
-        }
-      }
-
-    } catch (Exception e) {
-      log.exception("Indexing Failed for: " + path, e);
-      try {
-        // remove the incomplete doc ... wil try again next time.
-        if (doc != null) {
-          doc.delete();
-        }
-      } catch (Exception e2) {
-        log.exception("Indexing 'rollback' failed for: " + path, e);
-      }
-    }
-  }
-
-  public static boolean checkIfNeedsReindexing(String path, long tstamp) {
-    JOTSQLCondition cond = new JOTSQLCondition("path", JOTSQLCondition.IS_EQUAL, path);
-    try {
-      FanDocument doc = (FanDocument) JOTQueryBuilder.selectQuery(null, FanDocument.class).where(cond).findOne();
-      if (doc != null) {
-        long indexedTime = doc.getTstamp();
-        if (indexedTime >= tstamp) {
-          return false;
-        }
-      }
-    } catch (Exception e) {
-      log.exception("FanDocument search exception", e);
-    }
-    return true;
-  }
-
-  public void indexFantomPods(boolean runInBackground) {
-    if (!FanPlatform.isConfigured()) {
-      return;
-    }
-    try {
-      String podsDir = FanPlatform.getInstance().getPodsDir();
-      File f = new File(podsDir);
-      // listen to changes in pod folder
-      try {
-        FileUtil.addRecursiveListener(this, f);
-      } catch (IllegalArgumentException e) {/*already listening*/
-
-      }
-      // index the pods if not up to date
-      File[] pods = f.listFiles();
-
-      for (File pod : pods) {
-        String path = pod.getAbsolutePath();
-        if (checkIfNeedsReindexing(path, pod.lastModified())) {
-          requestIndexing(path);
-        }
-      }
-    } catch (Throwable t) {
-      log.exception("Pod indexing thread error", t);
-
-    }
-    if (!runInBackground) {
-      while (!(shutdown || fanPodsToBeIndexed.isEmpty())) {
-        try {
-          Thread.sleep(100);
-          Thread.yield();
         } catch (Exception e) {
-          log.exception("waiting for pods indexign to complete", e);
+            log.exception("Indexing Failed for: " + path, e);
         }
-      }
     }
-  }
 
-  private void indexPod(String pod) {
-    if (pod.toLowerCase().endsWith(".pod")) {
-      FanDocument doc = null;
-      try {
-
-        //ZipFile zpod = new ZipFile(pod);
-        FPod fpod = new FPod(null, FStore.makeZip(new File(pod)));
-        fpod.readFully();
-        log.info("Indexing pod: " + pod);
-        // Create the document
-        doc = FanDocument.findOrCreateOne(null, pod);
-
-        doc.setPath(pod);
-        doc.setTstamp(0L);
-        doc.setIsSource(false);
-        doc.save();
-
-        Vector<FanType> types = FanType.findAllForDoc(null, doc.getId());
-        for (FType type : fpod.types) {
-          FTypeRef typeRef = type.pod.typeRef(type.self);
-          String sig = typeRef.signature;
-
-          int flags = type.flags;
-          // Skipping "internal" classes - closures and the likes
-          // synthetic means generated by compiler
-
-          if (hasFlag(flags, FConst.Synthetic) || CLOSURECLASS.matcher(typeRef.typeName).matches()) {
-            continue;
-          }
-          log.debug("Indexing Pod Type: " + sig);
-
-          JOTSQLCondition cond = new JOTSQLCondition("qualifiedName", JOTSQLCondition.IS_EQUAL, sig);
-          FanType dbType = (FanType) JOTQueryBuilder.selectQuery(null, FanType.class).where(cond).findOrCreateOne();
-
-          if (!dbType.isNew()) {
-            for (int i = 0; i != types.size(); i++) {
-              FanType t = types.get(i);
-              if (t.getId() == dbType.getId()) {
-                types.remove(i);
-                break;
-              }
-            }
-          }
-
-          dbType.setBinDocId(doc.getId());
-          dbType.setKind(getKind(type));
-
-          dbType.setIsAbstract(hasFlag(flags,
-                  FConst.Abstract));
-          dbType.setIsConst(hasFlag(flags, FConst.Const));
-          dbType.setIsFinal(hasFlag(flags, FConst.Final));
-          dbType.setQualifiedName(sig);
-          dbType.setSimpleName(typeRef.typeName);
-          dbType.setPod(typeRef.podName);
-          dbType.setProtection(getProtection(type.flags));
-          dbType.setIsFromSource(
-                  false);
-
-          dbType.save();
-          // Slots
-          // Try to reuse existing db entries.
-          Vector<FanSlot> currentSlots = FanSlot.findAllForType(dbType.getId());
-          Vector<FSlot> slots = new Vector<FSlot>();
-          slots.addAll(Arrays.asList(type.fields));
-          // It's a bit odd but type.methods has the fields in as well
-          // I guess because Fan creates "internal" field getter/setters ?
-          for (FMethod m : type.methods) {
-            boolean isField = false;
-            for (FSlot s : slots) {
-              if (s.name.equals(m.name)) {
-                isField = true;
-              }
-            }
-            if (!isField) {
-              slots.add(m);
-            }
-          }
-          for (FSlot slot : slots) {
-            // determine kind of slot
-            VarKind kind = VarKind.FIELD;
-            String retType = null;
-            if (slot instanceof FField) {
-              retType = type.pod.typeRef(((FField) slot).type).signature;
-            } else if (slot instanceof FMethod) {
-              if (hasFlag(slot.flags, FConst.Ctor)) {
-                // This returns Void -> retType = type.pod.typeRef(((FMethod) slot).ret);
-                retType = "sys::This";
-                kind = VarKind.CTOR;
-              } else {
-                retType = type.pod.typeRef(((FMethod) slot).ret).signature;
-                kind = VarKind.METHOD;
-              }
-            } else {
-              throw new RuntimeException("Unexpected Slot kind: " + slot.getClass().getName());
-            }
-
-            JOTSQLCondition cond2 = new JOTSQLCondition("typeId", JOTSQLCondition.IS_EQUAL, dbType.getId());
-            JOTSQLCondition cond3 = new JOTSQLCondition("name", JOTSQLCondition.IS_EQUAL, slot.name);
-            FanSlot dbSlot = (FanSlot) JOTQueryBuilder.selectQuery(null, FanSlot.class).where(cond2).where(cond3).findOrCreateOne();
-            if (!dbSlot.isNew()) {
-              for (int i = 0; i != currentSlots.size(); i++) {
-                FanSlot s = currentSlots.get(i);
-                if (s.getId() == dbSlot.getId()) {
-                  currentSlots.remove(i);
-                  break;
-                }
-              }
-            }
-            dbSlot.setTypeId(dbType.getId());
-            dbSlot.setSlotKind(kind.value());
-            dbSlot.setReturnedType(retType);
-            dbSlot.setName(slot.name);
-            dbSlot.setIsAbstract(hasFlag(slot.flags, FConst.Abstract));
-            dbSlot.setIsNative(hasFlag(slot.flags, FConst.Native));
-            dbSlot.setIsOverride(hasFlag(slot.flags, FConst.Override));
-            dbSlot.setIsStatic(hasFlag(slot.flags, FConst.Static));
-            dbSlot.setIsVirtual(hasFlag(slot.flags, FConst.Virtual));
-            dbSlot.setIsConst(hasFlag(slot.flags, FConst.Const));
-            dbSlot.setProtection(getProtection(slot.flags));
-
-            dbSlot.save();
-
-            // deal with parameters of method/ctor
-            if (slot instanceof FMethod) {
-
-              FMethod method = (FMethod) slot;
-              FMethodVar[] parameters = method.params();
-              // Try to reuse existing db entries.
-              Vector<FanMethodParam> currentParams = dbSlot.getAllParameters();
-              int paramIndex = 0;
-              for (FMethodVar param : parameters) {
-                JOTSQLCondition cond4 = new JOTSQLCondition("slotId", JOTSQLCondition.IS_EQUAL, dbSlot.getId());
-                JOTSQLCondition cond5 = new JOTSQLCondition("paramIndex", JOTSQLCondition.IS_EQUAL, paramIndex);
-                FanMethodParam dbParam = (FanMethodParam) JOTQueryBuilder.selectQuery(null, FanMethodParam.class).where(cond4).where(cond5).findOrCreateOne();
-                if (!dbParam.isNew()) {
-                  for (int i = 0; i != currentParams.size(); i++) {
-                    FanMethodParam p = currentParams.get(i);
-                    if (p.getId() == dbParam.getId()) {
-                      currentParams.remove(i);
-                      break;
-                    }
-                  }
-                }
-                FTypeRef tRef = type.pod.typeRef(param.type);
-                String signature = tRef.signature;
-                // Temp Workaround for Fantom bug 1056
-                // http://fantom.org/sidewalk/topic/1056#c7687
-                if (dbSlot.getName().equals("with") && dbType.getQualifiedName().equals("sys::Obj")) {
-                  signature = "|sys::This->sys::Void|";
-                }
-                // end workaround
-                dbParam.setSlotId(dbSlot.getId());
-                dbParam.setName(param.name);
-                dbParam.setQualifiedType(signature);
-                dbParam.setHasDefault(param.def != null);
-                dbParam.setParamIndex(paramIndex);
-
-                dbParam.save();
-
-                paramIndex++;
-              } // end param loop
-              // Whatever param wasn't removed from the vector is not needed anymore.
-              for (FanMethodParam param : currentParams) {
-                param.delete();
-              }
-            }
-          } // end slot loop
-          // Whatever slot wasn't removed from the vector is not needed anymore.
-          for (FanSlot s : currentSlots) {
-            s.delete();
-          }
-
-          // Deal with Inheritance
-          Vector<FTypeRef> inhTypes = new Vector<FTypeRef>();
-          if (type.base >= 0 && type.base != 65535) // 65535 seem to eb value for a type with no base (Obj?)
-          {
-            inhTypes.add(type.pod.typeRef(type.base));
-          }
-
-          for (int t : type.mixins) {
-            inhTypes.add(type.pod.typeRef(t));
-          }
-          // Try to reuse existing db entries.
-          Vector<FanTypeInheritance> currentInh = FanTypeInheritance.findAllForMainType(null, typeRef.signature);
-          for (FTypeRef item : inhTypes) {
-            String mainType = typeRef.signature;
-            String inhType = item.signature;
-            if (inhType.equals("sys::Obj")
-                    || inhType.equals("sys::Enum")) {
-              // Those types are implied, no need to pollute the DB
-              continue;
-            }
-            int foundIdx = -1;
-            for (int i = 0; i != currentInh.size(); i++) {
-              FanTypeInheritance cur = currentInh.get(i);
-              if (cur.getMainType().equals(mainType) && cur.getInheritedType().equals(inhType)) {
-                foundIdx = i;
-                break;
-              }
-            }
-            if (foundIdx != -1) {
-              // already in there, leave it alone
-              currentInh.remove(foundIdx);
-            } else {
-              // new one, creating it
-              FanTypeInheritance inh = new FanTypeInheritance();
-              inh.setMainType(mainType);
-              inh.setInheritedType(inhType);
-              inh.save();
-              //System.out.println("saving inh: " + inh.getMainType() + " " + inh.getInheritedType() + " " + inh.getId());
-            }
-          } // end inh
-          // Whatever wasn't removed from the vector is not needed anymore.
-          for (FanTypeInheritance inh : currentInh) {
-            inh.delete();
-          }
-
-          // allow for quicker exit on shutdown
-          if (shutdown) {
-            break;
-          }
-        } // end type
-
-        // all went well, set the tstamp - mark as good
-        doc.setTstamp(new Date().getTime());
-        doc.save();
-
-        for (FanType t : types) {
-          t.delete();
+    public static boolean checkIfNeedsReindexing(String path, long tstamp) {
+        FanSrcFile file = FanSrcFile.findByPath(path);
+        if (file == null) {
+            return true;
         }
-      } catch (Exception e) {
-        log.exception("Indexing failed for: " + pod, e);
-        try {
-          // remove broken entry, will try again next time
-          if (doc != null) {
-            doc.delete();
-
-
-          }
-        } catch (Exception e2) {
-          log.exception("Indexing 'rollback' failed for: " + pod, e);
+        if (file.getTstamp() < tstamp) {
+            return true;
         }
-      }
-    }
-  }
-
-  private int getKind(FType type) {
-    if (hasFlag(type.flags, FConst.Mixin)) {
-      return FanAstScopeVarBase.VarKind.TYPE_MIXIN.value();
-    }
-    if (hasFlag(type.flags, FConst.Enum)) {
-      return FanAstScopeVarBase.VarKind.TYPE_ENUM.value();
-    } // class is default
-    return FanAstScopeVarBase.VarKind.TYPE_CLASS.value();
-  }
-
-  private boolean hasFlag(int flags, int flag) {
-    return (flags & flag) != 0;
-  }
-
-  public static void shutdown() {
-    FanJarsIndexer.shutdown();
-    shutdown = true;
-  }
-
-  private int getProtection(int flags) {
-    if (hasFlag(flags, FConst.Private)) {
-      return ModifEnum.PRIVATE.value();
-    }
-    if (hasFlag(flags, FConst.Protected)) {
-      return ModifEnum.PROTECTED.value();
-    }
-    if (hasFlag(flags, FConst.Internal)) {
-      return ModifEnum.INTERNAL.value();
-    } // default is public
-    return ModifEnum.PUBLIC.value();
-  }
-
-  /**
-   * Index a fantom source folder recursively
-   * @param root
-   * @param nb - nb of files parsed
-   * @return
-   */
-  public int indexSrcFolder(FileObject root, int nb) {
-    if (!FanPlatform.isConfigured()) {
-      return 0;
-    }
-    if (!isAllowedIndexing(root)) {
-      return nb;
-    }
-    FileObject[] children = root.getChildren();
-    for (FileObject child : children) {
-      if (child.isFolder()) {
-        //recurse
-        nb = indexSrcFolder(child, nb);
-      } else {
-        if (child.hasExt("fan") || child.hasExt("fwt")) {
-          if (FanIndexer.checkIfNeedsReindexing(child.getPath(), child.lastModified().getTime())) {
-            log.info("ReIndexing: " + root.getPath());
-            nb++;
-            requestIndexing(child.getPath());
-          }
-        }
-      }
-    }
-    return nb;
-  }
-
-  public static String getPodDoc(String podName) {
-    if (!FanPlatform.isConfigured()) {
-      return null;
-    }
-    Pod pod = null;
-    try {
-      pod = Pod.find(podName);
-    } catch (RuntimeException e) {
-      log.debug("Pod doc not found for " + podName);
-    }
-    if (pod != null) {
-      return fanDocToHtml((String) pod.meta().get("pod.summary"));
-    }
-    return null;
-  }
-
-  public static String getSlotDoc(FanSlot slot) {
-    FanType type = FanType.findByID(slot.getTypeId());
-    if (type != null) {
-      String sig = type.getQualifiedName() + "." + slot.getName();
-      try {
-        Slot fslot = Slot.find(sig);
-        if (fslot != null) {
-          return fanDocToHtml(fslot.doc());
-        }
-      } catch (Throwable t) {
-        // Fantom runtime exception if type ! found
-        log.debug(t.toString());
-      }
-    }
-    return null;
-  }
-
-  public static String getDoc(FanType type) {
-    if (!FanPlatform.isConfigured()) {
-      return null;
-    }
-    try {
-      Pod pod = Pod.find(type.getPod());
-      Type t = pod.type(type.getSimpleName());
-      if (t != null) {
-        return fanDocToHtml(t.doc());
-      }
-    } catch (RuntimeException e) {
-      log.debug("Type doc not found for " + type);
-    }
-    return null;
-  }
-
-  /**
-   * Parse Fandoc text into HTML using fan's builtin parser.
-   * @param fandoc
-   * @return
-   */
-  public static String fanDocToHtml(String fandoc) {
-    if (fandoc == null) {
-      return null;
-    }
-    if (!FanPlatform.isConfigured()) {
-      return fandoc;
-    }
-    String html = fandoc;
-    try {
-      FanObj parser = (FanObj) Type.find("fandoc::FandocParser").make();
-      FanObj doc = (FanObj) parser.typeof().method("parseStr").call(parser, fandoc);
-      Buf buf = Buf.make();
-      FanObj writer = (FanObj) Type.find("fandoc::HtmlDocWriter").method("make").call(buf.out());
-      doc.typeof().method("write").call(doc, writer);
-      html = buf.flip().readAllStr();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } //System.out.println("Html doc: "+html);
-    return html;
-  }
-
-  @SuppressWarnings("unchecked")
-  private void cleanupOldDocs() {
-    try {
-      Vector<FanDocument> docs = (Vector<FanDocument>) JOTQueryBuilder.selectQuery(null, FanDocument.class).find().getAllResults();
-      for (FanDocument doc : docs) {
-        String path = doc.getPath();
-        if (!new File(path).exists()) {
-          log.info("Removing entries for removed document: " + path);
-          doc.delete();
-        }
-      }
-    } catch (Exception e) {
-      log.exception("Error deleting outdated docs", e);
-    }
-  }
-
-  //*********** File listeners ****************************
-  public void fileFolderCreated(FileEvent fe) {
-    // Listen for changes
-    String path = fe.getFile().getPath();
-    log.debug("Folder created: " + path);
-    FileUtil.addFileChangeListener(this, FileUtil.toFile(fe.getFile()));
-  }
-
-  public void fileDataCreated(FileEvent fe) {
-    String path = fe.getFile().getPath();
-    log.debug("File created: " + path);
-    requestIndexing(
-            path);
-  }
-
-  public void fileChanged(FileEvent fe) {
-    String path = fe.getFile().getPath();
-    log.debug("File changed: " + path);
-    requestIndexing(
-            path);
-  }
-
-  public void fileDeleted(FileEvent fe) {
-    // synced because we don't want to do it at the same time as the thread
-    String path = fe.getFile().getPath();
-    log.debug("File deleted: " + path);
-    toBeDeleted.put(path, new Date().getTime());
-  }
-
-  public void fileRenamed(FileRenameEvent fre) {
-    // synced because we don't want to do it at the same time as the thread
-    FileObject src = (FileObject) fre.getSource();
-    log.debug("File renamed: " + src.getPath() + " -> " + fre.getFile().getPath());
-    //TODO add this to a hashtable and do it in the thread
-    FanDocument.renameDoc(src.getPath(), fre.getFile().getPath());
-  }
-
-  public void fileAttributeChanged(FileAttributeEvent fae) {
-    int bkpt = 0;
-    // don't care
-  }
-
-  public void waitForEmptyFantomQueue() {
-    while (true) {
-      if (mainIndexer != null) {
-        mainIndexer.waitFor();
-        if (fanPodsToBeIndexed.size() == 0 && fanSrcToBeIndexed.size() == 0) {
-          return;
-        }
-      }
-      try {
-        Thread.sleep(500);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  /*********************************************************************
-   *  Indexer Thread class
-   * All indexing request should go through here to avoid issues.
-   */
-  class FanIndexerThread extends Thread implements Runnable {
-
-    @Override
-    public void run() {
-
-      while (!shutdown) {
-        try {
-          Thread.yield();
-          sleep(100);
-        } catch (Exception e) {
-        }
-
-        if (!toBeDeleted.isEmpty() || !fanPodsToBeIndexed.isEmpty() || !fanSrcToBeIndexed.isEmpty()) {
-          // Will show a progress bar if it takes more than 5 sec
-          ProgressHandle progressHandle = ProgressHandleFactory.createHandle("Fantom indexing", (Cancellable) null);
-          progressHandle.setInitialDelay(5000);
-          progressHandle.start();
-          Enumeration<String> tbd = toBeDeleted.keys();
-          // to be deleted
-          {
-            while (tbd.hasMoreElements()) {
-              if (shutdown) {
-                return;
-              }
-              String path = tbd.nextElement();
-
-              FanDocument doc = FanDocument.findByPath(path);
-              try {
-                if (doc != null) {
-                  progressHandle.progress("De-Indexing: " + path);
-                  doc.delete();
-                }
-              } catch (Exception e) {
-                log.exception("Error deleting doc", e);
-              }
-            }
-          }
-          // always do binaries first
-          do {
-            // Usig keys() since it uses a "snapshot"
-            // no concurrentmodif error
-            // also nextElement() should be safe since we only remove elements from within here
-            // elems can be added outside ... but that should be fine.
-            Enumeration<String> it = fanPodsToBeIndexed.keys();
-            while (it.hasMoreElements()) {
-              if (shutdown) {
-                return;
-              }
-              String path = it.nextElement();
-              Long l = fanPodsToBeIndexed.get(path);
-              long now = new Date().getTime();
-              if (l != null && l.longValue() < now - 1000) {
-                fanPodsToBeIndexed.remove(path);
-                progressHandle.progress("Indexing: " + path);
-                indexPod(path);
-              }
-            }
-          } while (!fanPodsToBeIndexed.isEmpty());
-          // then do the sources
-          Enumeration<String> it = fanSrcToBeIndexed.keys();
-          while (it.hasMoreElements()) {
-            if (shutdown) {
-              return;
-            }
-            String path = it.nextElement();
-            Long l = fanSrcToBeIndexed.get(path);
-            // Hasn't changed in a couple seconds
-            long now = new Date().getTime();
-            if (path != null && l != null && l.longValue() < now - 2000) {
-              fanSrcToBeIndexed.remove(path);
-              progressHandle.progress("Indexing: " + path);
-              indexSrc(path);
-            }
-          }
-          progressHandle.finish();
-        }
-      }
-    }
-  }
-
-  class MainIndexer extends Thread implements Runnable {
-
-    volatile boolean done = false;
-    private final boolean bg;
-
-    public MainIndexer(boolean backgroundJava) {
-      super();
-      this.bg = backgroundJava;
-    }
-
-    @Override
-    public void run() {
-      done = false;
-      alreadyWarned = false;
-      // cleanup old docs
-      cleanupOldDocs();
-      // start the indexing thread
-      // index Fantom libs right aways
-      long then = new Date().getTime();
-      // index first existing pods
-      // we want to wait for pods, since we want them done first (there might be pods without sources)
-      indexFantomPods(false);
-      // then index from source
-      //indexSrcFolder(FanPlatform.getInstance().getFanSrcHome(), 0);
-
-      long now = new Date().getTime();
-      log.info("Fantom Pod Parsing completed in " + (now - then) + " ms.");
-      // sources indexes will be called  through scanStarted()
-      jarsIndexer = new FanJarsIndexer();
-      // Do this one in the background (might take a while and not needed for everyone)
-      jarsIndexer.indexJars(bg);
-      done = true;
-    }
-
-    public void waitFor() {
-      while (!done && !shutdown) {
-        try {
-          sleep(250);
-          yield();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }
-  }
-
-  public static boolean isAllowedIndexing(FileObject srcFile) {
-    FileObject fanHome = FanPlatform.getInstance().getFanHome();
-    if(fanHome.getPath().equals(srcFile.getPath()) ||
-        FileUtil.isParentOf(fanHome, srcFile))
-    {
         return false;
     }
-    return true;
-  }
+
+    public void indexFantomPods() {
+        if (!FanPlatform.isConfigured()) {
+            return;
+        }
+        try {
+            String podsDir = FanPlatform.getInstance().getPodsDir();
+            File f = new File(podsDir);
+            // listen to changes in pod folder
+            try {
+                FileUtil.addRecursiveListener(this, f);
+            } catch (IllegalArgumentException e) {/*already listening*/
+
+            }
+            // index the pods if not up to date
+            File[] pods = f.listFiles();
+
+            for (File pod : pods) {
+                String path = pod.getAbsolutePath();
+                if (checkIfNeedsReindexing(path, pod.lastModified())) {
+                    requestIndexing(path);
+                }
+            }
+        } catch (Throwable t) {
+            log.exception("Pod indexing thread error", t);
+
+        }
+    }
+
+    private void indexPod(String pod) {
+        if (!pod.toLowerCase().endsWith(".pod")) {
+            return;
+        }
+        FanSrcFile doc = null;
+        try {
+
+            //ZipFile zpod = new ZipFile(pod);
+            FPod fpod = new FPod(null, FStore.makeZip(new File(pod)));
+            fpod.readFully();
+            log.info("Indexing pod: " + pod);
+            // Create the document
+            doc = FanSrcFile.findOrCreateOne(pod);
+            doc.setPath(pod);
+            doc.setTstamp(0L);
+            doc.setIsSource(false);
+            
+            List<FanType> oldTypes = doc.getTypes();
+            for (FanType t : oldTypes) {
+                Namespace.get().remove(t);
+            }
+
+            for (FType type : fpod.types) {
+                FTypeRef typeRef = type.pod.typeRef(type.self);
+                String sig = typeRef.signature;
+
+                int flags = type.flags;
+                // Skipping "internal" classes - closures and the likes
+                // synthetic means generated by compiler
+
+                if (hasFlag(flags, FConst.Synthetic) || CLOSURECLASS.matcher(typeRef.typeName).matches()) {
+                    continue;
+                }
+                log.debug("Indexing Pod Type: " + sig);
+
+                FanType dbType = new FanType();
+                dbType.setSrcFile(doc);
+
+//          dbType.setIsAbstract(hasFlag(flags, FConst.Abstract));
+//          dbType.setIsConst(hasFlag(flags, FConst.Const));
+//          dbType.setIsFinal(hasFlag(flags, FConst.Final));
+                dbType.setQualifiedName(sig);
+                dbType.setSimpleName(typeRef.typeName);
+                dbType.setPod(typeRef.podName);
+                dbType.flags = type.flags;
+
+                // Slots
+                for (FField slot : type.fields) {
+                    String retType = null;
+                    retType = type.pod.typeRef(((FField) slot).type).signature;
+                    FanSlot dbSlot = new FanSlot(slot.name, retType, false);
+                    dbSlot.flags = slot.flags;
+                    dbType.addSlot(dbSlot);
+                }
+
+                // It's a bit odd but type.methods has the fields in as well
+                // I guess because Fan creates "internal" field getter/setters ?
+                for (FMethod m : type.methods) {
+                    boolean isField = (m.flags & FConst.Getter) != 0 || (m.flags & FConst.Setter) != 0;
+                    if (isField) {
+                        continue;
+                    }
+                    String retType = null;
+                    FMethod slot = m;
+                    if (hasFlag(m.flags, FConst.Ctor)) {
+                        // This returns Void -> retType = type.pod.typeRef(((FMethod) slot).ret);
+                        retType = "sys::This";
+                    } else {
+                        retType = type.pod.typeRef(((FMethod) slot).ret).signature;
+                    }
+
+                    FanSlot dbSlot = new FanSlot(slot.name, retType, false);
+                    dbSlot.flags = slot.flags;
+
+                    FMethod method = (FMethod) slot;
+                    FMethodVar[] parameters = method.params();
+                    // Try to reuse existing db entries.
+                    int paramIndex = 0;
+                    for (FMethodVar param : parameters) {
+                        FTypeRef tRef = type.pod.typeRef(param.type);
+                        String signature = tRef.signature;
+
+                        FanMethodParam dbParam = new FanMethodParam(param.name, signature);
+                        dbParam.setHasDefault(param.def != null);
+                        dbParam.setParamIndex(paramIndex);
+                        paramIndex++;
+                    }
+                    dbType.addSlot(dbSlot);
+                }
+
+                // Deal with Inheritance
+                List<FTypeRef> inhTypes = new ArrayList<FTypeRef>();
+                if (type.base >= 0 && type.base != 65535) // 65535 seem to eb value for a type with no base (Obj?)
+                {
+                    inhTypes.add(type.pod.typeRef(type.base));
+                }
+
+                for (int t : type.mixins) {
+                    inhTypes.add(type.pod.typeRef(t));
+                }
+
+                // Try to reuse existing db entries.
+                for (FTypeRef item : inhTypes) {
+                    dbType.getInheritedTypes().add(item.signature);
+                } // end inh
+
+                Namespace.get().put(dbType);
+
+                // allow for quicker exit on shutdown
+                if (shutdown) {
+                    break;
+                }
+            } // end type
+
+            // all went well, set the tstamp - mark as good
+            doc.setTstamp(System.currentTimeMillis());
+
+        } catch (Exception e) {
+            log.exception("Indexing failed for: " + pod, e);
+        }
+    }
+
+    private int getKind(FType type) {
+        if (hasFlag(type.flags, FConst.Mixin)) {
+            return FanAstScopeVarBase.VarKind.TYPE_MIXIN.value();
+        }
+        if (hasFlag(type.flags, FConst.Enum)) {
+            return FanAstScopeVarBase.VarKind.TYPE_ENUM.value();
+        } // class is default
+        return FanAstScopeVarBase.VarKind.TYPE_CLASS.value();
+    }
+
+    private boolean hasFlag(int flags, int flag) {
+        return (flags & flag) != 0;
+    }
+
+    public static void shutdown() {
+//        FanJarsIndexer.shutdown();
+        shutdown = true;
+    }
+
+    private int getProtection(int flags) {
+        if (hasFlag(flags, FConst.Private)) {
+            return ModifEnum.PRIVATE.value();
+        }
+        if (hasFlag(flags, FConst.Protected)) {
+            return ModifEnum.PROTECTED.value();
+        }
+        if (hasFlag(flags, FConst.Internal)) {
+            return ModifEnum.INTERNAL.value();
+        } // default is public
+        return ModifEnum.PUBLIC.value();
+    }
+
+    /**
+     * Index a fantom source folder recursively
+     *
+     * @param root
+     * @param nb - nb of files parsed
+     * @return
+     */
+    public int indexSrcFolder(FileObject root, int nb) {
+        if (!FanPlatform.isConfigured()) {
+            return 0;
+        }
+        if (!isAllowedIndexing(root)) {
+            return nb;
+        }
+        FileObject[] children = root.getChildren();
+        for (FileObject child : children) {
+            if (child.isFolder()) {
+                //recurse
+                nb = indexSrcFolder(child, nb);
+            } else {
+                if (child.hasExt("fan") || child.hasExt("fwt")) {
+                    if (FanIndexer.checkIfNeedsReindexing(child.getPath(), child.lastModified().getTime())) {
+                        log.info("ReIndexing: " + root.getPath());
+                        nb++;
+                        requestIndexing(child.getPath());
+                    }
+                }
+            }
+        }
+        return nb;
+    }
+
+    public static String getPodDoc(String podName) {
+        if (!FanPlatform.isConfigured()) {
+            return null;
+        }
+        Pod pod = null;
+        try {
+            pod = Pod.find(podName);
+        } catch (RuntimeException e) {
+            log.debug("Pod doc not found for " + podName);
+        }
+        if (pod != null) {
+            return fanDocToHtml((String) pod.meta().get("pod.summary"));
+        }
+        return null;
+    }
+
+    public static String getSlotDoc(FanSlot slot) {
+        FanType type = slot.parent;
+        if (type != null) {
+            String sig = type.getQualifiedName() + "." + slot.getName();
+            try {
+                Slot fslot = Slot.find(sig);
+                if (fslot != null) {
+                    return fanDocToHtml(fslot.doc());
+                }
+            } catch (Throwable t) {
+                // Fantom runtime exception if type ! found
+                log.debug(t.toString());
+            }
+        }
+        return null;
+    }
+
+    public static String getDoc(FanType type) {
+        if (!FanPlatform.isConfigured()) {
+            return null;
+        }
+        try {
+            Pod pod = Pod.find(type.getPod());
+            Type t = pod.type(type.getSimpleName());
+            if (t != null) {
+                return fanDocToHtml(t.doc());
+            }
+        } catch (RuntimeException e) {
+            log.debug("Type doc not found for " + type);
+        }
+        return null;
+    }
+
+    /**
+     * Parse Fandoc text into HTML using fan's builtin parser.
+     *
+     * @param fandoc
+     * @return
+     */
+    public static String fanDocToHtml(String fandoc) {
+        if (fandoc == null) {
+            return null;
+        }
+        if (!FanPlatform.isConfigured()) {
+            return fandoc;
+        }
+        String html = fandoc;
+        try {
+            FanObj parser = (FanObj) Type.find("fandoc::FandocParser").make();
+            FanObj doc = (FanObj) parser.typeof().method("parseStr").call(parser, fandoc);
+            Buf buf = Buf.make();
+            FanObj writer = (FanObj) Type.find("fandoc::HtmlDocWriter").method("make").call(buf.out());
+            doc.typeof().method("write").call(doc, writer);
+            html = buf.flip().readAllStr();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } //System.out.println("Html doc: "+html);
+        return html;
+    }
+
+    //*********** File listeners ****************************
+    public void fileFolderCreated(FileEvent fe) {
+        // Listen for changes
+        String path = fe.getFile().getPath();
+        log.debug("Folder created: " + path);
+        FileUtil.addFileChangeListener(this, FileUtil.toFile(fe.getFile()));
+    }
+
+    public void fileDataCreated(FileEvent fe) {
+        String path = fe.getFile().getPath();
+        log.debug("File created: " + path);
+        requestIndexing(
+                path);
+    }
+
+    public void fileChanged(FileEvent fe) {
+        String path = fe.getFile().getPath();
+        log.debug("File changed: " + path);
+        requestIndexing(
+                path);
+    }
+
+    public void fileDeleted(FileEvent fe) {
+        // synced because we don't want to do it at the same time as the thread
+        String path = fe.getFile().getPath();
+        log.debug("File deleted: " + path);
+        toBeDeleted.put(path, new Date().getTime());
+    }
+
+    public void fileRenamed(FileRenameEvent fre) {
+        // synced because we don't want to do it at the same time as the thread
+        FileObject src = (FileObject) fre.getSource();
+        log.debug("File renamed: " + src.getPath() + " -> " + fre.getFile().getPath());
+        //TODO add this to a hashtable and do it in the thread
+        FanSrcFile.renameDoc(src.getPath(), fre.getFile().getPath());
+    }
+
+    public void fileAttributeChanged(FileAttributeEvent fae) {
+        int bkpt = 0;
+        // don't care
+    }
+
+    public void waitForEmptyFantomQueue() {
+        while (true) {
+            if (fanPodsToBeIndexed.size() == 0 && fanSrcToBeIndexed.size() == 0) {
+                return;
+            }
+
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * *******************************************************************
+     * Indexer Thread class All indexing request should go through here to avoid
+     * issues.
+     */
+    class FanIndexerThread extends Thread implements Runnable {
+
+        @Override
+        public void run() {
+
+            while (!shutdown) {
+                try {
+                    Thread.yield();
+                    sleep(100);
+                } catch (Exception e) {
+                }
+
+                if (!toBeDeleted.isEmpty() || !fanPodsToBeIndexed.isEmpty() || !fanSrcToBeIndexed.isEmpty()) {
+                    // Will show a progress bar if it takes more than 5 sec
+                    ProgressHandle progressHandle = ProgressHandleFactory.createHandle("Fantom indexing", (Cancellable) null);
+                    progressHandle.setInitialDelay(5000);
+                    progressHandle.start();
+                    Enumeration<String> tbd = toBeDeleted.keys();
+                    // to be deleted
+                    {
+                        while (tbd.hasMoreElements()) {
+                            if (shutdown) {
+                                return;
+                            }
+                            String path = tbd.nextElement();
+
+                            FanSrcFile doc = FanSrcFile.findByPath(path);
+                            try {
+                                if (doc != null) {
+                                    progressHandle.progress("De-Indexing: " + path);
+                                    doc.delete();
+                                }
+                            } catch (Exception e) {
+                                log.exception("Error deleting doc", e);
+                            }
+                        }
+                    }
+                    // always do binaries first
+                    do {
+                        // Usig keys() since it uses a "snapshot"
+                        // no concurrentmodif error
+                        // also nextElement() should be safe since we only remove elements from within here
+                        // elems can be added outside ... but that should be fine.
+                        Enumeration<String> it = fanPodsToBeIndexed.keys();
+                        while (it.hasMoreElements()) {
+                            if (shutdown) {
+                                return;
+                            }
+                            String path = it.nextElement();
+                            Long l = fanPodsToBeIndexed.get(path);
+                            long now = new Date().getTime();
+                            if (l != null && l.longValue() < now - 1000) {
+                                fanPodsToBeIndexed.remove(path);
+                                progressHandle.progress("Indexing: " + path);
+                                indexPod(path);
+                            }
+                        }
+                    } while (!fanPodsToBeIndexed.isEmpty());
+                    // then do the sources
+                    Enumeration<String> it = fanSrcToBeIndexed.keys();
+                    while (it.hasMoreElements()) {
+                        if (shutdown) {
+                            return;
+                        }
+                        String path = it.nextElement();
+                        Long l = fanSrcToBeIndexed.get(path);
+                        // Hasn't changed in a couple seconds
+                        long now = new Date().getTime();
+                        if (path != null && l != null && l.longValue() < now - 2000) {
+                            fanSrcToBeIndexed.remove(path);
+                            progressHandle.progress("Indexing: " + path);
+                            indexSrc(path);
+                        }
+                    }
+                    progressHandle.finish();
+                }
+            }
+        }
+    }
+
+    public static boolean isAllowedIndexing(FileObject srcFile) {
+        FileObject fanHome = FanPlatform.getInstance().getFanHome();
+        if (fanHome.getPath().equals(srcFile.getPath())
+                || FileUtil.isParentOf(fanHome, srcFile)) {
+            return false;
+        }
+        return true;
+    }
 }

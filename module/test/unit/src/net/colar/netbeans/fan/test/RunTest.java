@@ -3,24 +3,15 @@
  */
 package net.colar.netbeans.fan.test;
 
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanType;
 
 /**
  * Just a main for quickly testing something
+ *
  * @author thibautc
  */
-public class RunTest
-{
+public class RunTest {
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			FanType model = new FanType();
-			model.save();
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+    public static void main(String[] args) {
+    }
 }

@@ -9,9 +9,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.text.BadLocationException;
+import net.colar.netbeans.fan.indexer.FanIndex;
 import net.colar.netbeans.fan.parser.FanParserErrorKey;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -145,7 +146,7 @@ public class FanHintsProvider implements HintsProvider
         }
         if (type != null)
         {
-            Collection<FanType> types = FanType.findTypes(type);
+            Collection<FanType> types = FanIndex.get().findTypes(type);
             List<HintFix> fixes = new ArrayList<HintFix>();
             for (FanType t : types)
             {

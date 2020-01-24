@@ -17,7 +17,6 @@ import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
 import net.colar.netbeans.fan.editor.FantomIndentUtils;
-import net.colar.netbeans.fan.indexer.model.FanDocument;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -179,11 +178,10 @@ public class FanAddFieldDialog extends javax.swing.JDialog
         setVisible(false);
         dispose();
 
-        Long docId = targetType.getDbType().getSrcDocId();
-        FanDocument doc = FanDocument.findById(docId);
-        if (doc != null)
+        String srcPath = targetType.getDbType().getSourcePath();
+        if (srcPath != null)
         {
-            FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(doc.getPath())));
+            FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(srcPath)));
             Source source = Source.create(fo);
             Snapshot snapshot = source.createSnapshot();
             // Parse the snaphot

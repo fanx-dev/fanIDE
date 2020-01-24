@@ -3,6 +3,7 @@
  */
 package net.colar.netbeans.fan.types;
 
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -17,7 +18,7 @@ public class FanResolvedMapType extends FanResolvedType
 
 	public FanResolvedMapType(AstNode scopeNode, FanResolvedType keyType, FanResolvedType valType)
 	{
-		super(scopeNode, "sys::Map", scopeNode.getRoot().getParserTask().findCachedQualifiedType("sys::Map"));
+		super(scopeNode, "sys::Map", Namespace.get().findByQualifiedName("sys::Map"));
 		this.keyType = keyType;
 		this.valType = valType;
 	}

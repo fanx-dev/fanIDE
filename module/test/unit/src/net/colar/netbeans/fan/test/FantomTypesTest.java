@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.test;
 import net.colar.netbeans.fan.test.mock.DummyAstRootNode;
 import java.util.List;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
+import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -18,7 +18,6 @@ import net.colar.netbeans.fan.scope.FanLocalScopeVar;
 import net.colar.netbeans.fan.types.FanResolvedListType;
 import net.colar.netbeans.fan.types.FanResolvedNullType;
 import net.colar.netbeans.fan.types.FanResolvedType;
-import net.jot.testing.JOTTester;
 import org.parboiled.Parboiled;
 import org.parboiled.common.StringUtils;
 import org.parboiled.parserunners.RecoveringParseRunner;
@@ -29,7 +28,7 @@ import org.parboiled.support.ParsingResult;
  *
  * @author thibautc
  */
-public class FantomTypesTest extends FantomCSLTest {
+public class FantomTypesTest extends FantomCSLTestBase {
 
     // List some fq imports we will use in the tests, so we can add them to the node's scope (sys types implied)
     static String[] testUsings = {
@@ -52,12 +51,12 @@ public class FantomTypesTest extends FantomCSLTest {
 
         // Testing type signature stuff
         FanResolvedType t = FanResolvedType.makeFromTypeSig(node, "sys::Str");
-        JOTTester.checkIf("Type sig 1", t.getQualifiedType().equals("sys::Str") && !t.isNullable(), t.toString());
-        JOTTester.checkIf("Type sig 1a", t.asNullableContext(true).isNullable() && t.asStaticContext(true).isStaticContext(), t.toString());
+        assertTrue("Type sig 1:" + t.toString(), t.getQualifiedType().equals("sys::Str") && !t.isNullable());
+        assertTrue("Type sig 1a:"+t.toString(), t.asNullableContext(true).isNullable() && t.asStaticContext(true).isStaticContext());
         t = FanResolvedType.makeFromTypeSig(node, "sys::Str?");
-        JOTTester.checkIf("Type sig 2", t.getQualifiedType().equals("sys::Str") && t.isNullable(), t.toString());
+        assertTrue("Type sig 2:"+t.toString(), t.getQualifiedType().equals("sys::Str") && t.isNullable());
         t = FanResolvedType.makeFromTypeSig(node, "sys::Str[]");
-        JOTTester.checkIf("Type sig 3", (t instanceof FanResolvedListType) && t.toTypeSig(true).equals("sys::Str[]"), t.toString());
+        assertTrue("Type sig 3:"+t.toString(), (t instanceof FanResolvedListType) && t.toTypeSig(true).equals("sys::Str[]"));
         t = FanResolvedType.makeFromTypeSig(node, "Int");
         check(t, "sys::Int", false, true);
         t = FanResolvedType.makeFromTypeSig(node, "Int?");
@@ -67,7 +66,7 @@ public class FantomTypesTest extends FantomCSLTest {
         checkExpr("5", "sys::Int", false, false);
         checkExpr("0x5A", "sys::Int", false, false);
         AstNode resultNode = checkExpr("null", "null::null?", true, false);
-        JOTTester.checkIf("checking null type", resultNode.getType() instanceof FanResolvedNullType);
+        assertTrue("checking null type", resultNode.getType() instanceof FanResolvedNullType);
         checkExpr("\"a\"", "sys::Str", false, false);
 
         checkExpr("0x3bca.not.and(0xffff)", "sys::Int", false, false);
@@ -91,9 +90,9 @@ public class FantomTypesTest extends FantomCSLTest {
         check(t, "sys::Obj[]?", true, false);
         t = FanResolvedType.makeFromTypeSig(node, "Str[][]?");
         check(t, "sys::Str[][]?", true, false);
-        JOTTester.checkIf("List of List type",
+        assertTrue("List of List type:"+t.toString(),
                 (t instanceof FanResolvedListType)
-                && ((FanResolvedListType) t).getItemType().toTypeSig(true).equals("sys::Str[]"), t.toString());
+                && ((FanResolvedListType) t).getItemType().toTypeSig(true).equals("sys::Str[]"));
 
         // maps
         t = FanResolvedType.makeFromTypeSig(node, "[sys::Str : sys::Str]");
@@ -160,25 +159,25 @@ public class FantomTypesTest extends FantomCSLTest {
         checkExpr("500ms.ticks.abs", null, false, false);
 
         // Testing isCompatible()
-        JOTTester.checkIf("Compatibility of Enum vs Obj", mkt("sys::Enum", node).isTypeCompatible(mkt("sys::Obj", node)));
-        JOTTester.checkIf("Compatibility of Obj vs Obj", mkt("sys::Obj", node).isTypeCompatible(mkt("sys::Obj", node)));
-        JOTTester.checkIf("Un-Compatibility of mixin vs Enum", !mkt("web::Weblet", node).isTypeCompatible(mkt("sys::Enum", node)));
-        JOTTester.checkIf("Compatibility of Button vs Obj", mkt("fwt::Button", node).isTypeCompatible(mkt("sys::Obj", node)));
-        JOTTester.checkIf("Compatibility of Button vs widget", mkt("fwt::Button", node).isTypeCompatible(mkt("fwt::Widget", node)));
+        assertTrue("Compatibility of Enum vs Obj", mkt("sys::Enum", node).isTypeCompatible(mkt("sys::Obj", node)));
+        assertTrue("Compatibility of Obj vs Obj", mkt("sys::Obj", node).isTypeCompatible(mkt("sys::Obj", node)));
+        assertTrue("Un-Compatibility of mixin vs Enum", !mkt("web::Weblet", node).isTypeCompatible(mkt("sys::Enum", node)));
+        assertTrue("Compatibility of Button vs Obj", mkt("fwt::Button", node).isTypeCompatible(mkt("sys::Obj", node)));
+        assertTrue("Compatibility of Button vs widget", mkt("fwt::Button", node).isTypeCompatible(mkt("fwt::Widget", node)));
 
         // Testing getParent()
         t = mkt("concurrent::Actor", node);
         FanResolvedType p = t.getParentType();
-        JOTTester.checkIf("Actor parent is Obj", p.getDbType().getQualifiedName().equals("sys::Obj"), p.toString());
+        assertTrue("Actor parent is Obj:"+p.toString(), p.getDbType().getQualifiedName().equals("sys::Obj"));
         t = mkt("sys::Weekday", node);
         p = t.getParentType();
-        JOTTester.checkIf("Weekday parent is Enum", p.getDbType().getQualifiedName().equals("sys::Enum"), p.toString());
+        assertTrue("Weekday parent is Enum:"+p.toString(), p.getDbType().getQualifiedName().equals("sys::Enum"));
         t = mkt("sys::Enum", node);
         p = t.getParentType();
-        JOTTester.checkIf("Enum parent is Obj", p.getDbType().getQualifiedName().equals("sys::Obj"), p.toString());
+        assertTrue("Enum parent is Obj:"+p.toString(), p.getDbType().getQualifiedName().equals("sys::Obj"));
         t = mkt("web::Weblet", node);
         p = t.getParentType();
-        JOTTester.checkIf("Mixin parent is Obj", p.getDbType().getQualifiedName().equals("sys::Obj"), p.toString());
+        assertTrue("Mixin parent is Obj:"+p.toString(), p.getDbType().getQualifiedName().equals("sys::Obj"));
 
         checkExpr("Str<|{\"foo\": 1234}|>.in", "sys::InStream", false, false); // DSL too
 
@@ -233,7 +232,7 @@ public class FantomTypesTest extends FantomCSLTest {
                 && t.isNullable() == isNullable
                 && t.isStaticContext() == isStatic;
         String expected = "got: " + t + ", expected: " + typeSig + ", ST:" + isStatic + ", NL:" + isNullable;
-        JOTTester.checkIf("Checking " + infoStr, good, expected);
+        assertTrue("Checking " + infoStr + "expected:" + expected, good);
     }
 
     /**
@@ -249,7 +248,7 @@ public class FantomTypesTest extends FantomCSLTest {
         FanParserTask task = new FanParserTask(null);
         FantomParser parser = Parboiled.createParser(FantomParser.class, task);
         ParsingResult<AstNode> result = new RecoveringParseRunner<AstNode>(parser.testExpr()).run(expr);
-        JOTTester.checkIf("Checking for parsing errors: " + expr, !result.hasErrors(), StringUtils.join(result.parseErrors, "\n"));
+        assertTrue("Checking for parsing errors: " + expr+":"+StringUtils.join(result.parseErrors, "\n"), !result.hasErrors());
         AstNode node = result.parseTreeRoot.getValue();
         FantomParserAstActions.linkNodes(result.valueStack);
 
@@ -261,19 +260,19 @@ public class FantomTypesTest extends FantomCSLTest {
         {
             FanLexAstUtils.dumpTree(node, 0);
         }
-        JOTTester.checkIf("Checking for Semantic errors: " + expr, task.getDiagnostics().isEmpty(), StringUtils.join(task.getDiagnostics(), "\n"));
+        assertTrue("Checking for Semantic errors: " + expr+ ":" + StringUtils.join(task.getDiagnostics(), "\n"), task.getDiagnostics().isEmpty());
         FanResolvedType t = node.getType();
         check(expr, t, typeSig, isNullable, isStatic);
         return node;
     }
 
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomTypesTest(), true);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            JOTTester.singleTest(new FantomTypesTest(), true);
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
 
     public static void addUsingsToNode(AstNode node, String[] usings) {
         for (String using : usings) {
@@ -290,7 +289,7 @@ public class FantomTypesTest extends FantomCSLTest {
     public static void addTypeSlotsToNode(AstNode node, FanParserTask task, String[] types) {
         for (String type : types) {
             FanResolvedType baseType = FanResolvedType.makeFromDbType(node, type);
-            List<FanSlot> slots = FanSlot.getAllSlotsForType(type, false, task);
+            List<FanSlot> slots = baseType.getDbType().getAllSlots();
             for (FanSlot slot : slots) {
                 FanAstScopeVarBase newVar = new FanLocalScopeVar(node, baseType, slot, slot.getName());
                 node.addScopeVar(newVar, true);

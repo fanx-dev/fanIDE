@@ -16,13 +16,14 @@ import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.test.mock.MockLookup;
+import net.colar.netbeans.fan.test.mock.MockProjectManager;
 import net.colar.netbeans.fan.test.mock.MockTrampoline;
+import net.colar.netbeans.fan.test.mock.TestEnvironmentFactory;
 import net.jot.prefs.JOTPropertiesPreferences;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.DataLoadersBridge;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Source;
-import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
@@ -82,7 +83,7 @@ public class NBTestUtilities {
          */
         Preferences.userRoot().sync();
         // Addd the required trampoline impl.
-        MockLookup.setInstances(new MockTrampoline());
+        MockLookup.setInstances(new MockTrampoline(), new TestEnvironmentFactory(), new MockProjectManager());
 
         // Setup the test Platform
         System.setProperty("netbeans.user", prefs.getString("test.home")); // the user it will run in, should probably use some netbeans prop instaed

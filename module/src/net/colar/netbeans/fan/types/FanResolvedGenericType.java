@@ -3,8 +3,9 @@
  */
 package net.colar.netbeans.fan.types;
 
-import net.colar.netbeans.fan.indexer.model.FanDummyType;
+import net.colar.netbeans.fan.namespace.FanType;
 import java.util.Vector;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -16,7 +17,7 @@ public class FanResolvedGenericType extends FanResolvedType
 
 	public FanResolvedGenericType(AstNode node, String enteredType)
 	{
-		super(node, enteredType, new FanDummyType(enteredType));
+		super(node, enteredType, FanType.makeDummy());
 	}
 
 	/**
@@ -25,7 +26,7 @@ public class FanResolvedGenericType extends FanResolvedType
 	 */
 	public FanResolvedType getPhysicalType()
 	{
-		FanResolvedType objType = new FanResolvedType(getScopeNode(), "sys::Obj", getScopeNode().getRoot().getParserTask().findCachedQualifiedType("sys::Obj"));
+		FanResolvedType objType = new FanResolvedType(getScopeNode(), "sys::Obj", Namespace.get().findByQualifiedName("sys::Obj"));
 		if (getShortAsTypedType().equals("L"))
 		{ // List
 			return new FanResolvedListType(getScopeNode(), objType);

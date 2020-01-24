@@ -12,7 +12,6 @@ import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FantomParser;
 import net.colar.netbeans.fan.parser.parboiled.FantomParserAstActions;
-import net.jot.testing.JOTTester;
 import org.parboiled.Parboiled;
 import org.parboiled.Rule;
 import org.parboiled.common.StringUtils;
@@ -26,7 +25,7 @@ import org.parboiled.support.ParsingResult;
  *
  * @author thibautc
  */
-public class FantomParserTest extends FantomCSLTest {
+public class FantomParserTest extends FantomCSLTestBase {
 
     public FantomParserTest() {
         super(true);
@@ -393,14 +392,14 @@ public class FantomParserTest extends FantomCSLTest {
             // Test all Fantom distro examples
             testAllFanFilesUnder(fanHome + "/examples/", false);
             // Test all Fantom distro sources
-            testAllFanFilesUnder(fanHome + "/src/", false);
+//            testAllFanFilesUnder(fanHome + "/src/", false);
         }
 
         if (fantomFilesLexerTest) {
             // Test all Fantom distro examples
             testAllFanFilesUnder(fanHome + "/examples/", true);
             // Test all Fantom distro sources
-            testAllFanFilesUnder(fanHome + "/src/", true);
+//            testAllFanFilesUnder(fanHome + "/src/", true);
         }
     }
 
@@ -439,10 +438,10 @@ public class FantomParserTest extends FantomCSLTest {
                 System.out.println("Parsed " + (lexerOnly ? "(lex only)" : "") + filePath + " in " + length + "ms");
             }
 
-            JOTTester.checkIf("Parsing " + (lexerOnly ? "(lex only)" : "") + filePath, !result.hasErrors());
-            JOTTester.checkIf("Parsing time " + (lexerOnly ? "(lex only)" : "") + filePath, length < 2000, "Took: " + length);
+            assertTrue("Parsing " + (lexerOnly ? "(lex only)" : "") + filePath, !result.hasErrors());
+            assertTrue("Parsing time " + (lexerOnly ? "(lex only)" : "") + filePath+"Took: " + length, length < 2000);
         } catch (Exception e) {
-            JOTTester.checkIf("Exception while parsing " + (lexerOnly ? "(lex only)" : "") + filePath, false);
+            assertTrue("Exception while parsing " + (lexerOnly ? "(lex only)" : "") + filePath, false);
             e.printStackTrace();
             //throw (e);
         }
@@ -458,14 +457,14 @@ public class FantomParserTest extends FantomCSLTest {
             System.err.println(label + " ERROR -> " + ErrorUtils.printParseErrors(result));
             System.err.println(label + " -> " + ParseTreeUtils.printNodeTree(result));
         }
-        JOTTester.checkIf(label + " - parsing failed", !result.hasErrors());
-        JOTTester.checkIf(label + " - root is null", result.parseTreeRoot != null);
+        assertTrue(label + " - parsing failed", !result.hasErrors());
+        assertTrue(label + " - root is null", result.parseTreeRoot != null);
         if (result.parseTreeRoot != null) {
-            JOTTester.checkIf(label + " - check name(" + nodeName + ")", result.parseTreeRoot.getLabel().equalsIgnoreCase(nodeName), result.parseTreeRoot.getLabel());
+            assertTrue(label + " - check name(" + nodeName + ")"+ result.parseTreeRoot.getLabel(), result.parseTreeRoot.getLabel().equalsIgnoreCase(nodeName));
         }
         if (value != null && result.parseTreeRoot != null) {
             String txt = ParseTreeUtils.getNodeText(result.parseTreeRoot, result.inputBuffer);
-            JOTTester.checkIf(label + " - check value", txt.equals(value), "'" + value + "' VS '" + txt + "'");
+            assertTrue(label + " - check value" + "'" + value + "' VS '" + txt + "'", txt.equals(value));
         }
     }
 
@@ -492,13 +491,5 @@ public class FantomParserTest extends FantomCSLTest {
         //System.out.println("Abstract Syntax Tree:\n" +
         //            GraphUtils.printTree(result.parseTreeRoot.getValue(), new ToStringFormatter<AstNode>()) + '\n');
         //System.err.println("Parse Tree:\n" + ParseTreeUtils.printNodeTree(result) + '\n');
-    }
-
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomParserTest(), true);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
     }
 }

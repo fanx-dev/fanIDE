@@ -14,14 +14,15 @@ import java.util.Set;
 import java.util.Vector;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import net.colar.netbeans.fan.indexer.FanIndex;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
-import net.colar.netbeans.fan.indexer.FanJarsIndexer;
 import net.colar.netbeans.fan.types.FanResolvedType;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanSlot;
+import net.colar.netbeans.fan.namespace.FanType;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -231,7 +232,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
      */
     private void proposePods(ArrayList<CompletionProposal> proposals, int anchor, String prefix)
     {
-        Vector<String> names = FanType.findAllPodNames();
+        List<String> names = Namespace.get().findAllPodNames();
         if (prefix.length() == 0)
         {
             proposals.add(new FanImportProposal("[java] ", anchor - prefix.length(), true));
@@ -255,13 +256,13 @@ public class FanCompletionHandler implements CodeCompletionHandler
      */
     private void proposeTypes(String podName, ArrayList<CompletionProposal> proposals, int anchor, String prefix)
     {
-        Vector<FanType> types;
+        List<FanType> types;
         if (podName == null)
         {
-            types = FanType.findAllFantomTypes(prefix);
+            types = FanIndex.get().findAllFantomTypes(prefix);
         } else
         {
-            types = FanType.findPodTypes(podName, prefix);
+            types = FanIndex.get().findPodTypes(podName, prefix);
         }
         for (FanType type : types)
         {
@@ -281,77 +282,24 @@ public class FanCompletionHandler implements CodeCompletionHandler
      */
     private void proposeSlots(FanResolvedType type, ArrayList<CompletionProposal> proposals, int anchor, String prefix, AstNode node)
     {
-        if (type.getDbType().isJava())
+        /*if(type instanceof FanResolvedGenericType)
         {
-            FanJarsIndexer indexer = FanIndexerFactory.getJavaIndexer();
-            List<Member> slots = indexer.findTypeSlots(type.getDbType().getQualifiedName());
-            for (Member slot : slots)
+        type = ((FanResolvedGenericType)type).getPhysicalType();
+        }*/
+        // Not using a cache here.
+        List<FanSlot> slots = type.getDbType().getAllSlots();
+        for (FanSlot slot : slots)
+        {
+            if (slot.getName().toLowerCase().startsWith(prefix))
             {
-                if (slot.getName().toLowerCase().startsWith(prefix))
+                // constructor are not marked as static ... but fot this purpose they are
+                boolean isStatic = slot.isStatic() || slot.isCtor();
+                if (type.isStaticContext() == isStatic)
                 {
-                    boolean isStatic = Modifier.isStatic(slot.getModifiers()) || (slot instanceof Constructor);
-                    if (type.isStaticContext() == isStatic)
-                    {
-                        proposals.add(new FanSlotProposal(slot, anchor - prefix.length()));
-                        // TODO: javadoc for types/slots
-                        docType = DocTypes.NA;
-                    }
+                    proposals.add(new FanSlotProposal(slot, anchor - prefix.length(), node, type));
+                    docType = DocTypes.SLOT;
                 }
             }
-        } else
-        {
-            /*if(type instanceof FanResolvedGenericType)
-            {
-            type = ((FanResolvedGenericType)type).getPhysicalType();
-            }*/
-            // Not using a cache here.
-            List<FanSlot> slots = FanSlot.getAllSlotsForType(type.getDbType().getQualifiedName(), true, null);
-            for (FanSlot slot : slots)
-            {
-                if (slot.getName().toLowerCase().startsWith(prefix))
-                {
-                    // constructor are not marked as static ... but fot this purpose they are
-                    boolean isStatic = slot.isStatic() || slot.isCtor();
-                    if (type.isStaticContext() == isStatic)
-                    {
-                        proposals.add(new FanSlotProposal(slot, anchor - prefix.length(), node, type));
-                        docType = DocTypes.SLOT;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Java packages
-     * @param proposals
-     * @param anchor
-     * @param pod
-     */
-    private void proposeJavaPacks(ArrayList<CompletionProposal> proposals, int anchor, String basePack)
-    {
-        List<String> items = FanIndexerFactory.getJavaIndexer().listSubPackages(basePack);
-        for (String s : items)
-        {
-            FanUtilities.GENERIC_LOGGER.debug("Proposal: " + s);
-            proposals.add(new FanImportProposal(s, anchor - basePack.length(), true));
-        }
-    }
-
-    /**
-     *
-     * @param proposals
-     * @param anchor
-     * @param basePack   null means from any package
-     * @param type  type (starts with "[java]")
-     */
-    private void proposeJavaTypes(ArrayList<CompletionProposal> proposals, int anchor, String basePack, String type)
-    {
-        List<String> items = FanIndexerFactory.getJavaIndexer().listTypes(basePack, type);
-        for (String s : items)
-        {
-            FanUtilities.GENERIC_LOGGER.debug("Proposal: " + s);
-            proposals.add(new FanImportProposal(s, anchor - type.length(), true));
         }
     }
 
@@ -400,7 +348,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
             return;
         }
         AstNode idNode = FanLexAstUtils.getFirstChild(curNode, new NodeKindPredicate(AstKind.AST_ID));
-        AstNode ffi = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_FFI));
+//      AstNode ffi = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_FFI));
         //AstNode as = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_AS));
         String id = "";
         if (idNode != null)
@@ -416,30 +364,13 @@ public class FanCompletionHandler implements CodeCompletionHandler
             id = id.substring(id.indexOf("::") + 2);
         }
 
-        if (ffi != null)
+        if (pod == null)
         {
-            String ffiText = ffi.getNodeText(true);
-            if (ffiText.equals("java"))
-            {
-                if (pod == null)
-                {
-                    proposeJavaPacks(proposals, anchor, id);
-                } else
-                {
-                    proposeJavaTypes(proposals, anchor, pod, id);
-                }
-            }
+            proposePods(proposals, anchor, id);
         } else
         {
-            if (pod == null)
-            {
-                proposePods(proposals, anchor, id);
-            } else
-            {
-                proposeTypes(pod, proposals, anchor, id);
-            }
+            proposeTypes(pod, proposals, anchor, id);
         }
-
     }
 
     /**

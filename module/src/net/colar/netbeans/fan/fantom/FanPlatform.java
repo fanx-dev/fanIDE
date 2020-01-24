@@ -289,7 +289,7 @@ public class FanPlatform {
     public static void update() {
         // called when FAN_HOME is changed/updated.
         updateFromSettings();
-        FanIndexerFactory.getIndexer().indexAll(true);
+        FanIndexerFactory.getIndexer().indexAll();
     }
 
     public String getPodsDir() {

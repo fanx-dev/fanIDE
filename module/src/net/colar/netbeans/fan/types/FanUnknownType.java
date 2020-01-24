@@ -5,7 +5,7 @@
 
 package net.colar.netbeans.fan.types;
 
-import net.colar.netbeans.fan.indexer.model.FanDummyType;
+import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -20,6 +20,6 @@ public class FanUnknownType extends FanResolvedType
 {
 	public FanUnknownType(AstNode node, String enteredType)
 	{
-		super(node, enteredType, new FanDummyType(enteredType), false, true);
+		super(node, enteredType, FanType.makeDummy(), false, true);
 	}
 }

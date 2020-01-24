@@ -4,7 +4,7 @@
 
 package net.colar.netbeans.fan.types;
 
-import net.colar.netbeans.fan.indexer.model.FanDummyType;
+import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -15,7 +15,7 @@ public class FanResolvedNullType extends FanResolvedType
 {
 	public FanResolvedNullType(AstNode node)
 	{
-		super(node, "null", new FanDummyType("null::null"));
+		super(node, "null", FanType.makeDummy());
 	}
 
 }

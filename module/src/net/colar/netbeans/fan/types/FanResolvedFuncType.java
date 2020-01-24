@@ -5,6 +5,7 @@ package net.colar.netbeans.fan.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -21,7 +22,7 @@ public class FanResolvedFuncType extends FanResolvedType
 
     public FanResolvedFuncType(AstNode scopeNode, List<FanResolvedType> types, FanResolvedType retType)
     {
-        super(scopeNode, "sys::Func", scopeNode.getRoot().getParserTask().findCachedQualifiedType("sys::Func"));
+        super(scopeNode, "sys::Func", Namespace.get().findByQualifiedName("sys::Func"));
         if (retType == null)
         {
             retType = FanResolvedType.makeFromDbType(scopeNode, "sys::Void");

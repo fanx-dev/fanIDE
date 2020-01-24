@@ -6,14 +6,13 @@ package net.colar.netbeans.fan.test;
 
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 
 /**
  *
  * @author tcolar
  */
-public class FantomBasicIndexerTest extends FantomCSLTest {
+public class FantomBasicIndexerTest extends FantomCSLTestBase {
 
     @Override
     public void cslTest() throws Throwable {
@@ -24,13 +23,5 @@ public class FantomBasicIndexerTest extends FantomCSLTest {
         //result.parseLocalScopes();
         
         FanLexAstUtils.dumpTree(result.getAstTree(), 0);
-    }
-
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomBasicIndexerTest(), false);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
     }
 }

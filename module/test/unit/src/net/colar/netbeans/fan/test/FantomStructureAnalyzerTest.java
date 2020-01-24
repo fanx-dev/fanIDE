@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.List;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.structure.FanStructureAnalyzer;
-import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 
 /**
@@ -15,13 +14,13 @@ import org.netbeans.modules.parsing.api.Snapshot;
  *
  * @author thibautc
  */
-public class FantomStructureAnalyzerTest extends FantomCSLTest {
+public class FantomStructureAnalyzerTest extends FantomCSLTestBase {
 
     public void cslTest() throws Throwable {
         String fanHome = prefs.getString("fantom.home");
 
-        testAllFanFilesUnder(fanHome + "/examples/");
-        testAllFanFilesUnder(fanHome + "/src/");
+//        testAllFanFilesUnder(fanHome + "/examples/");
+        testAllFanFilesUnder(fanHome + "/src/util");
     }
 
     private static void testAllFanFilesUnder(String folderPath) throws Exception {
@@ -34,7 +33,7 @@ public class FantomStructureAnalyzerTest extends FantomCSLTest {
                 e = ex;
                 e.printStackTrace();
             }
-            JOTTester.checkIf("StructureAnalysis of: " + f.getAbsolutePath(), e == null);
+            assertTrue("StructureAnalysis of: " + f.getAbsolutePath(), e == null);
         }
     }
 
@@ -68,11 +67,11 @@ public class FantomStructureAnalyzerTest extends FantomCSLTest {
         return task;
     }
 
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomStructureAnalyzerTest(), false);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            JOTTester.singleTest(new FantomStructureAnalyzerTest(), false);
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
 }

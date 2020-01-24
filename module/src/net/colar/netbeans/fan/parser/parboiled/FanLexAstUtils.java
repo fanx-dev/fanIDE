@@ -12,7 +12,6 @@ import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
-import net.colar.netbeans.fan.indexer.model.FanDocument;
 import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;
 import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
 import net.colar.netbeans.fan.parser.parboiled.pred.NodeLabelPredicate;
@@ -386,9 +385,7 @@ public class FanLexAstUtils
     public static DeclarationLocation findTypeDeclaration(FanResolvedType t, String slot)
     {
         // Find the relevant item in the source
-        Long docId = t.getDbType().getSrcDocId();
-        FanDocument doc = FanDocument.findById(docId);
-        FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(doc.getPath())));
+        FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(t.getDbType().getSourcePath())));
         Source source = Source.create(fo);
         Snapshot snapshot = source.createSnapshot();
         // Parse the snaphot

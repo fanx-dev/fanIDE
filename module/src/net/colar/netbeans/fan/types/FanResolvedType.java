@@ -13,9 +13,9 @@ import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
-import net.colar.netbeans.fan.indexer.model.FanType;
-import net.colar.netbeans.fan.indexer.model.FanTypeInheritance;
+import net.colar.netbeans.fan.namespace.FanSlot;
+import net.colar.netbeans.fan.namespace.FanType;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -178,39 +178,17 @@ public class FanResolvedType implements Cloneable
         {
             return new FanUnknownType(scopeNode, slotName);
         }
-        if (baseType.getDbType().isJava())
+        
+        FanResolvedType slotBaseType = resolveSlotBaseType(slotName, task);
+        if (slotBaseType.isResolved())
         {
-            List<Member> members = FanIndexerFactory.getJavaIndexer().findTypeSlots(getQualifiedType());
-            for (Member member : members)
-            {
-                if (member.getName().equalsIgnoreCase(slotName))
-                {
-                    // Not dealing with it for now, because it might be tricky
-                    // java generics, automatic conversion to fantom and what not
-                    return new FanUnknownType(scopeNode, slotName);
-                }
-            }
-            // Even java types, implicitely inherit from sys::Obj
-            FanSlot slot = FanSlot.findByTypeAndName("sys::Obj", slotName);
+            FanSlot slot = FanSlot.findByTypeAndName(slotBaseType.getQualifiedType(), slotName);
             if (slot == null)
             {
                 return FanResolvedType.makeUnresolved(baseType.scopeNode);
             }
             FanResolvedType t = makeFromTypeSig(baseType.scopeNode, slot.returnedType);
             return t;
-        } else
-        {
-            FanResolvedType slotBaseType = resolveSlotBaseType(slotName, task);
-            if (slotBaseType.isResolved())
-            {
-                FanSlot slot = FanSlot.findByTypeAndName(slotBaseType.getQualifiedType(), slotName);
-                if (slot == null)
-                {
-                    return FanResolvedType.makeUnresolved(baseType.scopeNode);
-                }
-                FanResolvedType t = makeFromTypeSig(baseType.scopeNode, slot.returnedType);
-                return t;
-            }
         }
         return makeUnresolved(baseType.scopeNode);
     }
@@ -247,20 +225,10 @@ public class FanResolvedType implements Cloneable
         {
             return FanResolvedType.makeUnresolved(null);
         }
-        if (baseType.getDbType().isJava())
-        {
-            return baseType;
-        } else
-        {
-            // Fan slots
-            for (FanSlot slot : FanSlot.getAllSlotsForType(baseType.getDbType().getQualifiedName(), true, task))
-            {
-                if (slot.getName().equals(slotName))
-                {
-                    FanType slotBaseType = FanType.findByID(slot.getTypeId());
-                    return makeFromTypeSig(scopeNode, slotBaseType.getQualifiedName());
-                }
-            }
+        
+        FanSlot slot = baseType.getDbType().findSlot(slotName);
+        if (slot != null) {
+            return makeFromTypeSig(scopeNode, slot.parent.getQualifiedName());
         }
         return makeUnresolved(baseType.scopeNode);
     }
@@ -551,11 +519,11 @@ public class FanResolvedType implements Cloneable
         if(enteredType.startsWith("[java]"))
         {
           String s = enteredType.substring(6).trim().replace("::", ".");   
-          type = scopeNode.getRoot().getParserTask().findCachedQualifiedType(s);
+          type = Namespace.get().findByQualifiedName(s);
         }
         else if (enteredType.indexOf("::") != -1 && !isGenericType(enteredType))
         {	// Qualified type
-            type = scopeNode.getRoot().getParserTask().findCachedQualifiedType(enteredType);
+            type = Namespace.get().findByQualifiedName(enteredType);
             toStatic = true;
         } else
         {
@@ -568,13 +536,13 @@ public class FanResolvedType implements Cloneable
             if (type == null)
             {
                 // first, other types in this pod
-                type = scopeNode.getRoot().getParserTask().findCachedQualifiedType(scopeNode.getRoot().getPod() + "::" + enteredType);
+                type = Namespace.get().findByQualifiedName(scopeNode.getRoot().getPod() + "::" + enteredType);
                 toStatic = true;
             }
             // if still not found try in "sys" pod
             if (type == null)
             {
-                type = scopeNode.getRoot().getParserTask().findCachedQualifiedType("sys::" + enteredType);
+                type = Namespace.get().findByQualifiedName("sys::" + enteredType);
                 toStatic = true;
             }
             // Deal with Generic types
@@ -613,14 +581,7 @@ public class FanResolvedType implements Cloneable
      */
     public static FanResolvedType makeFromDbType(AstNode node, String qualifiedType)
     {
-        FanType type = null;
-        if (node == null)
-        {	// typically, shouldn't be null, but protect in case it is
-            type = FanType.findByQualifiedName(qualifiedType);
-        } else
-        {
-            type = node.getRoot().getParserTask().findCachedQualifiedType(qualifiedType);
-        }
+        FanType type = Namespace.get().findByQualifiedName(qualifiedType);
         return new FanResolvedType(node, qualifiedType, type);
     }
 
@@ -656,34 +617,7 @@ public class FanResolvedType implements Cloneable
      */
     public boolean isTypeCompatible(FanResolvedType baseType)
     {
-        FanResolvedType t = this;
-        while (t != null)
-        {
-            if (this instanceof FanResolvedNullType)
-            {
-                return baseType.isNullable();
-            }
-            if (this instanceof FanUnknownType || baseType instanceof FanUnknownType)
-            {
-                return true;
-            }
-            // TODO: might not work for generics
-            if (t.getDbType().getQualifiedName().equals(baseType.getDbType().getQualifiedName())
-                    && t.getClass().getName().equals(baseType.getClass().getName()))
-            {
-                return true;
-            }
-            // check inheritance too
-            for (FanTypeInheritance inh : FanTypeInheritance.findAllForMainType(null, t.getQualifiedType()))
-            {
-                if (inh.getInheritedType().equals(baseType.getDbType().getQualifiedName()))
-                {
-                    return true;
-                }
-            }
-            t = t.getParentType();
-        }
-        return false;
+        return this.getDbType().fits(baseType.getDbType());
     }
 
     /**
@@ -693,10 +627,6 @@ public class FanResolvedType implements Cloneable
      */
     public FanResolvedType getParentType()
     {
-        if (this instanceof FanUnknownType)
-        {
-            return this;
-        }
         if (!this.isResolved())
         {
             return makeUnresolved(scopeNode);
@@ -713,16 +643,15 @@ public class FanResolvedType implements Cloneable
         {
         return makeFromTypeSig(scopeNode, "sys::Obj");
         }*/
-
-        Vector<FanTypeInheritance> inhs = FanTypeInheritance.findAllForMainType(null, getDbType().getQualifiedName());
-        for (FanTypeInheritance inh : inhs)
-        {
-            FanResolvedType t = FanResolvedType.makeFromDbType(getScopeNode(), inh.getInheritedType());
-            if (t.isResolved() && t.getDbType().isClass())
-            {
-                return t;
-            }
+        if (!getDbType().isValid()) {
+            return this;
         }
+
+        FanType t = this.getDbType().getBaseType();
+        if (t != null) {
+            return FanResolvedType.makeFromDbType(getScopeNode(), t.getQualifiedName());
+        }
+        
         if (!getDbType().getQualifiedName().equals("sys::Obj"))
         {
             return FanResolvedType.makeFromDbType(getScopeNode(), "sys::Obj");

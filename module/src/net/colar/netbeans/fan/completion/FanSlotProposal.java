@@ -9,16 +9,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
-import net.colar.netbeans.fan.indexer.model.FanMethodParam;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
+import net.colar.netbeans.fan.namespace.FanMethodParam;
+import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.structure.FanBasicElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanType;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.types.FanResolvedFuncType;
 import net.colar.netbeans.fan.types.FanResolvedType;
@@ -50,7 +52,7 @@ public class FanSlotProposal extends FanCompletionProposal
             }
             html = name;
             prefix = name;
-            rHtml += FanType.getShortName(slot.getReturnedType());
+            rHtml += Namespace.getShortName(slot.getReturnedType());
         } else if (slot.isMethod() || slot.isCtor())
         {
             this.kind = ElementKind.METHOD;
@@ -61,17 +63,17 @@ public class FanSlotProposal extends FanCompletionProposal
             String args = "";
             html = name + "(";
             prefix = name + "(";
-            rHtml = FanType.getShortName(slot.getReturnedType());
+            rHtml = Namespace.getShortName(slot.getReturnedType());
             if (rHtml.equals("sys::Void"))
             {
                 rHtml = "";
             }
-            Vector<FanMethodParam> params = slot.getAllParameters();
+            List<FanMethodParam> params = slot.getAllParameters();
             int lastNotOptional = -1;
             for (int i = 0; i != params.size(); i++)
             {
                 FanMethodParam p = params.get(i);
-                if ( ! p.hasDefault)
+                if ( ! p.hasDefault())
                 {
                     lastNotOptional = i;
                 }
@@ -108,7 +110,7 @@ public class FanSlotProposal extends FanCompletionProposal
                         prefix += p.getName();
                     }
                 }
-                String typeName = FanType.getShortName(p.getQualifiedType());
+                String typeName = Namespace.getShortName(p.getQualifiedType());
                 args += typeName + " " + nm;
             }
 
@@ -126,7 +128,7 @@ public class FanSlotProposal extends FanCompletionProposal
 
         } else
         {
-            FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot.slotKind);
+            FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot);
         }
         FanBasicElementHandle handle = new FanBasicElementHandle(name, kind);
         handle.setDoc(FanIndexer.getSlotDoc(slot));

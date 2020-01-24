@@ -8,14 +8,13 @@ import java.io.FileInputStream;
 import net.colar.netbeans.fan.FanLanguage;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.structure.FanSemanticAnalyzer;
-import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 
 /**
  * Try to give some random partial file through the parser and see that it doesn't explode
  * @author thibautc
  */
-public class FantomPartialFileParserTest extends FantomCSLTest
+public class FantomPartialFileParserTest extends FantomCSLTestBase
 {
 
 	int NB_FILES_TO_USE = 10;
@@ -68,7 +67,7 @@ public class FantomPartialFileParserTest extends FantomCSLTest
 			task.parse(false, 2000);
 			task.parseGlobalScope();
 			task.parseLocalScopes();
-			JOTTester.checkIf("Parser errors ?", ! task.hasGlobalError());
+			assertTrue("Parser errors ?", ! task.hasGlobalError());
 			// parse errors are ok, we just don't want exceptions
 			if (task.getDiagnostics().isEmpty())
 			{
@@ -82,19 +81,19 @@ public class FantomPartialFileParserTest extends FantomCSLTest
 			e.printStackTrace();
 			err = true;
 		}
-		JOTTester.checkIf("Exception during partial file analysis", ! err);
+		assertTrue("Exception during partial file analysis", ! err);
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			JOTTester.singleTest(new FantomPartialFileParserTest(), false);
-		} catch (Throwable t)
-		{
-			t.printStackTrace();
-		}
-	}
+//	public static void main(String[] args)
+//	{
+//		try
+//		{
+//			JOTTester.singleTest(new FantomPartialFileParserTest(), false);
+//		} catch (Throwable t)
+//		{
+//			t.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Just remove/add to the the text ... so we get broken code as it would be as a user is typing/pasting.

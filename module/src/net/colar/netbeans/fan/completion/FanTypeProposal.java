@@ -10,7 +10,7 @@ import net.colar.netbeans.fan.structure.FanBasicElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.openide.util.ImageUtilities;
-import net.colar.netbeans.fan.indexer.model.FanType;
+import net.colar.netbeans.fan.namespace.FanType;
 
 /**
  * Propose a Type such as Str or Int
@@ -44,35 +44,7 @@ public class FanTypeProposal extends FanCompletionProposal
 		handle.setDoc(FanIndexer.getDoc(type));
 		element = handle;
 	}
-	public FanTypeProposal(Type type, int anchor, String forcedName)
-	{
-		if (type.isJava())
-		{
-			String qname = type.qname();
-			this.pod = qname.substring(0, qname.lastIndexOf("::"));
-		} else
-		{
-			// for java type pod() return null;
-			this.pod = type.pod().name();
-		}
-		this.name = type.name();
-		if (forcedName != null)
-		{
-			this.name = forcedName;
-		}
-		this.anchor = anchor;
-		this.modifiers = Collections.emptySet();
-		this.kind = ElementKind.CLASS;
-		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
-		if (type.isJava())
-		{
-			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
-		}
-		FanBasicElementHandle handle = new FanBasicElementHandle(name, kind);
-		handle.setDoc(FanIndexer.fanDocToHtml(type.doc()));
-		element = handle;
-	}
-
+        
 	@Override
 	public String getInsertPrefix()
 	{

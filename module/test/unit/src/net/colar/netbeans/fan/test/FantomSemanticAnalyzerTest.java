@@ -8,14 +8,13 @@ import java.io.FileOutputStream;
 import java.util.List;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.structure.FanSemanticAnalyzer;
-import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 
 /**
  *
  * @author thibautc
  */
-public class FantomSemanticAnalyzerTest extends FantomCSLTest {
+public class FantomSemanticAnalyzerTest extends FantomCSLTestBase {
 
     File failedListFile = null;
     // just used for testing fixes on some files I have issues with
@@ -39,7 +38,7 @@ public class FantomSemanticAnalyzerTest extends FantomCSLTest {
         failedListFile = new File(prefs.getString("test.home") + File.separator + "failed.txt");
         failedListFile.delete();
 
-        testAllFanFilesUnder(fanHome + "/src/");
+        testAllFanFilesUnder(fanHome + "/src/util/fan/");
 
         /*
          * for (String file : badFiles) { testFile(new File(fanHome, file));
@@ -74,7 +73,7 @@ public class FantomSemanticAnalyzerTest extends FantomCSLTest {
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOTTester.checkIf("Exception during semantic analysis " + f.getPath(), false);
+            assertTrue("Exception during semantic analysis " + f.getPath(), false);
             if (task != null) {
                 documentFailedFile(task.getSourceFile().getPath());
             }
@@ -85,6 +84,9 @@ public class FantomSemanticAnalyzerTest extends FantomCSLTest {
         task.parse(false, 2000);
         task.parseGlobalScope();
         task.parseLocalScopes();
+        
+        assertTrue("Semantic errors in " + task.getSourceFile().getPath(), task.getDiagnostics().size() == 0);
+        
         FanSemanticAnalyzer analyzer = new FanSemanticAnalyzer();
         analyzer.run(task, null);
         boolean hasErr = false;
@@ -98,17 +100,17 @@ public class FantomSemanticAnalyzerTest extends FantomCSLTest {
                 }
             }
         }
-        JOTTester.checkIf("Semantic errors in " + task.getSourceFile().getPath(), !hasErr);
+        assertTrue("Semantic errors in " + task.getSourceFile().getPath(), !hasErr);
         return hasErr;
     }
 
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomSemanticAnalyzerTest(), false);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            JOTTester.singleTest(new FantomSemanticAnalyzerTest(), false);
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
 
     private void documentFailedFile(String path) throws Exception {
         FileOutputStream fis = new FileOutputStream(failedListFile, true);

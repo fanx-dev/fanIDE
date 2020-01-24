@@ -69,9 +69,9 @@ public class FanModuleInstall extends ModuleInstall
             JOTLogger.init(prefs, logHome.getAbsolutePath(), "jot.log");
             JOTLogger.setPrintToConcole(true);
             // Call DB upgrader
-            FanIndexer.upgrade();
+//            FanIndexer.upgrade();
             // Initialize the persistance / databases(s).
-            JOTPersistanceManager.getInstance().init(prefs);
+//            JOTPersistanceManager.getInstance().init(prefs);
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -80,22 +80,7 @@ public class FanModuleInstall extends ModuleInstall
         //start indexer
         if (startIndexer && FanPlatform.isConfigured())
         {
-            // run in a thread, so that startup continues
-            new Thread()
-            {
-
-                @Override
-                public void run()
-                {
-                    try
-                    { // Delay it a bit, it looks better if started once netbeans is done starting (popup).
-                        sleep(6000);
-                    } catch (Exception e)
-                    {
-                    }
-                    FanIndexerFactory.getIndexer().indexAll(false);
-                }
-            }.start();
+            FanIndexerFactory.getIndexer().indexAll();
         }
 
         super.restored();
@@ -114,7 +99,7 @@ public class FanModuleInstall extends ModuleInstall
             FanAction.shutdownTales();
             FanIndexer.shutdown();
             Thread.sleep(250);
-            JOTPersistanceManager.getInstance().destroy();
+//            JOTPersistanceManager.getInstance().destroy();
             JOTLogger.destroy();
         } catch (Exception e)
         {

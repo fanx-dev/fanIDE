@@ -3,7 +3,7 @@
  */
 package net.colar.netbeans.fan.scope;
 
-import net.colar.netbeans.fan.indexer.model.FanSlot;
+import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import net.colar.netbeans.fan.types.FanResolvedGenericType;
 import net.colar.netbeans.fan.types.FanResolvedType;
@@ -51,7 +51,7 @@ public class FanLocalScopeVar extends FanAstScopeVar
 
 	public FanLocalScopeVar(AstNode node, FanResolvedType baseType, FanSlot slot, String name)
 	{
-		super(node, VarKind.makeFromVal(slot.getSlotKind()), name, getSlotType(node, baseType, slot));
+		super(node, slot.isField() ? VarKind.FIELD : VarKind.METHOD, name, getSlotType(node, baseType, slot));
 		this.slot = slot;
 
 		if (slot.isField())
@@ -67,27 +67,27 @@ public class FanLocalScopeVar extends FanAstScopeVar
 			this.kind = VarKind.CTOR;
 		}
 
-		if (slot.isAbstract)
+		if (slot.isAbstract())
 		{
 			addModifiers("abstract");
 		}
-		if (slot.isConst)
+		if (slot.isConst())
 		{
 			addModifiers("const");
 		}
-		if (slot.isNative)
+		if (slot.isNative())
 		{
 			addModifiers("native");
 		}
-		if (slot.isOverride)
+		if (slot.isOverride())
 		{
 			addModifiers("override");
 		}
-		if (slot.isStatic)
+		if (slot.isStatic())
 		{
 			addModifiers("static");
 		}
-		if (slot.isVirtual)
+		if (slot.isVirtual())
 		{
 			addModifiers("virtual");
 		}

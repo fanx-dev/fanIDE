@@ -4,6 +4,7 @@
 
 package net.colar.netbeans.fan.types;
 
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
 
 /**
@@ -16,7 +17,7 @@ public class FanResolvedListType extends FanResolvedType
 
 	public FanResolvedListType(AstNode scopeNode, FanResolvedType itemType)
 	{
-		super(scopeNode, "sys::List", scopeNode.getRoot().getParserTask().findCachedQualifiedType("sys::List"));
+		super(scopeNode, "sys::List", Namespace.get().findByQualifiedName("sys::List"));
 		if(itemType==null)
 			throw new RuntimeException("Null List item type");
 		this.itemType = itemType;

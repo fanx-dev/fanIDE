@@ -4,12 +4,12 @@
 package net.colar.netbeans.fan.completion;
 
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.List;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.indexer.FanIndexer;
-import net.colar.netbeans.fan.indexer.model.FanMethodParam;
-import net.colar.netbeans.fan.indexer.model.FanType;
-import net.colar.netbeans.fan.indexer.model.FanSlot;
+import net.colar.netbeans.fan.namespace.FanMethodParam;
+import net.colar.netbeans.fan.namespace.FanSlot;
+import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.scope.FanAstScopeVarBase;
 import net.colar.netbeans.fan.scope.FanLocalScopeVar;
 import net.colar.netbeans.fan.structure.FanBasicElementHandle;
@@ -72,7 +72,7 @@ public class FanVarProposal extends FanCompletionProposal
 				}
 				html = name;
 				prefix = name;
-				rHtml += FanType.getShortName(slot.getReturnedType());
+				rHtml += Namespace.getShortName(slot.getReturnedType());
 				handle.setDoc(FanIndexer.getSlotDoc(slot));
 				if (slot.isPrivate())
 				{
@@ -99,12 +99,12 @@ public class FanVarProposal extends FanCompletionProposal
 				String args = "";
 				html = name + "(";
 				prefix = name + "(";
-				rHtml = FanType.getShortName(slot.getReturnedType());
+				rHtml = Namespace.getShortName(slot.getReturnedType());
 				if (rHtml.equals("sys::Void"))
 				{
 					rHtml = "";
 				}
-				Vector<FanMethodParam> params = slot.getAllParameters();
+				List<FanMethodParam> params = slot.getAllParameters();
 				for (FanMethodParam p : params)
 				{
 					if (args.length() > 0)
@@ -125,7 +125,7 @@ public class FanVarProposal extends FanCompletionProposal
 						}
 						prefix += p.getName();
 					}
-					String typeName = FanType.getShortName(p.getQualifiedType());
+					String typeName = Namespace.getShortName(p.getQualifiedType());
 					args += typeName + " " + nm;
 				}
 
@@ -156,7 +156,7 @@ public class FanVarProposal extends FanCompletionProposal
 
 			} else
 			{
-				FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot.slotKind);
+				FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot);
 			}
 			element = handle;
 

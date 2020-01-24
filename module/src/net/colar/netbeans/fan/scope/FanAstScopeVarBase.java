@@ -182,22 +182,22 @@ public abstract class FanAstScopeVarBase
 		return modifiers.contains(modifier);
 	}
 
-	public int getProtection()
+	public ModifEnum getProtection()
 	{
 		if (hasModifier(ModifEnum.PRIVATE))
 		{
-			return ModifEnum.PRIVATE.value();
+			return ModifEnum.PRIVATE;
 		}
 		if (hasModifier(ModifEnum.PROTECTED))
 		{
-			return ModifEnum.PROTECTED.value();
+			return ModifEnum.PROTECTED;
 		}
 		if (hasModifier(ModifEnum.INTERNAL))
 		{
-			return ModifEnum.INTERNAL.value();
+			return ModifEnum.INTERNAL;
 		}
 		// default is public
-		return ModifEnum.PUBLIC.value();
+		return ModifEnum.PUBLIC;
 	}
 
 	/**

@@ -3,10 +3,7 @@
  */
 package net.colar.netbeans.fan.test;
 
-import net.colar.netbeans.fan.test.mock.MockTrampoline;
-import java.io.InputStream;
 import java.util.Date;
-import java.util.prefs.Preferences;
 import net.colar.netbeans.fan.FanModuleInstall;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
@@ -15,7 +12,7 @@ import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.test.mock.MockLookup;
 import net.jot.prefs.JOTPropertiesPreferences;
-import net.jot.testing.JOTTestable;
+import org.netbeans.junit.NbTestCase;
 import org.parboiled.Rule;
 import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.support.ParsingResult;
@@ -26,20 +23,21 @@ import org.parboiled.support.ParsingResult;
  *
  * @author thibautc
  */
-public abstract class FantomCSLTest implements JOTTestable {
+public abstract class FantomCSLTestBase extends NbTestCase {
 
     public JOTPropertiesPreferences prefs = new JOTPropertiesPreferences();
     private final boolean startIndexer;
 
-    public FantomCSLTest() {
+    public FantomCSLTestBase() {
         this(true);
     }
 
-    public FantomCSLTest(boolean startIndexer) {
+    public FantomCSLTestBase(boolean startIndexer) {
+        super("Test");
         this.startIndexer = startIndexer;
     }
 
-    public void jotTest() throws Throwable {
+    public void testDef() throws Throwable {
         FanModuleInstall mi = NBTestUtilities.initNb(startIndexer,prefs);
 
         if(startIndexer)
@@ -64,7 +62,7 @@ public abstract class FantomCSLTest implements JOTTestable {
      *
      * @throws Throwable
      */
-    public abstract void cslTest() throws Throwable;
+    public void cslTest() throws Throwable {}
 
     public ParsingResult<AstNode> parse(FantomParser parser, Rule rule, String input) {
         long start = new Date().getTime();

@@ -8,7 +8,6 @@ import fanx.util.FileUtil;
 import java.io.File;
 import java.util.List;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.jot.testing.JOTTester;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.parboiled.errors.ErrorUtils;
 
@@ -17,14 +16,14 @@ import org.parboiled.errors.ErrorUtils;
  * Copy them to /tmp/fantom_test/broken/ for further investigation
  * @author tcolar
  */
-public class FantomProblemFinder extends FantomCSLTest {
+public class FantomProblemFinder extends FantomCSLTestBase {
 
     
     @Override
     public void cslTest() throws Throwable {
         String fanHome = prefs.getString("fantom.home");
 
-        List<File> files = NBTestUtilities.listAllFanFilesUnder(fanHome + "/src/");
+        List<File> files = NBTestUtilities.listAllFanFilesUnder(fanHome + "/src/util");
         //List<File> files = NBTestUtilities.listAllFanFilesUnder(fanHome + "/examples/");
         for (File f : files) {
             Snapshot snapshot = NBTestUtilities.fileToSnapshot(f);
@@ -53,12 +52,12 @@ public class FantomProblemFinder extends FantomCSLTest {
 
     }
 
-    public static void main(String[] args) {
-        try {
-            JOTTester.singleTest(new FantomProblemFinder(), false);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            JOTTester.singleTest(new FantomProblemFinder(), false);
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
     
 }
