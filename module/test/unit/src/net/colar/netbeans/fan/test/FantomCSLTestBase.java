@@ -65,9 +65,9 @@ public abstract class FantomCSLTestBase extends NbTestCase {
     public void cslTest() throws Throwable {}
 
     public ParsingResult<AstNode> parse(FantomParser parser, Rule rule, String input) {
-        long start = new Date().getTime();
+        long start = System.currentTimeMillis();
         ParsingResult<AstNode> result = new RecoveringParseRunner<AstNode>(rule).run(input);
-        long time = new Date().getTime() - start;
+        long time = System.currentTimeMillis() - start;
         //System.err.println("Parsing in " + (new Date().getTime() - start) + "ms");
         if (time > 100) {
             System.err.println("Long parsing : " + (new Date().getTime() - start) + "ms, for:\n" + input);

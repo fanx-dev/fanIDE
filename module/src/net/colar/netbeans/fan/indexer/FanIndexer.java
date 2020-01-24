@@ -199,7 +199,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         log.debug("Indexing parsed result for : " + path);
 
         FanParserTask fanResult = (FanParserTask) parserResult;
-        indexSrcDoc(path, fanResult.getRootScope());
+        doIndexSrc(path, fanResult.getRootScope());
     }
 
     private void setProtection(FanElement elem, ModifEnum modifiers) {
@@ -237,7 +237,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
      * @param indexable
      * @param rootScope
      */
-    private void indexSrcDoc(String path, AstNode rootScope) {
+    private void doIndexSrc(String path, AstNode rootScope) {
         FanSrcFile doc = null;
         try {
             if (rootScope == null) {
@@ -321,7 +321,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                                 FanMethodParam dbParam = new FanMethodParam(paramName, pType);
                                 dbParam.setParamIndex(paramResult.getOrder());
                                 dbParam.setHasDefault(paramResult.hasDefaultValue());
-
+                                dbSlot.addParam(dbParam);
                             } // end param loop
                         }
                         dbType.addSlot(dbSlot);
@@ -463,6 +463,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                         dbParam.setHasDefault(param.def != null);
                         dbParam.setParamIndex(paramIndex);
                         paramIndex++;
+                        dbSlot.addParam(dbParam);
                     }
                     dbType.addSlot(dbSlot);
                 }

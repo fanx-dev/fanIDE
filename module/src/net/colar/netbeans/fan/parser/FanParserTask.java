@@ -69,13 +69,15 @@ public class FanParserTask extends ParserResult {
 
     boolean invalidated = false;
     public boolean dumpTree = false; // debug
-    List<Error> errors = new Vector<Error>(); // -> use parsingResult.errors ?
+    List<Error> errors = new ArrayList<Error>(); // -> use parsingResult.errors ?
+
     // full path of the source file
     private final FileObject sourceFile;
     // simple name of the source file
     private final String sourceName;
     // pod name
     private final String pod;
+
     // once parse() is called, will contain the parboiled parsing result
     private ParsingResult<AstNode> parsingResult;
     private AstNode astRoot;
@@ -84,8 +86,10 @@ public class FanParserTask extends ParserResult {
     // Cache slots resolution, for performance
 //    private HashMap<String, List<FanSlot>> typeSlotsCache = new HashMap<String, List<FanSlot>>();
     private FantomParser parser;
+
     private boolean localScopeDone;
     boolean hasGlobalError = false;
+
     Future<ParsingResult> parsingTask;
     CancellableRecoveringParserRunner<ParsingResult> runner;
 
@@ -186,19 +190,19 @@ public class FanParserTask extends ParserResult {
      */
     @SuppressWarnings(value = "unchecked")
     public void parse(boolean quickScan, int msTimeout) {
-        long start = new Date().getTime();
+        long start = System.currentTimeMillis();
         System.out.println("Starting parsing of: " + sourceName);
 
         parser.setQuickScan(quickScan);
         try {
             try {
-                runner = new CancellableRecoveringParserRunner<ParsingResult>(parser.compilationUnit(), 
+                runner = new CancellableRecoveringParserRunner<ParsingResult>(parser.compilationUnit(),
                         getSnapshot().getText().toString(),
                         msTimeout);
                 parsingTask = runner.start();
                 parsingResult = parsingTask.get(msTimeout, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e){
-                addGlobalError("Parsing of this file took too long and timed out.", e);     
+            } catch (TimeoutException e) {
+                addGlobalError("Parsing of this file took too long and timed out.", e);
                 return;
             } catch (ParserCancelledError e) {
                 addGlobalError("Parsing was cancelled " + e, e);
@@ -244,7 +248,7 @@ public class FanParserTask extends ParserResult {
             hasGlobalError = true;
         }
 
-        FanUtilities.GENERIC_LOGGER.info("Parsing completed in " + (new Date().getTime() - start) + " for : " + sourceName);
+        FanUtilities.GENERIC_LOGGER.info("Parsing completed in " + (System.currentTimeMillis() - start) + " for : " + sourceName);
     }
 
     private void cleanup() {
@@ -255,15 +259,15 @@ public class FanParserTask extends ParserResult {
                 Thread.sleep(1000);
             } catch (Exception e) {
                 died = true;
-                System.err.println("Parser was cancelled properly : "+e);
+                System.err.println("Parser was cancelled properly : " + e);
             }
-            if ( ! died) {
+            if (!died) {
                 Context<AstNode> ctx = parser.getContext();
                 System.err.println("Hum, parser still running, could be a runaway CPU hog!");
                 System.err.println("Current path: " + ctx.getPath());
                 System.err.println("Position: " + ctx.getPosition());
                 System.err.println("Level: " + ctx.getLevel());
-                System.err.println("InRecovery: " + ctx.inErrorRecovery()+", InPred: "+ctx.inErrorRecovery()+", NodeSupressed:"+ctx.isNodeSuppressed());
+                System.err.println("InRecovery: " + ctx.inErrorRecovery() + ", InPred: " + ctx.inErrorRecovery() + ", NodeSupressed:" + ctx.isNodeSuppressed());
             }
         }
         if (parsingTask != null) {
@@ -399,7 +403,7 @@ public class FanParserTask extends ParserResult {
             return;
         }
         // If base type is unknown ... so are child
-        if (type instanceof FanUnknownType) {
+        if (type != null && type instanceof FanUnknownType) {
             node.setType(type);
             // Note: all children(if any) will be "unknown" as well.
             for (AstNode nd : node.getChildren()) {
@@ -625,7 +629,6 @@ public class FanParserTask extends ParserResult {
             name = name.substring(name.indexOf("::") + 2);
         }
 
-        
         if (type.indexOf("::") > 0) {
             // Adding a specific type
             String[] data = type.split("::");
@@ -813,7 +816,8 @@ public class FanParserTask extends ParserResult {
                 baseType = type.asStaticContext(false);
                 name = "make";
             }
-        } else // otherwise a slot of the base type like var.toStr()
+        }
+        else // otherwise a slot of the base type like var.toStr()
         {
             // checking what call op we are dealing with
             String op = ".";
@@ -1230,7 +1234,6 @@ public class FanParserTask extends ParserResult {
 //    public HashMap<String, List<FanSlot>> getTypeSlotCache() {
 //        return typeSlotsCache;
 //    }
-
     private FanResolvedType doTypeLitteral(AstNode node, FanResolvedType type) {
         FanResolvedType baseType = type;
         String slotId = node.getNodeText(true).substring(1); // always starts with #
