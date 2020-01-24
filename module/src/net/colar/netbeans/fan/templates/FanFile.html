@@ -7,8 +7,8 @@ ${license}
 **
 ** ${name}
 **
-<jot:if eval="doClass">class ${name}
-{<jot:if eval="doMain">
+${type} ${name}
+{
   **
   ** Main method
   **
@@ -16,18 +16,4 @@ ${license}
   {
     // TODO
   }
-  </jot:if>
-}</jot:if><jot:if eval="doMixin">
-mixin ${name}
-{
-  // TODO
-}</jot:if><jot:if eval="doEnum">
-enum class ${name}
-{
-  // TODO
-}</jot:if><jot:if eval="doFacet">
-facet class ${name}
-{
-  // TODO
 }
-</jot:if>

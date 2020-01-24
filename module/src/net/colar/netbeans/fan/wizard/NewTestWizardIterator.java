@@ -15,7 +15,6 @@ import javax.swing.event.ChangeListener;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;
-import net.jot.web.views.JOTLightweightView;
 import org.netbeans.spi.project.ui.templates.support.Templates;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
@@ -91,7 +90,7 @@ public final class NewTestWizardIterator implements WizardDescriptor.Instantiati
 		//create file
 		FileObject template = Templates.getTemplate(wizard);
 
-		JOTLightweightView view = new TemplateView(template, name);
+		TemplateView view = new TemplateView(template, name);
 
 		FileObject license = FanUtilities.getRelativeFileObject(template, "../Licenses/FanDefaultLicense.txt");
 		view.addVariable("license", license.asText());

@@ -15,59 +15,48 @@ import net.colar.netbeans.fan.types.FanResolvedType;
  *
  * @author thibautc
  */
-public class FanFieldScopeVar extends FanAstScopeVarBase
-{
-	// the string the type was resolved from
+public class FanFieldScopeVar extends FanAstScopeVarBase {
+    // the string the type was resolved from
 
-	protected String typeString;
+    protected String typeString;
 
-	@SuppressWarnings("unchecked")
-	public FanFieldScopeVar(AstNode fieldNode, String name)
-	{
-		super(fieldNode, name);
-		this.kind = VarKind.FIELD;
-		if (node.getKind() == AstKind.AST_CTOR_DEF)
-		{
-			// ctor is always returning type sys::This
-			type = FanResolvedType.makeFromDbType(node, "sys::This");
-			if (type == null)
-			{
-				FanUtilities.GENERIC_LOGGER.error(getClass().getName() + " Null type for: " + node.getNodeText(true));
-			}
-		} else
-		{
-			AstNode typeNode = FanLexAstUtils.getFirstChild(node, new NodeKindPredicate(AstKind.AST_TYPE));
-			if (typeNode != null)
-			{
-				typeString = typeNode.getNodeText(true);
-				if(typeString!=null && typeString.length()>0)
-				{
-					type = FanResolvedType.makeFromTypeSigWithWarning(typeNode);
-				}
-				if (type == null)
-				{
-					FanUtilities.GENERIC_LOGGER.error(getClass().getName() + " Null type for: " + typeString);
-				}
-			}
-		}
-		if (type == null)
-		{
-			type = FanResolvedType.makeUnresolved(node);
-		}
+    @SuppressWarnings("unchecked")
+    public FanFieldScopeVar(AstNode fieldNode, String name) {
+        super(fieldNode, name);
+        this.kind = VarKind.FIELD;
+        if (node.getKind() == AstKind.AST_CTOR_DEF) {
+            // ctor is always returning type sys::This
+            type = FanResolvedType.makeFromDbType(node, "sys::This");
+            if (type == null) {
+                FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + node.getNodeText(true));
+            }
+        } else {
+            AstNode typeNode = FanLexAstUtils.getFirstChild(node, new NodeKindPredicate(AstKind.AST_TYPE));
+            if (typeNode != null) {
+                typeString = typeNode.getNodeText(true);
+                if (typeString != null && typeString.length() > 0) {
+                    type = FanResolvedType.makeFromTypeSigWithWarning(typeNode);
+                }
+                if (type == null) {
+                    FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + typeString);
+                }
+            }
+        }
+        if (type == null) {
+            type = FanResolvedType.makeUnresolved(node);
+        }
 
-		type = type.asStaticContext(false);
+        type = type.asStaticContext(false);
 
-		node.setType(type);
-		//FanLexAstUtils.dumpTree(node, 0);
-		List<AstNode> modifs = FanLexAstUtils.getChildren(node, new NodeKindPredicate(AstKind.AST_MODIFIER));
-		for (AstNode m : modifs)
-		{
-			addModifiers(m.getNodeText(true));
-		}
-	}
+        node.setType(type);
+        //FanLexAstUtils.dumpTree(node, 0);
+        List<AstNode> modifs = FanLexAstUtils.getChildren(node, new NodeKindPredicate(AstKind.AST_MODIFIER));
+        for (AstNode m : modifs) {
+            addModifiers(m.getNodeText(true));
+        }
+    }
 
-	public String getTypeString()
-	{
-		return typeString;
-	}
+    public String getTypeString() {
+        return typeString;
+    }
 }

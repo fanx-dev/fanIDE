@@ -64,7 +64,7 @@ public class FanTypeScopeVar extends FanAstScopeVarBase {
         type = FanResolvedType.makeFromTypeSig(node, nameNode.getNodeText(true));
 
         if (type == null || !type.isResolved()) {
-            FanUtilities.GENERIC_LOGGER.error(getClass().getName() + " Null type for: " + nameNode.getNodeText(true));
+            FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + nameNode.getNodeText(true));
             type = FanResolvedType.makeUnresolved(node);
         }
         node.setType(type);

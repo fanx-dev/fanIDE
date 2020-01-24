@@ -15,7 +15,6 @@ import javax.swing.JFileChooser;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;
-import net.jot.web.views.JOTLightweightView;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
@@ -172,7 +171,7 @@ public class FanCreateTypeDialog extends javax.swing.JDialog
 
         if (folder.exists() && folder.isDirectory())
         {
-            JOTLightweightView view = new TemplateView(template, name);
+            TemplateView view = new TemplateView(template, name);
 
             switch (combo)
             {
@@ -201,7 +200,7 @@ public class FanCreateTypeDialog extends javax.swing.JDialog
                 FileUtil.refreshFor(newFile.getParentFile());
             } catch (Exception e)
             {
-                FanUtilities.GENERIC_LOGGER.exception("Failed creating new type", e);
+                FanUtilities.GENERIC_LOGGER.throwing("Failed creating new type", "CreateActionPerformed", e);
             }
         }
     }//GEN-LAST:event_CreateActionPerformed

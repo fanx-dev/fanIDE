@@ -15,7 +15,6 @@ import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import net.colar.netbeans.fan.templates.TemplateUtils;
 import net.colar.netbeans.fan.templates.TemplateView;
-import net.jot.web.views.JOTLightweightView;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.netbeans.spi.project.ui.templates.support.Templates;
 import org.openide.WizardDescriptor;
@@ -89,7 +88,7 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
         {
             String name = panel.getMainClassName();
             File mainFile = new File(fan, name + ".fan");
-            JOTLightweightView view = new TemplateView(buildTemplate, name);
+            TemplateView view = new TemplateView(buildTemplate, name);
             view.addVariable("doClass", Boolean.TRUE);
             view.addVariable("doMain", Boolean.TRUE);
             FileObject license = FanUtilities.getRelativeFileObject(buildTemplate, "../../Licenses/FanDefaultLicense.txt");
@@ -112,7 +111,7 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
         // NB will recognize this as a project, so we want everything(props) to be ready by then
         if (createBuildFile)
         {
-            JOTLightweightView view = new TemplateView(buildTemplate, podName);
+            TemplateView view = new TemplateView(buildTemplate, podName);
 
             view.addVariable("desc", podDesc);
 

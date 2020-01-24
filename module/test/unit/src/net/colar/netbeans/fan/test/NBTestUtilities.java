@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.text.StyledDocument;
 import net.colar.netbeans.fan.FanModuleInstall;
@@ -19,7 +20,6 @@ import net.colar.netbeans.fan.test.mock.MockLookup;
 import net.colar.netbeans.fan.test.mock.MockProjectManager;
 import net.colar.netbeans.fan.test.mock.MockTrampoline;
 import net.colar.netbeans.fan.test.mock.TestEnvironmentFactory;
-import net.jot.prefs.JOTPropertiesPreferences;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.DataLoadersBridge;
 import org.netbeans.modules.parsing.api.Snapshot;
@@ -54,6 +54,9 @@ public class NBTestUtilities {
         List<File> results = new ArrayList<File>();
         File folder = new File(folderPath);
         File[] files = folder.listFiles();
+        if (files == null) {
+            return results;
+        }
         for (File f : files) {
             if (f.isDirectory()) {
                 results.addAll(listAllFanFilesUnder(f.getAbsolutePath()));
@@ -70,10 +73,10 @@ public class NBTestUtilities {
         return results;
     }
     
-    static FanModuleInstall initNb(boolean startIndexer, JOTPropertiesPreferences prefs) throws Exception
+    static FanModuleInstall initNb(boolean startIndexer, Properties prefs) throws Exception
     {
         InputStream is = NBTestUtilities.class.getResourceAsStream("test.properties");
-        prefs.loadFrom(is);
+        prefs.load(is);
 
         // Set netbeans props
         System.setProperty("netbeans.full.hack", "true");
@@ -86,8 +89,8 @@ public class NBTestUtilities {
         MockLookup.setInstances(new MockTrampoline(), new TestEnvironmentFactory(), new MockProjectManager());
 
         // Setup the test Platform
-        System.setProperty("netbeans.user", prefs.getString("test.home")); // the user it will run in, should probably use some netbeans prop instaed
-        FanPlatformSettings.getInstance().put(FanPlatformSettings.PREF_FAN_HOME, prefs.getString("fantom.home"));
+        System.setProperty("netbeans.user", prefs.getProperty("test.home")); // the user it will run in, should probably use some netbeans prop instaed
+        FanPlatformSettings.getInstance().put(FanPlatformSettings.PREF_FAN_HOME, prefs.getProperty("fantom.home"));
         FanPlatformSettings.getInstance().put(FanPlatformSettings.PREF_DEBUG_PORT, "8080");
         FanPlatformSettings.getInstance().put(FanPlatformSettings.PREF_RUN_OPTIONS, "-Xmx256m");
         FanPlatform.updateFromSettings();

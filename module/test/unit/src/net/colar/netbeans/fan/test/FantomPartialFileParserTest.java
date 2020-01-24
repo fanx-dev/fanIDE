@@ -23,7 +23,7 @@ public class FantomPartialFileParserTest extends FantomCSLTestBase
 	@Override
 	public void cslTest() throws Throwable
 	{
-		File folder = new File(prefs.getString("fantom.home") + File.separator + "src" + File.separator + "sys" + File.separator + "fan");
+		File folder = new File(fanHome + File.separator + "src" + File.separator + "sys" + File.separator + "fan");
 		File[] files = folder.listFiles();
 		for (int i = 0; i != NB_FILES_TO_USE; i++)
 		{

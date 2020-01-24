@@ -4,6 +4,7 @@
 package net.colar.netbeans.fan.test;
 
 import java.util.Date;
+import java.util.Properties;
 import net.colar.netbeans.fan.FanModuleInstall;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
@@ -11,7 +12,6 @@ import net.colar.netbeans.fan.parser.parboiled.FantomParser;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.test.mock.MockLookup;
-import net.jot.prefs.JOTPropertiesPreferences;
 import org.netbeans.junit.NbTestCase;
 import org.parboiled.Rule;
 import org.parboiled.parserunners.RecoveringParseRunner;
@@ -25,7 +25,9 @@ import org.parboiled.support.ParsingResult;
  */
 public abstract class FantomCSLTestBase extends NbTestCase {
 
-    public JOTPropertiesPreferences prefs = new JOTPropertiesPreferences();
+    String fanHome;
+    private Properties prefs = new Properties();
+    
     private final boolean startIndexer;
 
     public FantomCSLTestBase() {
@@ -38,8 +40,9 @@ public abstract class FantomCSLTestBase extends NbTestCase {
     }
 
     public void testDef() throws Throwable {
-        FanModuleInstall mi = NBTestUtilities.initNb(startIndexer,prefs);
-
+        FanModuleInstall mi = NBTestUtilities.initNb(startIndexer, prefs);
+        fanHome = prefs.getProperty("fantom.home");
+        
         if(startIndexer)
         {
             // wait for indexer to be done

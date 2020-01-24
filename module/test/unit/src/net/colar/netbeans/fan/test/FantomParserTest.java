@@ -34,7 +34,6 @@ public class FantomParserTest extends FantomCSLTestBase {
     public void cslTest() throws Throwable {
         FantomParser parser = Parboiled.createParser(FantomParser.class, (FanParserTask) null);
         ParsingResult<AstNode> result = null;
-        String fanHome = prefs.getString("fantom.home");
 
         boolean singleTest = false;// Do just the 1 first test
         boolean grammarTest = true; // Do all the grammar tests

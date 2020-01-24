@@ -17,8 +17,6 @@ import org.netbeans.modules.parsing.api.Snapshot;
 public class FantomStructureAnalyzerTest extends FantomCSLTestBase {
 
     public void cslTest() throws Throwable {
-        String fanHome = prefs.getString("fantom.home");
-
 //        testAllFanFilesUnder(fanHome + "/examples/");
         testAllFanFilesUnder(fanHome + "/src/util");
     }

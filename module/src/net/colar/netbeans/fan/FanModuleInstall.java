@@ -11,14 +11,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import net.colar.netbeans.fan.actions.FanAction;
 import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.fantom.FanPlatform;
-import net.jot.logger.JOTLogger;
-import net.jot.persistance.JOTPersistanceManager;
-import net.jot.prefs.JOTPreferences;
 import org.openide.modules.ModuleInstall;
+import org.openide.util.Exceptions;
 
 /**
  * Module startup/shutdown hooks.
@@ -50,10 +50,16 @@ public class FanModuleInstall extends ModuleInstall
     {
         System.out.println("Starting up Fantom plugin.");
         // Initialize special logging as needed
-        FanNBLogging.setupLogging();
+        
         File fantomHome = FanUtilities.getFanUserHome();
         File logHome = new File(fantomHome + File.separator + "log" + File.separator);
         logHome.mkdirs();
+        
+        try {
+            FanNBLogging.setupLogging(logHome.getAbsolutePath()+File.separator+ "jot.log");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         File prefFile = new File(fantomHome, "jot.prefs");
         try
@@ -64,14 +70,6 @@ public class FanModuleInstall extends ModuleInstall
             }
             System.setProperty("jot.prefs", prefFile.getAbsolutePath());
 
-            JOTPreferences prefs = JOTPreferences.getInstance();
-            // Initializing the Logger
-            JOTLogger.init(prefs, logHome.getAbsolutePath(), "jot.log");
-            JOTLogger.setPrintToConcole(true);
-            // Call DB upgrader
-//            FanIndexer.upgrade();
-            // Initialize the persistance / databases(s).
-//            JOTPersistanceManager.getInstance().init(prefs);
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -100,7 +98,7 @@ public class FanModuleInstall extends ModuleInstall
             FanIndexer.shutdown();
             Thread.sleep(250);
 //            JOTPersistanceManager.getInstance().destroy();
-            JOTLogger.destroy();
+//            JOTLogger.destroy();
         } catch (Exception e)
         {
             e.printStackTrace();

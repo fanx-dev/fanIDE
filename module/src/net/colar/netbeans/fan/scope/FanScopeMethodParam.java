@@ -10,38 +10,32 @@ import net.colar.netbeans.fan.types.FanResolvedType;
  *
  * @author thibautc
  */
-public class FanScopeMethodParam
-{
+public class FanScopeMethodParam {
 
-	private final AstNode defaultValNode;
-	private FanResolvedType type;
-	private final int order; // order of the parameter (first, second ...)
+    private final AstNode defaultValNode;
+    private FanResolvedType type;
+    private final int order; // order of the parameter (first, second ...)
 
-	public FanScopeMethodParam(FanResolvedType type, AstNode defaultValNode, int order)
-	{
-		this.defaultValNode = defaultValNode;
-		this.type = type;
-		this.order=order;
-	}
+    public FanScopeMethodParam(FanResolvedType type, AstNode defaultValNode, int order) {
+        this.defaultValNode = defaultValNode;
+        this.type = type;
+        this.order = order;
+    }
 
-	public AstNode getDefaultValNode()
-	{
-		return defaultValNode;
-	}
+    public AstNode getDefaultValNode() {
+        return defaultValNode;
+    }
 
-	public FanResolvedType getType()
-	{
-		return type;
-	}
+    public FanResolvedType getType() {
+        return type;
+    }
 
-	public boolean hasDefaultValue()
-	{
-		return defaultValNode != null;
-	}
+    public boolean hasDefaultValue() {
+        return defaultValNode != null;
+    }
 
-	public int getOrder()
-	{
-		return order;
-	}
-	
+    public int getOrder() {
+        return order;
+    }
+
 }

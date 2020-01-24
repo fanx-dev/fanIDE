@@ -104,7 +104,7 @@ public class FanBuildFileHelper
         }
         if (pod == null)
         {
-            FanUtilities.GENERIC_LOGGER.error("Could not find pod for: " + path);
+            FanUtilities.GENERIC_LOGGER.severe("Could not find pod for: " + path);
             // Must be a script, make-up a "pod" from folder name .. should probably normalize it
             return "_SCRIPT_" + scriptFolder.getName();
         }

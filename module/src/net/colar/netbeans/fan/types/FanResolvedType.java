@@ -273,7 +273,7 @@ public class FanResolvedType implements Cloneable
             return copy;
         } catch (CloneNotSupportedException e)
         {
-            FanUtilities.GENERIC_LOGGER.exception("Clone error", e);
+            FanUtilities.GENERIC_LOGGER.throwing("Clone error", "asNullableContext", e);
         }
         return null;
     }
@@ -300,7 +300,7 @@ public class FanResolvedType implements Cloneable
             return copy;
         } catch (CloneNotSupportedException e)
         {
-            FanUtilities.GENERIC_LOGGER.exception("Clone error", e);
+            FanUtilities.GENERIC_LOGGER.throwing("Clone error", "asStaticContext", e);
         }
         return null;
     }

@@ -128,7 +128,7 @@ public class FanSlotProposal extends FanCompletionProposal
 
         } else
         {
-            FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot);
+            FanUtilities.GENERIC_LOGGER.severe("Unknown Slot type: " + slot);
         }
         FanBasicElementHandle handle = new FanBasicElementHandle(name, kind);
         handle.setDoc(FanIndexer.getSlotDoc(slot));

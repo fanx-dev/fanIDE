@@ -15,7 +15,6 @@ import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.project.FanBuildFileHelper;
 import net.colar.netbeans.fan.project.FanProject;
 import net.colar.netbeans.fan.project.FanProjectProperties;
-import net.jot.logger.JOTLogger;
 import org.netbeans.api.debugger.jpda.DebuggerStartException;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
@@ -150,7 +149,7 @@ public abstract class FanAction {
                     fanExec.addCommandArg(arg);
                 }
             }
-            JOTLogger.info(this, fanExec.toString());
+            FanUtilities.GENERIC_LOGGER.info(fanExec.toString());
 
             return fanExec;
         }
@@ -301,9 +300,9 @@ public abstract class FanAction {
                         // if connected, then we are good
                         return;
                     } catch (DebuggerStartException e) {
-                        FanUtilities.GENERIC_LOGGER.debug("Failed connecting to debugger, will try again: " + e);
+                        FanUtilities.GENERIC_LOGGER.fine("Failed connecting to debugger, will try again: " + e);
                         if (i == 14) {
-                            FanUtilities.GENERIC_LOGGER.exception("Failed connecting to Debugger", e);
+                            FanUtilities.GENERIC_LOGGER.throwing("Failed connecting to Debugger", "fan jpda", e);
                         }
                     }
                     Thread.yield();

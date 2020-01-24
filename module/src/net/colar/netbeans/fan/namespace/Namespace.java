@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import net.colar.netbeans.fan.indexer.FanIndex;
-import net.jot.logger.JOTLogger;
-import net.jot.persistance.JOTQueryResult;
-import net.jot.persistance.JOTSQLCondition;
-import net.jot.persistance.builders.JOTQueryBuilder;
 
 /**
  *

@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.utils;
 
 import java.io.File;
 import java.util.StringTokenizer;
-import net.jot.logger.JOTLoggerLocation;
+import java.util.logging.Logger;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -20,8 +20,17 @@ import org.openide.loaders.DataObjectNotFoundException;
 public class FanUtilities
 {
 
-    public static final JOTLoggerLocation GENERIC_LOGGER = new JOTLoggerLocation("Generic (FanUtilities)");
+    public static final Logger GENERIC_LOGGER = Logger.getLogger("Generic (FanUtilities)");
 
+    public static boolean isWindowsOS() {
+        String os = System.getProperty("os.name");
+        if(os.toLowerCase().startsWith("win")){
+          return true;
+        }
+        return false;
+    }
+    
+    
     /**
      * Opens the given file in the editor.
      * @param newFile
@@ -84,11 +93,11 @@ public class FanUtilities
      */
     public static void dumpFileObject(FileObject fo)
     {
-        FanUtilities.GENERIC_LOGGER.debug("---- FileObject DUMP -----");
+        FanUtilities.GENERIC_LOGGER.fine("---- FileObject DUMP -----");
         try
         {
             dumpFileObject(fo, "");
-            FanUtilities.GENERIC_LOGGER.debug("**---- FileObject root dump -----");
+            FanUtilities.GENERIC_LOGGER.fine("**---- FileObject root dump -----");
             //dumpFileObject(fo.getFileSystem().getRoot(),"**");
         } catch (Exception e)
         {
@@ -98,10 +107,10 @@ public class FanUtilities
 
     private static void dumpFileObject(FileObject fo, String indent) throws Exception
     {
-        FanUtilities.GENERIC_LOGGER.debug(indent + "toStr: " + fo.toString());
-        FanUtilities.GENERIC_LOGGER.debug(indent + "Name: " + fo.getNameExt());
-        FanUtilities.GENERIC_LOGGER.debug(indent + "Path: " + fo.getPath());
-        FanUtilities.GENERIC_LOGGER.debug(indent + "URL: " + fo.getURL());
+        FanUtilities.GENERIC_LOGGER.fine(indent + "toStr: " + fo.toString());
+        FanUtilities.GENERIC_LOGGER.fine(indent + "Name: " + fo.getNameExt());
+        FanUtilities.GENERIC_LOGGER.fine(indent + "Path: " + fo.getPath());
+        FanUtilities.GENERIC_LOGGER.fine(indent + "URL: " + fo.getURL());
         FileObject[] children = fo.getChildren();
         //indent+="  ";
         //for(int i=0;i!=children.length;i++)

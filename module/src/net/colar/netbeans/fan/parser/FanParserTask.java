@@ -132,9 +132,9 @@ public class FanParserTask extends ParserResult {
      * Dump AST tree
      */
     public void dumpTree() {
-        FanUtilities.GENERIC_LOGGER.trace("-------------------Start AST Tree dump-----------------------");
+        FanUtilities.GENERIC_LOGGER.info("-------------------Start AST Tree dump-----------------------");
         ParseTreeUtils.printNodeTree(parsingResult);
-        FanUtilities.GENERIC_LOGGER.trace("-------------------End AST Tree dump-----------------------");
+        FanUtilities.GENERIC_LOGGER.info("-------------------End AST Tree dump-----------------------");
     }
 
     /**
@@ -284,7 +284,7 @@ public class FanParserTask extends ParserResult {
     @SuppressWarnings("unchecked")
     public void parseGlobalScope() {
         long start = new Date().getTime();
-        FanUtilities.GENERIC_LOGGER.debug("Starting parsing scope of: " + sourceName);
+        FanUtilities.GENERIC_LOGGER.fine("Starting parsing scope of: " + sourceName);
         if (astRoot == null) {
             return;
         }
@@ -552,7 +552,7 @@ public class FanParserTask extends ParserResult {
             // Do mark a global parsing error however
             type = FanResolvedType.makeUnresolved(node);
             addError(FanParserErrorKey.PARSING_ERR, "Unexpected Parsing error: " + e.toString(), node);
-            FanUtilities.GENERIC_LOGGER.exception("Error parsing node: " + text, e);
+            FanUtilities.GENERIC_LOGGER.throwing("Error parsing node: " + text, "parseVars", e);
         }
         node.setType(type);
         if (type != null && !type.isResolved()) {

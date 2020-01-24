@@ -29,8 +29,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import net.colar.netbeans.fan.FanDbUpgrader;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
@@ -54,12 +54,6 @@ import net.colar.netbeans.fan.scope.FanMethodScopeVar;
 import net.colar.netbeans.fan.scope.FanScopeMethodParam;
 import net.colar.netbeans.fan.scope.FanTypeScopeVar;
 import net.colar.netbeans.fan.types.FanResolvedType;
-import net.jot.logger.JOTLogger;
-import net.jot.logger.JOTLoggerLocation;
-import net.jot.persistance.JOTPersistanceManager;
-import net.jot.persistance.JOTSQLCondition;
-import net.jot.persistance.builders.JOTQueryBuilder;
-import net.jot.prefs.JOTPreferences;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.modules.parsing.api.Snapshot;
@@ -68,8 +62,6 @@ import org.netbeans.modules.parsing.spi.Parser.Result;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileAttributeEvent;
 import org.openide.filesystems.FileChangeListener;
 import org.openide.filesystems.FileEvent;
@@ -91,7 +83,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     private static Integer VERSION = 2;
     public static final String UNRESOLVED_TYPE = "!!UNRESOLVED!!";
     private final static Pattern CLOSURECLASS = Pattern.compile(".*?\\$\\d+\\z");
-    static JOTLoggerLocation log = new JOTLoggerLocation(FanIndexer.class);
+    static Logger log = FanUtilities.GENERIC_LOGGER;
 
     private final FanIndexerThread indexerThread;
     public static volatile boolean shutdown = false;
@@ -183,20 +175,20 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         try {
             parser.parse(snapshot, true);
         } catch (Throwable e) {
-            log.exception("Parsing failed for: " + path, e);
+            log.throwing("Parsing failed for: " + path, "indexSrc", e);
             return;
         }
         Result result = parser.getResult();
         long now = new Date().getTime();
-        log.debug("Indexing - parsing done in " + (now - then) + " ms for: " + path);
+        log.fine("Indexing - parsing done in " + (now - then) + " ms for: " + path);
         // Index the parsed doc
         indexSrc(path, result);
         now = new Date().getTime();
-        log.debug("Indexing completed in " + (now - then) + " ms for: " + path);
+        log.fine("Indexing completed in " + (now - then) + " ms for: " + path);
     }
 
     private void indexSrc(String path, Result parserResult) {
-        log.debug("Indexing parsed result for : " + path);
+        log.fine("Indexing parsed result for : " + path);
 
         FanParserTask fanResult = (FanParserTask) parserResult;
         doIndexSrc(path, fanResult.getRootScope());
@@ -334,7 +326,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
             doc.setTstamp(System.currentTimeMillis());
 
         } catch (Exception e) {
-            log.exception("Indexing Failed for: " + path, e);
+            log.throwing("Indexing Failed for: " + path, "doIndexSrc", e);
         }
     }
 
@@ -372,8 +364,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 }
             }
         } catch (Throwable t) {
-            log.exception("Pod indexing thread error", t);
-
+            log.throwing("Pod indexing thread error", "indexFantomPods", t);
         }
     }
 
@@ -410,7 +401,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 if (hasFlag(flags, FConst.Synthetic) || CLOSURECLASS.matcher(typeRef.typeName).matches()) {
                     continue;
                 }
-                log.debug("Indexing Pod Type: " + sig);
+                log.fine("Indexing Pod Type: " + sig);
 
                 FanType dbType = new FanType();
                 dbType.setSrcFile(doc);
@@ -496,19 +487,19 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
             doc.setTstamp(System.currentTimeMillis());
 
         } catch (Exception e) {
-            log.exception("Indexing failed for: " + pod, e);
+            log.throwing("Indexing failed for: " + pod, "indexPod", e);
         }
     }
 
-    private int getKind(FType type) {
-        if (hasFlag(type.flags, FConst.Mixin)) {
-            return FanAstScopeVarBase.VarKind.TYPE_MIXIN.value();
-        }
-        if (hasFlag(type.flags, FConst.Enum)) {
-            return FanAstScopeVarBase.VarKind.TYPE_ENUM.value();
-        } // class is default
-        return FanAstScopeVarBase.VarKind.TYPE_CLASS.value();
-    }
+//    private int getKind(FType type) {
+//        if (hasFlag(type.flags, FConst.Mixin)) {
+//            return FanAstScopeVarBase.VarKind.TYPE_MIXIN.value();
+//        }
+//        if (hasFlag(type.flags, FConst.Enum)) {
+//            return FanAstScopeVarBase.VarKind.TYPE_ENUM.value();
+//        } // class is default
+//        return FanAstScopeVarBase.VarKind.TYPE_CLASS.value();
+//    }
 
     private boolean hasFlag(int flags, int flag) {
         return (flags & flag) != 0;
@@ -572,7 +563,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         try {
             pod = Pod.find(podName);
         } catch (RuntimeException e) {
-            log.debug("Pod doc not found for " + podName);
+            log.fine("Pod doc not found for " + podName);
         }
         if (pod != null) {
             return fanDocToHtml((String) pod.meta().get("pod.summary"));
@@ -591,7 +582,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 }
             } catch (Throwable t) {
                 // Fantom runtime exception if type ! found
-                log.debug(t.toString());
+                log.fine(t.toString());
             }
         }
         return null;
@@ -608,7 +599,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 return fanDocToHtml(t.doc());
             }
         } catch (RuntimeException e) {
-            log.debug("Type doc not found for " + type);
+            log.fine("Type doc not found for " + type);
         }
         return null;
     }
@@ -644,20 +635,20 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     public void fileFolderCreated(FileEvent fe) {
         // Listen for changes
         String path = fe.getFile().getPath();
-        log.debug("Folder created: " + path);
+        log.fine("Folder created: " + path);
         FileUtil.addFileChangeListener(this, FileUtil.toFile(fe.getFile()));
     }
 
     public void fileDataCreated(FileEvent fe) {
         String path = fe.getFile().getPath();
-        log.debug("File created: " + path);
+        log.fine("File created: " + path);
         requestIndexing(
                 path);
     }
 
     public void fileChanged(FileEvent fe) {
         String path = fe.getFile().getPath();
-        log.debug("File changed: " + path);
+        log.fine("File changed: " + path);
         requestIndexing(
                 path);
     }
@@ -665,14 +656,14 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     public void fileDeleted(FileEvent fe) {
         // synced because we don't want to do it at the same time as the thread
         String path = fe.getFile().getPath();
-        log.debug("File deleted: " + path);
+        log.fine("File deleted: " + path);
         toBeDeleted.put(path, new Date().getTime());
     }
 
     public void fileRenamed(FileRenameEvent fre) {
         // synced because we don't want to do it at the same time as the thread
         FileObject src = (FileObject) fre.getSource();
-        log.debug("File renamed: " + src.getPath() + " -> " + fre.getFile().getPath());
+        log.fine("File renamed: " + src.getPath() + " -> " + fre.getFile().getPath());
         //TODO add this to a hashtable and do it in the thread
         FanSrcFile.renameDoc(src.getPath(), fre.getFile().getPath());
     }
@@ -734,7 +725,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                                     doc.delete();
                                 }
                             } catch (Exception e) {
-                                log.exception("Error deleting doc", e);
+                                log.throwing("Error deleting doc", "FanIndexerThread", e);
                             }
                         }
                     }

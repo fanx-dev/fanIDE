@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.project.FanProject;
-import net.jot.utils.JOTUtilities;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.api.java.classpath.GlobalPathRegistryEvent;
@@ -176,7 +175,7 @@ public class FanDebugPathProvider extends SourcePathProvider
             relativePath = relativePath.substring(1);
         }
         
-        FanUtilities.GENERIC_LOGGER.debug("+++ Initial path: " + relativePath);
+        FanUtilities.GENERIC_LOGGER.fine("+++ Initial path: " + relativePath);
         String path = null;
         if (relativePath != null && (relativePath.endsWith(".fan") || relativePath.endsWith(".fwt")))
         {
@@ -236,7 +235,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         System.out.println("Get URL Path: " + relativePath);
         //System.out.println(getClass().getName() + " getUrl :" + relativePath);
         relativePath = normalize(relativePath);
-        if (JOTUtilities.isWindowsOS())
+        if (FanUtilities.isWindowsOS())
         {
             relativePath = relativePath.replace("/", "\\");
         }
@@ -263,7 +262,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         
         if (fo == null)
         {
-            FanUtilities.GENERIC_LOGGER.debug(getClass().getName() + " Url not found for " + relativePath);
+            FanUtilities.GENERIC_LOGGER.fine(getClass().getName() + " Url not found for " + relativePath);
             return null;
         }
         
@@ -342,7 +341,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         { // Fantom sources
             String folderPath = folder.getPath();
             // Not perfect, but good enough for winblows
-            if (JOTUtilities.isWindowsOS())
+            if (FanUtilities.isWindowsOS())
             {
                 folderPath = folderPath.replace("\\", "/");
             }
@@ -564,7 +563,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         {
             for (ClassPath.Entry entry : cp.entries())
             {
-                FanUtilities.GENERIC_LOGGER.debug(entry.toString());
+                FanUtilities.GENERIC_LOGGER.fine(entry.toString());
                 System.out.println(entry);
             }
         }

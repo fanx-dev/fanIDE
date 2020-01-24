@@ -42,7 +42,7 @@ package net.colar.netbeans.fan.test.mock;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import net.jot.testing.JOTTester;
+import org.netbeans.junit.NbTestCase;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
@@ -71,7 +71,7 @@ public class MockLookup extends ProxyLookup
         defaultLookup.setAccessible(true);
         defaultLookup.set(null, null);
       }
-      JOTTester.checkIf("Checking Looku Object", MockLookup.class.equals(Lookup.getDefault().getClass()));
+      NbTestCase.assertTrue("Checking Looku Object", MockLookup.class.equals(Lookup.getDefault().getClass()));
     } catch (Exception x)
     {
       throw new ExceptionInInitializerError(x);
@@ -84,8 +84,8 @@ public class MockLookup extends ProxyLookup
   /** Do not call this directly! */
   public MockLookup() throws Exception
   {
-    JOTTester.checkIf("Making is true", making);
-    JOTTester.checkIf("Default is null", DEFAULT == null);
+    NbTestCase.assertTrue("Making is true", making);
+    NbTestCase.assertTrue("Default is null", DEFAULT == null);
     DEFAULT = this;
   }
 

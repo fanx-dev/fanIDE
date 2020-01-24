@@ -21,7 +21,6 @@ public class FantomProblemFinder extends FantomCSLTestBase {
     
     @Override
     public void cslTest() throws Throwable {
-        String fanHome = prefs.getString("fantom.home");
 
         List<File> files = NBTestUtilities.listAllFanFilesUnder(fanHome + "/src/util");
         //List<File> files = NBTestUtilities.listAllFanFilesUnder(fanHome + "/examples/");

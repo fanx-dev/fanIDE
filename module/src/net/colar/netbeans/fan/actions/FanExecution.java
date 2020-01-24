@@ -14,8 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Future;
-import net.jot.logger.JOTLogger;
-import net.jot.utils.JOTUtilities;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionDescriptor.InputProcessorFactory;
 import org.netbeans.api.extexecution.ExecutionDescriptor.LineConvertorFactory;
@@ -87,7 +86,7 @@ public class FanExecution
                     descriptor, displayName);
             //io = descriptor.getInputOutput();
             // Start Service
-            JOTLogger.info(this, toString());
+            FanUtilities.GENERIC_LOGGER.info(toString());
             return service.run();
             //io = InputOutputManager.getInputOutput(displayName, true, path).getInputOutput();
         } catch (Exception ex)
@@ -109,7 +108,7 @@ public class FanExecution
         for (String name : envVars.keySet())
         {
             String value = envVars.get(name);
-            if (JOTUtilities.isWindowsOS())
+            if (FanUtilities.isWindowsOS())
             {
                 value = value.replace("\\", "\\\\");
             }
@@ -122,7 +121,7 @@ public class FanExecution
             String arg = commandArgs.get(i);
             if (arg != null && arg.trim().length() > 0)
             {
-                if (JOTUtilities.isWindowsOS())
+                if (FanUtilities.isWindowsOS())
                 {
                     arg = arg.replace("\\", "\\\\");
                 }

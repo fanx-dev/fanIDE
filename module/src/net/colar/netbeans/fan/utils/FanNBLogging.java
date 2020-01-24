@@ -4,6 +4,9 @@
 
 package net.colar.netbeans.fan.utils;
 
+import java.io.IOException;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.LogManager;
 
 /**
@@ -13,18 +16,11 @@ import java.util.logging.LogManager;
  */
 public class FanNBLogging
 {
-	public static void setupLogging()
+	public static void setupLogging(String logFile) throws IOException
 	{
-		//System.setProperty("org.netbeans.modules.debugger.jpda.breakpoints.level", "100");
-		//System.setProperty("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater.level", "100");
-		//System.setProperty("org.netbeans.modules.parsing.spi.indexing.support.QuerySupport.level", "100");
-		//System.setProperty("org.netbeans.modules.parsing.impl.indexing.lucene.LuceneIndex.level","100");
-		try
-		{
-			LogManager.getLogManager().readConfiguration();
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+                FanUtilities.GENERIC_LOGGER.addHandler(consoleHandler);
+                FileHandler fileHandler = new FileHandler(logFile);
+                FanUtilities.GENERIC_LOGGER.addHandler(fileHandler);
 	}
 }

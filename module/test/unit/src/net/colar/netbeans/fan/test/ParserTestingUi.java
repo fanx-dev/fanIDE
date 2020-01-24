@@ -12,10 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Properties;
 import javax.swing.*;
 import net.colar.netbeans.fan.FanModuleInstall;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.jot.prefs.JOTPropertiesPreferences;
 import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.openide.util.Exceptions;
@@ -154,7 +154,7 @@ public class ParserTestingUi extends JFrame implements ActionListener{
     
     public static void main(String[] args) throws Exception
     {
-        FanModuleInstall mi = NBTestUtilities.initNb(true, new JOTPropertiesPreferences());
+        FanModuleInstall mi = NBTestUtilities.initNb(true, new Properties());
         // "warmup" parser
         NBTestUtilities.warmupParser();
         try

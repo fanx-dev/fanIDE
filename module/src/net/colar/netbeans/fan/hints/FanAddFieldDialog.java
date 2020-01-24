@@ -234,7 +234,7 @@ public class FanAddFieldDialog extends javax.swing.JDialog
                 }
             } catch (BadLocationException e)
             {
-                FanUtilities.GENERIC_LOGGER.exception("BadLocation", e);
+                FanUtilities.GENERIC_LOGGER.throwing("BadLocation", "submitButtonActionPerformed", e);
             }
         }
 

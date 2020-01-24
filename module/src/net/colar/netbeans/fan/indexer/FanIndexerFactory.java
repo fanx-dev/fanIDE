@@ -4,7 +4,6 @@
 package net.colar.netbeans.fan.indexer;
 
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.jot.logger.JOTLogger;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexerFactory;
@@ -54,7 +53,7 @@ public class FanIndexerFactory extends CustomIndexerFactory {
     public void filesDeleted(Iterable<? extends Indexable> itrbl, Context cntxt) {
         for (Indexable idx : itrbl) {
             String path = idx.getURL().getPath();
-            JOTLogger.debug(this, "File deleted: " + path);
+            FanUtilities.GENERIC_LOGGER.fine("File deleted: " + path);
             indexer.requestDelete(path);
         }
     }

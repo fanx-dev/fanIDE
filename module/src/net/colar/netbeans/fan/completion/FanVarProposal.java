@@ -156,7 +156,7 @@ public class FanVarProposal extends FanCompletionProposal
 
 			} else
 			{
-				FanUtilities.GENERIC_LOGGER.error("Unknown Slot type: " + slot);
+				FanUtilities.GENERIC_LOGGER.severe("Unknown Slot type: " + slot);
 			}
 			element = handle;
 

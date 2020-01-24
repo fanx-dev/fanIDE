@@ -33,9 +33,8 @@ public class FantomSemanticAnalyzerTest extends FantomCSLTestBase {
     };
 
     public void cslTest() throws Throwable {
-        String fanHome = prefs.getString("fantom.home");
         // Outputs the names of the failed files into a text file, in a  format that makes it easy to use in a java string array
-        failedListFile = new File(prefs.getString("test.home") + File.separator + "failed.txt");
+        failedListFile = new File(fanHome + File.separator + "failed.txt");
         failedListFile.delete();
 
         testAllFanFilesUnder(fanHome + "/src/util/fan/");
