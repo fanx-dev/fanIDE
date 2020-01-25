@@ -187,6 +187,12 @@ public class FanCompletionHandler implements CodeCompletionHandler
         if (typedText.charAt(typedText.length()-1) == '.') {
             return QueryType.COMPLETION;
         }
+        
+        char c = typedText.charAt(0);
+        if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+            return QueryType.COMPLETION;
+        }
+        
         return QueryType.NONE;
     }
 

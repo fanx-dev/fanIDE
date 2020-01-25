@@ -28,8 +28,8 @@ public class FanDslEmbeddingProvider extends LanguageProvider
 
     public static final String DSL_OPEN = "<|";
     public static final String DSL_CLOSE = "|>";
-    public static final String TALES_DSL_CLIENT_ID = "client";
-    public static final String TALES_DSL_SQL_ID = "sql";
+    public static final String DSL_CLIENT_ID = "Js";
+    public static final String DSL_SQL_ID = "Sql";
     Language jscript;
     Language sql;
 
@@ -59,14 +59,14 @@ public class FanDslEmbeddingProvider extends LanguageProvider
         {
             if (token.id().name().equalsIgnoreCase(TokenName.DSL.name()))
             {
-                if (jscript!=null && token.text().toString().startsWith(TALES_DSL_CLIENT_ID + DSL_OPEN))
+                if (jscript!=null && token.text().toString().startsWith(DSL_CLIENT_ID + DSL_OPEN))
                 {
-                    int start = TALES_DSL_CLIENT_ID.length() + DSL_OPEN.length();
+                    int start = DSL_CLIENT_ID.length() + DSL_OPEN.length();
                     return LanguageEmbedding.create(jscript, start, DSL_CLOSE.length());
                 }
-                else if (sql!=null && token.text().toString().startsWith(TALES_DSL_SQL_ID + DSL_OPEN))
+                else if (sql!=null && token.text().toString().startsWith(DSL_SQL_ID + DSL_OPEN))
                 {
-                    int start = TALES_DSL_SQL_ID.length() + DSL_OPEN.length();
+                    int start = DSL_SQL_ID.length() + DSL_OPEN.length();
                     return LanguageEmbedding.create(sql, start, DSL_CLOSE.length());
                 }
             }

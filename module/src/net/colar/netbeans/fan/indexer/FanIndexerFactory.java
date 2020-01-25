@@ -72,6 +72,7 @@ public class FanIndexerFactory extends CustomIndexerFactory {
      * @return
      */
     public int scanFolder(FileObject root, int nb) {
+        FanUtilities.logger.fine("scanFolder");
         return indexer.indexSrcFolder(root, nb);
     }
 

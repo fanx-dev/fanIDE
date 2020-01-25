@@ -31,6 +31,10 @@ public class NBFanParser extends Parser {
         String taskClass = task.getClass().getName();
         boolean isIndexing = taskClass.startsWith("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater");
 
+        if (!FanIndexer.sysPodIsIndexed) {
+            isIndexing = true;
+        }
+        
         String path = snapshot.getSource().getFileObject().getPath();
         if (FanIndexer.isAllowedIndexing(snapshot.getSource().getFileObject())) {
             parse(snapshot, isIndexing);

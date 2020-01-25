@@ -148,7 +148,7 @@ public class FanParserTask extends ParserResult {
 
     public void addGlobalError(String title, Throwable t) {
         // "High level error"
-        t.printStackTrace();
+        if (!(t instanceof CancellationException)) t.printStackTrace();
         Error error = DefaultError.createDefaultError(FanParserErrorKey.GLOBAL_ERROR.name(), title, title, null, 0, 0, true, Severity.ERROR);
         errors.add(error);
     }

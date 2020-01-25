@@ -56,7 +56,7 @@ public class FanCustomizedProperties implements CustomizerProvider
 			settingsPanel.setBuildTarget(props.getBuildTarget());
 			settingsPanel.setArgs(props.getArgs());
 			settingsPanel.setJvm(props.getJvmArgs());
-			settingsPanel.setIsTales(props.isIsTalesProject());
+//			settingsPanel.setIsTales(props.isIsTalesProject());
 		}
 		
 		panels.put(settings, settingsPanel);
@@ -118,7 +118,7 @@ public class FanCustomizedProperties implements CustomizerProvider
 					props.setBuildTarget(settingsPanel.getBuildTarget());
                                         props.setArgs(settingsPanel.getArgs());
                                         props.setJvmArgs(settingsPanel.getJvm());
-                                        props.setIsTalesProject(settingsPanel.getIsTales());
+//                                        props.setIsTalesProject(settingsPanel.getIsTales());
 					props.save();
 				}
 			}

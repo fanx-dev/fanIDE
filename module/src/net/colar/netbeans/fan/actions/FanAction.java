@@ -37,7 +37,7 @@ public abstract class FanAction {
     public final ExecutionDescriptor descriptor = new ExecutionDescriptor().frontWindow(true).controllable(true).inputVisible(true).showProgress(true).showSuspended(true);
     private final FanProject project;
     private FanJpdaThread jpdaThread = null;
-    protected static Future<Integer> talesHandle;
+//    protected static Future<Integer> talesHandle;
 
     public FanAction(FanProject project) {
         this.project = project;
@@ -88,18 +88,12 @@ public abstract class FanAction {
     }
 
     protected FanExecution runPodAction(Lookup lookup, boolean debug) {
-        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
+//        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
 
-        return runPodAction(lookup, debug, props.isIsTalesProject());
+        return runPodAction(lookup, debug, null);
     }
 
-    protected FanExecution runPodAction(Lookup lookup, boolean debug, boolean tales)
-    {
-        return runPodAction(lookup, debug, tales, null);
-    }
-    
-
-    private FanExecution runPodAction(Lookup lookup, boolean debug, boolean tales, String clazz) 
+    private FanExecution runPodAction(Lookup lookup, boolean debug, String clazz) 
     {
         FileObject file = findTargetProject(lookup);
         FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
@@ -115,24 +109,13 @@ public abstract class FanAction {
                 target = podName + "::" + "Main" + "." + "main";
             }
             FanExecution fanExec = new FanExecution();
-            fanExec.setDisplayName((tales ? "Tales " : "") + getProjectName(lookup));
-            if (tales) {
-                // execute IN project directory
-                fanExec.setWorkingDirectory(FileUtil.toFile(file).getAbsolutePath());
-            } else {
-                // execute in parent dir.
-                fanExec.setWorkingDirectory(path);
-            }
+            fanExec.setDisplayName(getProjectName(lookup));
+            fanExec.setWorkingDirectory(path);
 
             FanPlatform.getInstance().buildFanCall(project, fanExec, debug, "");
 
             fanExec.addCommandArg(FanPlatform.FAN_CLASS);
-            if (tales) {
-                fanExec.addCommandArg(FanPlatform.FAN_TALES_POD_NAME);
-                fanExec.addCommandArg(FanPlatform.FAN_TALES_RUN_CMD);
-            } else {
-                fanExec.addCommandArg(target);
-            }
+            fanExec.addCommandArg(target);
             if (debug) {
                 if (jpdaThread != null && jpdaThread.isAlive()) {
                     jpdaThread.shutdown();
@@ -193,8 +176,8 @@ public abstract class FanAction {
             }
         }
         FileObject file = findTargetProject(lookup);
-        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
-        boolean tales = props.isIsTalesProject();
+//        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
+//        boolean tales = props.isIsTalesProject();
         if (file != null) {
             FileObject buildFile = file.getFileObject(FanBuildFileHelper.BUILD_FILE);
             if (buildFile != null) {
@@ -243,9 +226,9 @@ public abstract class FanAction {
             file = gdo.getPrimaryFile();
         }
         if (file != null && file.getMIMEType().equals(FanLanguage.FAN_MIME_TYPE)) {
-            String script = FileUtil.toFile(file).getAbsolutePath();
+//            String script = FileUtil.toFile(file).getAbsolutePath();
 
-            return runPodAction(Lookup.EMPTY, false, false, file.getName());
+            return runPodAction(Lookup.EMPTY, false, file.getName());
         }
         return null;
     }
@@ -318,32 +301,32 @@ public abstract class FanAction {
         }
     }
 
-    /**
-     * If this is a tales project, open the browser .. if not, do nothing.
-     * @param f 
-     */
-    public void showTalesBrowser(Future<Integer> f) {
-        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
-
-        if (props != null && props.isIsTalesProject()) {
-            talesHandle = f;
-            HtmlBrowser.URLDisplayer displayer = HtmlBrowser.URLDisplayer.getDefault();
-            try {
-                Thread.sleep(5000);
-                displayer.showURLExternal(new URL("http://127.0.0.1:8000/"));
-            } catch (MalformedURLException e) {
-            } catch (InterruptedException e) {
-            }
-        }
-
-    }
-
-    /**
-     * Try to shutdown properly
-     */
-    public static void shutdownTales() {
-        if (talesHandle != null && !talesHandle.isDone()) {
-            talesHandle.cancel(true);
-        }
-    }
+//    /**
+//     * If this is a tales project, open the browser .. if not, do nothing.
+//     * @param f 
+//     */
+//    public void showTalesBrowser(Future<Integer> f) {
+//        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
+//
+//        if (props != null && props.isIsTalesProject()) {
+//            talesHandle = f;
+//            HtmlBrowser.URLDisplayer displayer = HtmlBrowser.URLDisplayer.getDefault();
+//            try {
+//                Thread.sleep(5000);
+//                displayer.showURLExternal(new URL("http://127.0.0.1:8000/"));
+//            } catch (MalformedURLException e) {
+//            } catch (InterruptedException e) {
+//            }
+//        }
+//
+//    }
+//
+//    /**
+//     * Try to shutdown properly
+//     */
+//    public static void shutdownTales() {
+//        if (talesHandle != null && !talesHandle.isDone()) {
+//            talesHandle.cancel(true);
+//        }
+//    }
 }

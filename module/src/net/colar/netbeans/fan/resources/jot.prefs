@@ -1,6 +1,0 @@
-// For full debug use jot.logger.levels=0-5
-jot.logger.levels=2-5
-jot.db.properties_files=db.properties
-jot.db.create_missing_tables=true
-jot.logger.folder.windows=c:\\
-jot.logger.folder.others=/tmp

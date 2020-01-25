@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package net.colar.netbeans.fan.actions;
 
 import net.colar.netbeans.fan.project.FanProject;
@@ -14,39 +13,35 @@ import org.openide.util.Lookup;
  *
  * @author tcolar
  */
-public class TestFanPodAction extends FanAction
-{
-	public TestFanPodAction(FanProject project)
-	{
-		super(project);
-	}
+public class TestFanPodAction extends FanAction {
 
-	@Override
-	public String getCommandId()
-	{
-		// std test action
-		return ActionProvider.COMMAND_TEST;
-	}
+    public TestFanPodAction(FanProject project) {
+        super(project);
+    }
 
-	@Override
-	public void invokeAction(Lookup context) throws IllegalArgumentException
-	{
-    //TODO: only build if files changed ?
-		FanExecutionGroup group = new FanExecutionGroup(
-				buildPodAction(context),
-				testPodAction(context));
+    @Override
+    public String getCommandId() {
+        // std test action
+        return ActionProvider.COMMAND_TEST;
+    }
 
-		ExecutionService service =
-				ExecutionService.newService(
-				group,
-				descriptor, getProjectName(context));
+    @Override
+    public void invokeAction(Lookup context) throws IllegalArgumentException {
+        //TODO: only build if files changed ?
+        FanExecutionGroup group = new FanExecutionGroup(
+                buildPodAction(context),
+                testPodAction(context));
 
-		service.run();
-	}
+        ExecutionService service
+                = ExecutionService.newService(
+                        group,
+                        descriptor, getProjectName(context));
 
-	@Override
-	public boolean isActionEnabled(Lookup context) throws IllegalArgumentException
-	{
-		return true;
-	}
+        service.run();
+    }
+
+    @Override
+    public boolean isActionEnabled(Lookup context) throws IllegalArgumentException {
+        return true;
+    }
 }

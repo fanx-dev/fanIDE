@@ -29,6 +29,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import net.colar.netbeans.fan.parser.FanParserTask;
@@ -69,6 +71,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
+import org.openide.util.Exceptions;
 //import org.netbeans.modules.java.source.indexing.JavaBinaryIndexer;
 
 /**
@@ -88,11 +91,11 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     private final FanIndexerThread indexerThread;
     public static volatile boolean shutdown = false;
     //TODO: will that work or should they all be in the same fifo stack
-    Hashtable<String, Long> fanSrcToBeIndexed = new Hashtable<String, Long>();
-    Hashtable<String, Long> fanPodsToBeIndexed = new Hashtable<String, Long>();
-    Hashtable<String, Long> toBeDeleted = new Hashtable<String, Long>();
+
 //  private FanJarsIndexer jarsIndexer;
     private boolean alreadyWarned;
+
+    public static boolean sysPodIsIndexed = false;
 
     public FanIndexer() {
         super();
@@ -114,7 +117,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
      * @param backgroundJava
      */
     public void indexAll() {
-        this.indexFantomPods();
+        this.indexAllPods();
     }
 
     @Override
@@ -125,7 +128,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     }
 
     public void requestDelete(String path) {
-        toBeDeleted.put(path, new Date().getTime());
+        indexerThread.remove(path);
     }
 
     /**
@@ -138,17 +141,14 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         if (!FanPlatform.isConfigured()) {
             return;
         }
-        boolean isPod = path.toLowerCase().endsWith(".pod");
+//        boolean isPod = path.toLowerCase().endsWith(".pod");
 
         FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(new File(path)));
         if (fo.getNameExt().equalsIgnoreCase("sys.pod")) {
             warnIfNecessary();
         }
-        if (isPod) {
-            fanPodsToBeIndexed.put(path, new Date().getTime());
-        } else if (isAllowedIndexing(fo)) {
-            fanSrcToBeIndexed.put(path, new Date().getTime());
-        }
+
+        indexerThread.add(path);
     }
 
     private void indexSrc(String path) {
@@ -182,16 +182,12 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         long now = new Date().getTime();
         log.fine("Indexing - parsing done in " + (now - then) + " ms for: " + path);
         // Index the parsed doc
-        indexSrc(path, result);
+//        indexSrc(path, result);
+        FanParserTask fanResult = (FanParserTask) result;
+        doIndexSrc(path, fanResult.getRootScope());
+
         now = new Date().getTime();
         log.fine("Indexing completed in " + (now - then) + " ms for: " + path);
-    }
-
-    private void indexSrc(String path, Result parserResult) {
-        log.fine("Indexing parsed result for : " + path);
-
-        FanParserTask fanResult = (FanParserTask) parserResult;
-        doIndexSrc(path, fanResult.getRootScope());
     }
 
     private void setProtection(FanElement elem, ModifEnum modifiers) {
@@ -210,7 +206,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 break;
         }
     }
-    
+
     private FanType findOrCreateType(List<FanType> list, String qname) {
         for (FanType t : list) {
             if (t.getQualifiedName().equals(qname)) {
@@ -341,7 +337,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         return false;
     }
 
-    public void indexFantomPods() {
+    private void indexAllPods() {
         if (!FanPlatform.isConfigured()) {
             return;
         }
@@ -384,7 +380,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
             doc.setPath(pod);
             doc.setTstamp(0L);
             doc.setIsSource(false);
-            
+
             List<FanType> oldTypes = doc.getTypes();
             for (FanType t : oldTypes) {
                 Namespace.get().remove(t);
@@ -500,7 +496,6 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
 //        } // class is default
 //        return FanAstScopeVarBase.VarKind.TYPE_CLASS.value();
 //    }
-
     private boolean hasFlag(int flags, int flag) {
         return (flags & flag) != 0;
     }
@@ -510,19 +505,18 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         shutdown = true;
     }
 
-    private int getProtection(int flags) {
-        if (hasFlag(flags, FConst.Private)) {
-            return ModifEnum.PRIVATE.value();
-        }
-        if (hasFlag(flags, FConst.Protected)) {
-            return ModifEnum.PROTECTED.value();
-        }
-        if (hasFlag(flags, FConst.Internal)) {
-            return ModifEnum.INTERNAL.value();
-        } // default is public
-        return ModifEnum.PUBLIC.value();
-    }
-
+//    private int getProtection(int flags) {
+//        if (hasFlag(flags, FConst.Private)) {
+//            return ModifEnum.PRIVATE.value();
+//        }
+//        if (hasFlag(flags, FConst.Protected)) {
+//            return ModifEnum.PROTECTED.value();
+//        }
+//        if (hasFlag(flags, FConst.Internal)) {
+//            return ModifEnum.INTERNAL.value();
+//        } // default is public
+//        return ModifEnum.PUBLIC.value();
+//    }
     /**
      * Index a fantom source folder recursively
      *
@@ -657,7 +651,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         // synced because we don't want to do it at the same time as the thread
         String path = fe.getFile().getPath();
         log.fine("File deleted: " + path);
-        toBeDeleted.put(path, new Date().getTime());
+        requestDelete(path);
     }
 
     public void fileRenamed(FileRenameEvent fre) {
@@ -669,13 +663,13 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     }
 
     public void fileAttributeChanged(FileAttributeEvent fae) {
-        int bkpt = 0;
+//        int bkpt = 0;
         // don't care
     }
 
     public void waitForEmptyFantomQueue() {
         while (true) {
-            if (fanPodsToBeIndexed.size() == 0 && fanSrcToBeIndexed.size() == 0) {
+            if (indexerThread.isEmpty()) {
                 return;
             }
 
@@ -683,91 +677,6 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
                 Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * *******************************************************************
-     * Indexer Thread class All indexing request should go through here to avoid
-     * issues.
-     */
-    class FanIndexerThread extends Thread implements Runnable {
-
-        @Override
-        public void run() {
-
-            while (!shutdown) {
-                try {
-                    Thread.yield();
-                    sleep(100);
-                } catch (Exception e) {
-                }
-
-                if (!toBeDeleted.isEmpty() || !fanPodsToBeIndexed.isEmpty() || !fanSrcToBeIndexed.isEmpty()) {
-                    // Will show a progress bar if it takes more than 5 sec
-                    ProgressHandle progressHandle = ProgressHandleFactory.createHandle("Fantom indexing", (Cancellable) null);
-                    progressHandle.setInitialDelay(5000);
-                    progressHandle.start();
-                    Enumeration<String> tbd = toBeDeleted.keys();
-                    // to be deleted
-                    {
-                        while (tbd.hasMoreElements()) {
-                            if (shutdown) {
-                                return;
-                            }
-                            String path = tbd.nextElement();
-
-                            FanSrcFile doc = FanSrcFile.findByPath(path);
-                            try {
-                                if (doc != null) {
-                                    progressHandle.progress("De-Indexing: " + path);
-                                    doc.delete();
-                                }
-                            } catch (Exception e) {
-                                log.throwing("Error deleting doc", "FanIndexerThread", e);
-                            }
-                        }
-                    }
-                    // always do binaries first
-                    do {
-                        // Usig keys() since it uses a "snapshot"
-                        // no concurrentmodif error
-                        // also nextElement() should be safe since we only remove elements from within here
-                        // elems can be added outside ... but that should be fine.
-                        Enumeration<String> it = fanPodsToBeIndexed.keys();
-                        while (it.hasMoreElements()) {
-                            if (shutdown) {
-                                return;
-                            }
-                            String path = it.nextElement();
-                            Long l = fanPodsToBeIndexed.get(path);
-                            long now = new Date().getTime();
-                            if (l != null && l.longValue() < now - 1000) {
-                                fanPodsToBeIndexed.remove(path);
-                                progressHandle.progress("Indexing: " + path);
-                                indexPod(path);
-                            }
-                        }
-                    } while (!fanPodsToBeIndexed.isEmpty());
-                    // then do the sources
-                    Enumeration<String> it = fanSrcToBeIndexed.keys();
-                    while (it.hasMoreElements()) {
-                        if (shutdown) {
-                            return;
-                        }
-                        String path = it.nextElement();
-                        Long l = fanSrcToBeIndexed.get(path);
-                        // Hasn't changed in a couple seconds
-                        long now = new Date().getTime();
-                        if (path != null && l != null && l.longValue() < now - 2000) {
-                            fanSrcToBeIndexed.remove(path);
-                            progressHandle.progress("Indexing: " + path);
-                            indexSrc(path);
-                        }
-                    }
-                    progressHandle.finish();
-                }
             }
         }
     }
@@ -780,4 +689,54 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
         }
         return true;
     }
+
+    /**
+     * *******************************************************************
+     * Indexer Thread class All indexing request should go through here to avoid
+     * issues.
+     */
+    class FanIndexerThread extends Thread implements Runnable {
+
+        private BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+
+        public boolean isEmpty() {
+            return queue.isEmpty();
+        }
+
+        public void add(String path) {
+            try {
+                queue.put(path);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        
+        public void remove(String path) {
+            queue.remove(path);
+        }
+
+        @Override
+        public void run() {
+
+            while (!shutdown) {
+                try {
+                    String path = queue.take();
+
+                    if (path.endsWith(".pod")) {
+                        indexPod(path);
+                        if (path.endsWith("sys.pod")) {
+                            sysPodIsIndexed = true;
+                        }
+                    } else {
+                        indexSrc(path);
+                    }
+
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+
+            }
+        }
+    }
+
 }

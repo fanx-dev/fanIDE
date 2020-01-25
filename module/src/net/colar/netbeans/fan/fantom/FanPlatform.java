@@ -38,9 +38,9 @@ public class FanPlatform {
     public final static String FAN_CLASS = "fanx.tools.Fan";
     public final static String FANT_CLASS = "fanx.tools.Fant";
     public final static String FAN_SH = "fansh";
-    public final static String FAN_TALES_POD_NAME = "tales";
-    public final static String FAN_TALES_CREATE_CMD = "new";
-    public final static String FAN_TALES_RUN_CMD = "run";
+//    public final static String FAN_TALES_POD_NAME = "tales";
+//    public final static String FAN_TALES_CREATE_CMD = "new";
+//    public final static String FAN_TALES_RUN_CMD = "run";
     private String fanHome;
     private String podsDir;
     private String fanSrc;

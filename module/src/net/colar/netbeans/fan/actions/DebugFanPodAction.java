@@ -47,8 +47,7 @@ public class DebugFanPodAction extends FanAction {
             // don't allow rerun because with the JPDA debugger part it would not work
             descriptor.controllable(false), getProjectName(context));
 
-    
-    showTalesBrowser(service.run());
+    service.run();
   }
 
   @Override
