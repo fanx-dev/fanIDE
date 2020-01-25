@@ -19,7 +19,7 @@ public abstract class FanAstScopeVar extends FanAstScopeVarBase {
         super.type = type;
         super.kind = kind;
         if (type == null) {
-            FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + name);
+            FanUtilities.logger.severe(getClass().getName() + " Null type for: " + name);
             super.type = FanResolvedType.makeUnresolved(node);
         }
 

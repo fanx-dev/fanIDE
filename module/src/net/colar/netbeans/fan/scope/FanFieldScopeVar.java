@@ -28,7 +28,7 @@ public class FanFieldScopeVar extends FanAstScopeVarBase {
             // ctor is always returning type sys::This
             type = FanResolvedType.makeFromDbType(node, "sys::This");
             if (type == null) {
-                FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + node.getNodeText(true));
+                FanUtilities.logger.severe(getClass().getName() + " Null type for: " + node.getNodeText(true));
             }
         } else {
             AstNode typeNode = FanLexAstUtils.getFirstChild(node, new NodeKindPredicate(AstKind.AST_TYPE));
@@ -38,7 +38,7 @@ public class FanFieldScopeVar extends FanAstScopeVarBase {
                     type = FanResolvedType.makeFromTypeSigWithWarning(typeNode);
                 }
                 if (type == null) {
-                    FanUtilities.GENERIC_LOGGER.severe(getClass().getName() + " Null type for: " + typeString);
+                    FanUtilities.logger.severe(getClass().getName() + " Null type for: " + typeString);
                 }
             }
         }

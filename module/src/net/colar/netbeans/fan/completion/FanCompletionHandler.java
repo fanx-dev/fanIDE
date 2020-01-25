@@ -81,7 +81,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
             FanCompletionContext cpl = new FanCompletionContext(context);
             int anchor = context.getCaretOffset();
             preamble = cpl.getPreamble();
-            FanUtilities.GENERIC_LOGGER.fine("preamb: " + preamble);
+            FanUtilities.logger.fine("preamb: " + preamble);
             FanParserTask result = (FanParserTask) context.getParserResult();
 
             AstNode rootNode = result.getAstTree();
@@ -356,7 +356,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
             id = idNode.getNodeText(true);
         }
 
-        FanUtilities.GENERIC_LOGGER.fine("Using ID: " + id);
+        FanUtilities.logger.fine("Using ID: " + id);
         String pod = null;
         if (id.indexOf("::") != -1)
         {

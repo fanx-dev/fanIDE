@@ -35,7 +35,7 @@ public class NBFanParser extends Parser {
         if (FanIndexer.isAllowedIndexing(snapshot.getSource().getFileObject())) {
             parse(snapshot, isIndexing);
         } else {
-            FanUtilities.GENERIC_LOGGER.info("Ignoring request to parse Fantom distro source file: " + path);
+            FanUtilities.logger.info("Ignoring request to parse Fantom distro source file: " + path);
         }
     }
 

@@ -18,7 +18,7 @@ import org.netbeans.spi.debugger.DebuggerEngineProvider;
 //@DebuggerEngineProvider.Registration // TODO: doesn't work
 public class FanDebuggerEngineProvider extends DebuggerEngineProvider 
 {
-	static{FanUtilities.GENERIC_LOGGER.info("### Registering: "+FanDebuggerEngineProvider.class.getName());}
+	static{FanUtilities.logger.info("### Registering: "+FanDebuggerEngineProvider.class.getName());}
 
 	public static final String ID="FanDebuggerEngine";
 	public static final String[] langs = new String[] {"fan"};

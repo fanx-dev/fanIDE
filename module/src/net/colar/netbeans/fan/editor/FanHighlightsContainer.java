@@ -140,7 +140,7 @@ public class FanHighlightsContainer extends AbstractHighlightsContainer implemen
                     tokenSequenceList = scanner.tokenSequenceList(topLevelLanguagePath, startOffsetBoundary, endOffsetBoundary);
                 } else
                 {
-                    FanUtilities.GENERIC_LOGGER.info("Language " + mimeType + " obtained from the document mimeType property cannot be found!"); //NOI18N
+                    FanUtilities.logger.info("Language " + mimeType + " obtained from the document mimeType property cannot be found!"); //NOI18N
                 }
             }
 

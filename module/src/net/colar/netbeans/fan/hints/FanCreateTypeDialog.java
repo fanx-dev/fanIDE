@@ -200,7 +200,7 @@ public class FanCreateTypeDialog extends javax.swing.JDialog
                 FileUtil.refreshFor(newFile.getParentFile());
             } catch (Exception e)
             {
-                FanUtilities.GENERIC_LOGGER.throwing("Failed creating new type", "CreateActionPerformed", e);
+                FanUtilities.logger.throwing("Failed creating new type", "CreateActionPerformed", e);
             }
         }
     }//GEN-LAST:event_CreateActionPerformed

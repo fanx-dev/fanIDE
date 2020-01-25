@@ -86,7 +86,7 @@ public class FanExecution
                     descriptor, displayName);
             //io = descriptor.getInputOutput();
             // Start Service
-            FanUtilities.GENERIC_LOGGER.info(toString());
+            FanUtilities.logger.info(toString());
             return service.run();
             //io = InputOutputManager.getInputOutput(displayName, true, path).getInputOutput();
         } catch (Exception ex)

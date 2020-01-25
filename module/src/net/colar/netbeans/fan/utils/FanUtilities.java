@@ -20,7 +20,7 @@ import org.openide.loaders.DataObjectNotFoundException;
 public class FanUtilities
 {
 
-    public static final Logger GENERIC_LOGGER = Logger.getLogger("Generic (FanUtilities)");
+    public static final Logger logger = Logger.getLogger("Generic (FanUtilities)");
 
     public static boolean isWindowsOS() {
         String os = System.getProperty("os.name");
@@ -93,11 +93,11 @@ public class FanUtilities
      */
     public static void dumpFileObject(FileObject fo)
     {
-        FanUtilities.GENERIC_LOGGER.fine("---- FileObject DUMP -----");
+        FanUtilities.logger.fine("---- FileObject DUMP -----");
         try
         {
             dumpFileObject(fo, "");
-            FanUtilities.GENERIC_LOGGER.fine("**---- FileObject root dump -----");
+            FanUtilities.logger.fine("**---- FileObject root dump -----");
             //dumpFileObject(fo.getFileSystem().getRoot(),"**");
         } catch (Exception e)
         {
@@ -107,10 +107,10 @@ public class FanUtilities
 
     private static void dumpFileObject(FileObject fo, String indent) throws Exception
     {
-        FanUtilities.GENERIC_LOGGER.fine(indent + "toStr: " + fo.toString());
-        FanUtilities.GENERIC_LOGGER.fine(indent + "Name: " + fo.getNameExt());
-        FanUtilities.GENERIC_LOGGER.fine(indent + "Path: " + fo.getPath());
-        FanUtilities.GENERIC_LOGGER.fine(indent + "URL: " + fo.getURL());
+        FanUtilities.logger.fine(indent + "toStr: " + fo.toString());
+        FanUtilities.logger.fine(indent + "Name: " + fo.getNameExt());
+        FanUtilities.logger.fine(indent + "Path: " + fo.getPath());
+        FanUtilities.logger.fine(indent + "URL: " + fo.getURL());
         FileObject[] children = fo.getChildren();
         //indent+="  ";
         //for(int i=0;i!=children.length;i++)

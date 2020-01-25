@@ -234,7 +234,7 @@ public class FanAddFieldDialog extends javax.swing.JDialog
                 }
             } catch (BadLocationException e)
             {
-                FanUtilities.GENERIC_LOGGER.throwing("BadLocation", "submitButtonActionPerformed", e);
+                FanUtilities.logger.throwing("BadLocation", "submitButtonActionPerformed", e);
             }
         }
 
@@ -270,7 +270,7 @@ public class FanAddFieldDialog extends javax.swing.JDialog
         }
         } catch (BadLocationException e)
         {
-        FanUtilities.GENERIC_LOGGER.exception("BadLocation", e);
+        FanUtilities.logger.exception("BadLocation", e);
         }
         }*/
     }//GEN-LAST:event_submitButtonActionPerformed

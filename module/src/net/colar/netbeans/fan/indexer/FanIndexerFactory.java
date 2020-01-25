@@ -22,7 +22,7 @@ public class FanIndexerFactory extends CustomIndexerFactory {
     private static FanIndexer indexer = new FanIndexer();
 
     public FanIndexerFactory() {
-        FanUtilities.GENERIC_LOGGER.info("Fantom - Inited indexer Factory");
+        FanUtilities.logger.info("Fantom - Inited indexer Factory");
     }
 
     public static FanIndexer getIndexer() {
@@ -53,7 +53,7 @@ public class FanIndexerFactory extends CustomIndexerFactory {
     public void filesDeleted(Iterable<? extends Indexable> itrbl, Context cntxt) {
         for (Indexable idx : itrbl) {
             String path = idx.getURL().getPath();
-            FanUtilities.GENERIC_LOGGER.fine("File deleted: " + path);
+            FanUtilities.logger.fine("File deleted: " + path);
             indexer.requestDelete(path);
         }
     }

@@ -49,7 +49,7 @@ public class BuildFileData
 			}
 			catch(IOException e)
 			{
-				FanUtilities.GENERIC_LOGGER.throwing("Failed parsing buold file: "+buildFile.getPath(), "BuildFileData", e);
+				FanUtilities.logger.throwing("Failed parsing buold file: "+buildFile.getPath(), "BuildFileData", e);
 			}
 		}
 	}

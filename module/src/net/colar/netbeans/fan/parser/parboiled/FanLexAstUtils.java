@@ -350,7 +350,7 @@ public class FanLexAstUtils
     {
         StringBuffer sb = new StringBuffer("Tree Dump: \n");
         getDumpTree(sb, node, indent);
-        FanUtilities.GENERIC_LOGGER.info(sb.toString());
+        FanUtilities.logger.info(sb.toString());
     }
 
     private static void getDumpTree(StringBuffer sb, AstNode node, int indent)

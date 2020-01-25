@@ -36,7 +36,7 @@ public class FanBkptActionProvider extends ActionsProviderSupport implements Pro
 	public FanBkptActionProvider()
 	{
 		super();
-		FanUtilities.GENERIC_LOGGER.info("### Registering: " + FanBkptActionProvider.class.getName());
+		FanUtilities.logger.info("### Registering: " + FanBkptActionProvider.class.getName());
 		// listen on fan files
 		context.addPropertyChangeListener(FanLanguage.FAN_MIME_TYPE, WeakListeners.propertyChange(this, context));
 		setEnabled(ActionsManager.ACTION_TOGGLE_BREAKPOINT, false);
@@ -47,13 +47,13 @@ public class FanBkptActionProvider extends ActionsProviderSupport implements Pro
 	{
 		boolean enabled = EditorContextDispatcher.getDefault().getCurrentLine() != null;
 		setEnabled(ActionsManager.ACTION_TOGGLE_BREAKPOINT, enabled);
-		FanUtilities.GENERIC_LOGGER.info("Fan - BkptProvider enabling");
+		FanUtilities.logger.info("Fan - BkptProvider enabling");
 	}
 
 	@Override
 	public void doAction(Object action)
 	{
-		FanUtilities.GENERIC_LOGGER.info("Fan - BkptProvider doaction");
+		FanUtilities.logger.info("Fan - BkptProvider doaction");
 		FileObject fo = EditorContextDispatcher.getDefault().getCurrentFile();
 		if (fo == null /*|| !fo.getMIMEType().equals(FanLanguage.FAN_MIME_TYPE)*/)
 		{
@@ -61,7 +61,7 @@ public class FanBkptActionProvider extends ActionsProviderSupport implements Pro
 		}
 		Line line = EditorContextDispatcher.getDefault().getCurrentLine();
 		String url = EditorContextDispatcher.getDefault().getCurrentURLAsString();
-		FanUtilities.GENERIC_LOGGER.info("Dbg line:"+line);
+		FanUtilities.logger.info("Dbg line:"+line);
 		if (line == null)
 		{
 			return;
@@ -79,14 +79,14 @@ public class FanBkptActionProvider extends ActionsProviderSupport implements Pro
 				if (bp.getURL().equals(url) && bp.getLineNumber() == lineNb)
 				{
 					// Found existing BP, remove and quit
-					FanUtilities.GENERIC_LOGGER.info("Removing bkpt:"+ lineNb);
+					FanUtilities.logger.info("Removing bkpt:"+ lineNb);
 					DebuggerManager.getDebuggerManager().removeBreakpoint(bp);
 					return;
 				}
 			}
 		}
 		// If we get here, it's a new bkpt, so create it.
-		FanUtilities.GENERIC_LOGGER.info("creating BP:"+lineNb);
+		FanUtilities.logger.info("creating BP:"+lineNb);
 		LineBreakpoint bp = FanDebugHelper.createFanBp(url, lineNb);
 		DebuggerManager.getDebuggerManager().addBreakpoint(bp);
 		Breakpoint[] bkpts = DebuggerManager.getDebuggerManager().getBreakpoints();

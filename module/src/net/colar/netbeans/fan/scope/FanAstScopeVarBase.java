@@ -140,7 +140,7 @@ public abstract class FanAstScopeVarBase {
         } else if (m.toLowerCase().equalsIgnoreCase("final")) {
             return ModifEnum.FINAL;
         } else {
-            FanUtilities.GENERIC_LOGGER.info("Unrecognized modifier: " + m);
+            FanUtilities.logger.info("Unrecognized modifier: " + m);
             //throw new RuntimeException();
         }
         return null;

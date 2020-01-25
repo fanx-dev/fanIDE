@@ -137,22 +137,22 @@ public class FanDebugPathProvider extends SourcePathProvider
         // debugging
         if (projectSources != null)
         {
-            FanUtilities.GENERIC_LOGGER.info("===========Prj roots=============");
+            FanUtilities.logger.info("===========Prj roots=============");
             dump(projectSources);
         }
         if (customSources != null)
         {
-            FanUtilities.GENERIC_LOGGER.info("===========Custom roots=============");
+            FanUtilities.logger.info("===========Custom roots=============");
             dump(customSources);
         }
         if (fanSources != null)
         {
-            FanUtilities.GENERIC_LOGGER.info("===========Fan roots=============");
+            FanUtilities.logger.info("===========Fan roots=============");
             dump(fanSources);
         }
         if (jdkSources != null)
         {
-            FanUtilities.GENERIC_LOGGER.info("===========Jdk roots=============");
+            FanUtilities.logger.info("===========Jdk roots=============");
             dump(jdkSources);
         }
     }
@@ -175,7 +175,7 @@ public class FanDebugPathProvider extends SourcePathProvider
             relativePath = relativePath.substring(1);
         }
         
-        FanUtilities.GENERIC_LOGGER.fine("+++ Initial path: " + relativePath);
+        FanUtilities.logger.fine("+++ Initial path: " + relativePath);
         String path = null;
         if (relativePath != null && (relativePath.endsWith(".fan") || relativePath.endsWith(".fwt")))
         {
@@ -262,7 +262,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         
         if (fo == null)
         {
-            FanUtilities.GENERIC_LOGGER.fine(getClass().getName() + " Url not found for " + relativePath);
+            FanUtilities.logger.fine(getClass().getName() + " Url not found for " + relativePath);
             return null;
         }
         
@@ -563,7 +563,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         {
             for (ClassPath.Entry entry : cp.entries())
             {
-                FanUtilities.GENERIC_LOGGER.fine(entry.toString());
+                FanUtilities.logger.fine(entry.toString());
                 System.out.println(entry);
             }
         }

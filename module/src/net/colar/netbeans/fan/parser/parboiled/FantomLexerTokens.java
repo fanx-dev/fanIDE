@@ -58,12 +58,12 @@ public class FantomLexerTokens {
      */
     public static FanTokenID getTokenByName(String name) {
         if (name == null) {
-            FanUtilities.GENERIC_LOGGER.info("FantomparserToken: Null token passed");
+            FanUtilities.logger.info("FantomparserToken: Null token passed");
             return getTokenByName(TokenName.ERROR);
         }
         Integer id = tokenIdByName.get(name.toUpperCase());
         if (id == null) {
-            FanUtilities.GENERIC_LOGGER.info("FantomparserToken: No such token: " + name);
+            FanUtilities.logger.info("FantomparserToken: No such token: " + name);
             return getTokenByName(TokenName.ERROR);
         }
         return tokens.get(id);

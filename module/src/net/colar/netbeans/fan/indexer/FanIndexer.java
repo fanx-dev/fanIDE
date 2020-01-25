@@ -83,7 +83,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
     private static Integer VERSION = 2;
     public static final String UNRESOLVED_TYPE = "!!UNRESOLVED!!";
     private final static Pattern CLOSURECLASS = Pattern.compile(".*?\\$\\d+\\z");
-    static Logger log = FanUtilities.GENERIC_LOGGER;
+    static Logger log = FanUtilities.logger;
 
     private final FanIndexerThread indexerThread;
     public static volatile boolean shutdown = false;

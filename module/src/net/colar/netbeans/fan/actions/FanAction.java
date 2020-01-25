@@ -149,7 +149,7 @@ public abstract class FanAction {
                     fanExec.addCommandArg(arg);
                 }
             }
-            FanUtilities.GENERIC_LOGGER.info(fanExec.toString());
+            FanUtilities.logger.info(fanExec.toString());
 
             return fanExec;
         }
@@ -289,7 +289,7 @@ public abstract class FanAction {
         @Override
         public void run() {
             // start JPDA
-            FanUtilities.GENERIC_LOGGER.info("Starting JPDA");
+            FanUtilities.logger.info("Starting JPDA");
             String portStr = FanPlatformSettings.getInstance().get(FanPlatformSettings.PREF_DEBUG_PORT, "8008");
             int port = new Integer(portStr).intValue();
             try {
@@ -300,9 +300,9 @@ public abstract class FanAction {
                         // if connected, then we are good
                         return;
                     } catch (DebuggerStartException e) {
-                        FanUtilities.GENERIC_LOGGER.fine("Failed connecting to debugger, will try again: " + e);
+                        FanUtilities.logger.fine("Failed connecting to debugger, will try again: " + e);
                         if (i == 14) {
-                            FanUtilities.GENERIC_LOGGER.throwing("Failed connecting to Debugger", "fan jpda", e);
+                            FanUtilities.logger.throwing("Failed connecting to Debugger", "fan jpda", e);
                         }
                     }
                     Thread.yield();

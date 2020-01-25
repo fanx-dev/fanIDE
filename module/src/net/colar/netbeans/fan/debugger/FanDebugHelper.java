@@ -29,7 +29,7 @@ public class FanDebugHelper {
      * @return
      */
     public static LineBreakpoint createFanBp(String url, int lineNb) {
-        FanUtilities.GENERIC_LOGGER.fine("bp url: " + url);
+        FanUtilities.logger.fine("bp url: " + url);
         URI uri = null;
         try {
             uri = new URI(url);
@@ -67,15 +67,15 @@ public class FanDebugHelper {
             bp.setHidden(false);
             bp.setSourceName(name);
             bp.setSuspend(LineBreakpoint.SUSPEND_ALL);
-            FanUtilities.GENERIC_LOGGER.fine("bp class:" + bp.getPreferredClassName());
-            FanUtilities.GENERIC_LOGGER.fine("bp sourceName:" + bp.getSourceName());
-            FanUtilities.GENERIC_LOGGER.fine("bp lineNb:" + bp.getLineNumber());
-            FanUtilities.GENERIC_LOGGER.fine("bp cond:" + bp.getCondition());
-            FanUtilities.GENERIC_LOGGER.fine("bp printText:" + bp.getPrintText());
-            FanUtilities.GENERIC_LOGGER.fine("bp groupName:" + bp.getGroupName());
-            FanUtilities.GENERIC_LOGGER.fine("bp vMessage:" + bp.getValidityMessage());
-            FanUtilities.GENERIC_LOGGER.fine("bp sourcePath:" + bp.getSourcePath());
-            FanUtilities.GENERIC_LOGGER.fine("bp url:" + bp.getURL());
+            FanUtilities.logger.fine("bp class:" + bp.getPreferredClassName());
+            FanUtilities.logger.fine("bp sourceName:" + bp.getSourceName());
+            FanUtilities.logger.fine("bp lineNb:" + bp.getLineNumber());
+            FanUtilities.logger.fine("bp cond:" + bp.getCondition());
+            FanUtilities.logger.fine("bp printText:" + bp.getPrintText());
+            FanUtilities.logger.fine("bp groupName:" + bp.getGroupName());
+            FanUtilities.logger.fine("bp vMessage:" + bp.getValidityMessage());
+            FanUtilities.logger.fine("bp sourcePath:" + bp.getSourcePath());
+            FanUtilities.logger.fine("bp url:" + bp.getURL());
         }
         return bp;
     }
@@ -119,7 +119,7 @@ public class FanDebugHelper {
      */
     private static String getPod(Project prj) {
         String pod = prj.getProjectDirectory().getName();
-        FanUtilities.GENERIC_LOGGER.fine("~~~ Pod: " + pod);
+        FanUtilities.logger.fine("~~~ Pod: " + pod);
         return pod;
     }
 

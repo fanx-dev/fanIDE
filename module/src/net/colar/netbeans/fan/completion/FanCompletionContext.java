@@ -61,7 +61,7 @@ public class FanCompletionContext {
         AstNode curNode = FanLexAstUtils.findASTNodeAt(rootNode, offset);
 
         completionType = determineCompletionType(curNode);
-        FanUtilities.GENERIC_LOGGER.fine("Compl. type:" + completionType.toString());
+        FanUtilities.logger.fine("Compl. type:" + completionType.toString());
     }
 
     /**
@@ -111,11 +111,11 @@ public class FanCompletionContext {
     private completionTypes determineCompletionType(AstNode node) {
         //result.dumpTree();
         if (node == null) {
-            FanUtilities.GENERIC_LOGGER.info("Node : Null !");
+            FanUtilities.logger.info("Node : Null !");
             // Root level (not in type) default
             return completionTypes.ROOT_LEVEL;
         } else {
-            FanUtilities.GENERIC_LOGGER.fine("Node : " + node.toString());
+            FanUtilities.logger.fine("Node : " + node.toString());
             AstNode usingNode = FanLexAstUtils.findParentNode(node, AstKind.AST_USING);
             if (usingNode == null) {
                 usingNode = FanLexAstUtils.findParentNode(node, AstKind.AST_INC_USING);

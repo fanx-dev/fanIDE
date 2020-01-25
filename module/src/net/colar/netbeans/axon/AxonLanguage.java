@@ -33,7 +33,7 @@ public class AxonLanguage extends DefaultLanguageConfig
     public AxonLanguage()
     {
         super();
-        FanUtilities.GENERIC_LOGGER.info("Fantom - init AxonLanguage");
+        FanUtilities.logger.info("Fantom - init AxonLanguage");
     }
 
     @Override

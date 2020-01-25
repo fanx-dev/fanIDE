@@ -77,7 +77,7 @@ public class FanBuildFileHelper
                     }
                     catch(Throwable t) 
                     {
-                        //FanUtilities.GENERIC_LOGGER.exception("Failed to parse build script: "+buildFan.getAbsolutePath(), t);
+                        //FanUtilities.logger.exception("Failed to parse build script: "+buildFan.getAbsolutePath(), t);
                         // might fail if script is incomplete or otherwise invalid
                     }
                     
@@ -104,7 +104,7 @@ public class FanBuildFileHelper
         }
         if (pod == null)
         {
-            FanUtilities.GENERIC_LOGGER.severe("Could not find pod for: " + path);
+            FanUtilities.logger.severe("Could not find pod for: " + path);
             // Must be a script, make-up a "pod" from folder name .. should probably normalize it
             return "_SCRIPT_" + scriptFolder.getName();
         }

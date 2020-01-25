@@ -19,8 +19,8 @@ public class FanNBLogging
 	public static void setupLogging(String logFile) throws IOException
 	{
 		ConsoleHandler consoleHandler = new ConsoleHandler();
-                FanUtilities.GENERIC_LOGGER.addHandler(consoleHandler);
+                FanUtilities.logger.addHandler(consoleHandler);
                 FileHandler fileHandler = new FileHandler(logFile);
-                FanUtilities.GENERIC_LOGGER.addHandler(fileHandler);
+                FanUtilities.logger.addHandler(fileHandler);
 	}
 }

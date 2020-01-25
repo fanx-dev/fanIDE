@@ -159,7 +159,7 @@ public class FanResolvedType implements Cloneable
             String type = node.getNodeText(true);
             //TODO: Propose to auto-add using statements (Hints)
             node.getRoot().getParserTask().addError(FanParserErrorKey.UNKNOWN_TYPE, "Unresolved type: " + type, node);
-            FanUtilities.GENERIC_LOGGER.info("Could not resolve type: " + (node == null ? "null" : node.toString()));
+            FanUtilities.logger.info("Could not resolve type: " + (node == null ? "null" : node.toString()));
         }
         return result;
     }
@@ -273,7 +273,7 @@ public class FanResolvedType implements Cloneable
             return copy;
         } catch (CloneNotSupportedException e)
         {
-            FanUtilities.GENERIC_LOGGER.throwing("Clone error", "asNullableContext", e);
+            FanUtilities.logger.throwing("Clone error", "asNullableContext", e);
         }
         return null;
     }
@@ -300,7 +300,7 @@ public class FanResolvedType implements Cloneable
             return copy;
         } catch (CloneNotSupportedException e)
         {
-            FanUtilities.GENERIC_LOGGER.throwing("Clone error", "asStaticContext", e);
+            FanUtilities.logger.throwing("Clone error", "asStaticContext", e);
         }
         return null;
     }
