@@ -695,7 +695,7 @@ public class FanIndexer extends CustomIndexer implements FileChangeListener {
      * Indexer Thread class All indexing request should go through here to avoid
      * issues.
      */
-    class FanIndexerThread extends Thread implements Runnable {
+    class FanIndexerThread extends Thread {
 
         private BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 

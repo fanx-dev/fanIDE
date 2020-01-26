@@ -288,7 +288,7 @@ public abstract class FanAction {
                             FanUtilities.logger.throwing("Failed connecting to Debugger", "fan jpda", e);
                         }
                     }
-                    Thread.yield();
+//                    Thread.yield();
                     Thread.sleep(1000);
                 }
             } catch (Exception e) {

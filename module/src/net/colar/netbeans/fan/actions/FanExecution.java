@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
@@ -27,12 +28,11 @@ import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 
 /**
- * Mostly copied from python module
- * Provides shell for running external commands
+ * Mostly copied from python module Provides shell for running external commands
+ *
  * @author thibautc
  */
-public class FanExecution
-{
+public class FanExecution {
 
     private ExecutionDescriptor descriptor = new ExecutionDescriptor().frontWindow(true).controllable(true).inputVisible(true).showProgress(true).showSuspended(true);
     // execution commands
@@ -52,77 +52,64 @@ public class FanExecution
     private boolean lineBased;
     private Runnable postExecutionHook;
 
-    public FanExecution()
-    {
+    public FanExecution() {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sb = new StringBuilder("Executing in [").append(workingDirectory).append("] ").append(command).append(" ");
-        for (String arg : commandArgs)
-        {
+        for (String arg : commandArgs) {
             sb = sb.append(arg).append(" ");
         }
         return sb.toString();
     }
 
-    public ExecutionDescriptor toExecutionDescriptor()
-    {
+    public ExecutionDescriptor toExecutionDescriptor() {
         return descriptor;
     }
 
     /**
      * Execute the process described by this object
+     *
      * @return a Future object that provides the status of the running process
      */
-    public synchronized Future<Integer> run()
-    {
-        try
-        {
-            ExecutionService service =
-                    ExecutionService.newService(
-                    buildProcess(),
-                    descriptor, displayName);
+    public synchronized Future<Integer> run() {
+        try {
+            ExecutionService service
+                    = ExecutionService.newService(
+                            buildProcess(),
+                            descriptor, displayName);
             //io = descriptor.getInputOutput();
             // Start Service
             FanUtilities.logger.info(toString());
             return service.run();
             //io = InputOutputManager.getInputOutput(displayName, true, path).getInputOutput();
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             return null;
         }
 
     }
 
-    public ExternalProcessBuilder buildProcess() throws IOException
-    {
-        ExternalProcessBuilder processBuilder =
-                new ExternalProcessBuilder(command);
-        if (workingDirectory == null)
-        {
+    public ExternalProcessBuilder buildProcess() throws IOException {
+        ExternalProcessBuilder processBuilder
+                = new ExternalProcessBuilder(command);
+        if (workingDirectory == null) {
             workingDirectory = new File(System.getProperty("user.home")).getAbsolutePath();
         }
-        for (String name : envVars.keySet())
-        {
+        for (String name : envVars.keySet()) {
             String value = envVars.get(name);
-            if (FanUtilities.isWindowsOS())
-            {
+            if (FanUtilities.isWindowsOS()) {
                 value = value.replace("\\", "\\\\");
             }
             processBuilder = processBuilder.addEnvironmentVariable(name, value);
         }
 
         processBuilder = processBuilder.workingDirectory(FileUtil.normalizeFile(new File(workingDirectory)));
-        for (int i = 0; i != commandArgs.size(); i++)
-        {
+        for (int i = 0; i != commandArgs.size(); i++) {
             String arg = commandArgs.get(i);
-            if (arg != null && arg.trim().length() > 0)
-            {
-                if (FanUtilities.isWindowsOS())
-                {
+            if (arg != null && arg.trim().length() > 0) {
+                if (FanUtilities.isWindowsOS()) {
                     arg = arg.replace("\\", "\\\\");
                 }
                 processBuilder = processBuilder.addArgument(arg);
@@ -133,149 +120,125 @@ public class FanExecution
         return processBuilder;
     }
 
-    private ExecutionDescriptor buildDescriptor()
-    {
+    private ExecutionDescriptor buildDescriptor() {
 
         return descriptor;
     }
 
-    public synchronized String getCommand()
-    {
+    public synchronized String getCommand() {
         return command;
     }
 
-    public synchronized void setCommand(String command)
-    {
+    public synchronized void setCommand(String command) {
         this.command = command;
     }
 
-    public synchronized Vector<String> getCommandArgs()
-    {
+    public synchronized Vector<String> getCommandArgs() {
         return commandArgs;
     }
 
-    public synchronized void addCommandArg(String arg)
-    {
-        if (arg != null && arg.length() > 0)
-        {
+    public synchronized void addCommandArg(String arg) {
+        if (arg != null && arg.length() > 0) {
             commandArgs.add(arg);
         }
     }
 
-    public synchronized void addEnvVar(String name, String val)
-    {
+    public synchronized void addEnvVar(String name, String val) {
         envVars.put(name, val);
     }
 
-    public synchronized String getWorkingDirectory()
-    {
+    public synchronized String getWorkingDirectory() {
         return workingDirectory;
     }
 
-    public synchronized void setWorkingDirectory(String workingDirectory)
-    {
+    public synchronized void setWorkingDirectory(String workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
-    public synchronized String getDisplayName()
-    {
+    public synchronized String getDisplayName() {
         return displayName;
     }
 
-    public synchronized void setDisplayName(String displayName)
-    {
+    public synchronized void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    public synchronized void setShowControls(boolean showControls)
-    {
+    public synchronized void setShowControls(boolean showControls) {
         descriptor = descriptor.controllable(showControls);
     }
 
-    public FanExecution addOutConvertor(LineConvertor convertor)
-    {
+    public FanExecution addOutConvertor(LineConvertor convertor) {
         this.outConvertors.add(convertor);
         descriptor = descriptor.outConvertorFactory(lineConvertorFactory(outConvertors));
         return this;
     }
 
-    public FanExecution addErrConvertor(LineConvertor convertor)
-    {
+    public FanExecution addErrConvertor(LineConvertor convertor) {
         this.errConvertors.add(convertor);
         descriptor = descriptor.errConvertorFactory(lineConvertorFactory(errConvertors));
         return this;
     }
 
-    public synchronized void addStandardRecognizers()
-    {
+    public synchronized void addStandardRecognizers() {
         this.addStandardConvertors = true;
         descriptor = descriptor.outConvertorFactory(lineConvertorFactory(outConvertors));
         descriptor = descriptor.errConvertorFactory(lineConvertorFactory(errConvertors));
     }
 
-    public void setErrProcessorFactory(InputProcessorFactory errProcessorFactory)
-    {
+    public void setErrProcessorFactory(InputProcessorFactory errProcessorFactory) {
         this.errProcessorFactory = errProcessorFactory;
         descriptor = descriptor.errProcessorFactory(errProcessorFactory);
     }
 
-    public void setOutProcessorFactory(InputProcessorFactory outProcessorFactory)
-    {
+    public void setOutProcessorFactory(InputProcessorFactory outProcessorFactory) {
         this.outProcessorFactory = outProcessorFactory;
         descriptor = descriptor.outProcessorFactory(outProcessorFactory);
     }
 
-    public FanExecution lineBased(boolean lineBased)
-    {
+    public FanExecution lineBased(boolean lineBased) {
         this.lineBased = lineBased;
-        if (lineBased)
-        {
+        if (lineBased) {
             descriptor = descriptor.errLineBased(lineBased).outLineBased(lineBased);
         }
 
         return this;
     }
 
-    private LineConvertorFactory lineConvertorFactory(List<LineConvertor> convertors)
-    {
+    private LineConvertorFactory lineConvertorFactory(List<LineConvertor> convertors) {
         LineConvertor[] convertorArray = convertors.toArray(new LineConvertor[convertors.size()]);
-        if (addStandardConvertors)
-        {
+        if (addStandardConvertors) {
             return FanLineFactory.withStandardConvertors(fileLocator, convertorArray);
         }
         return FanLineFactory.create(fileLocator, convertorArray);
     }
 
-    public synchronized void setShowInput(boolean showInput)
-    {
+    public synchronized void setShowInput(boolean showInput) {
         descriptor = descriptor.inputVisible(showInput);
     }
 
-    public synchronized void setRedirectError(boolean redirect)
-    {
+    public synchronized void setRedirectError(boolean redirect) {
         this.redirect = redirect;
     }
 
-    public synchronized void setShowProgress(boolean showProgress)
-    {
+    public synchronized void setShowProgress(boolean showProgress) {
         descriptor = descriptor.showProgress(showProgress);
     }
 
     /**
      * Can the process be suppended
+     *
      * @param showSuspended boolean to set the status
      */
-    public synchronized void setShowSuspended(boolean showSuspended)
-    {
+    public synchronized void setShowSuspended(boolean showSuspended) {
         descriptor = descriptor.showSuspended(showSuspended);
     }
 
     /**
      * Show the window of the running process
+     *
      * @param showWindow display the windown or not?
      */
-    public synchronized void setShowWindow(boolean showWindow)
-    {
+    public synchronized void setShowWindow(boolean showWindow) {
         descriptor = descriptor.frontWindow(showWindow);
     }
     private final FanOutputProcessor outProcessor = new FanOutputProcessor();
@@ -283,70 +246,63 @@ public class FanExecution
     /**
      * Attach a Processor to collect the output of the running process
      */
-    public void attachOutputProcessor()
-    {
-        descriptor = descriptor.outProcessorFactory(new ExecutionDescriptor.InputProcessorFactory()
-        {
+    public void attachOutputProcessor() {
+        descriptor = descriptor.outProcessorFactory(new ExecutionDescriptor.InputProcessorFactory() {
 
-            public InputProcessor newInputProcessor()
-            {
+            public InputProcessor newInputProcessor() {
                 return outProcessor;
             }
 
-            public InputProcessor newInputProcessor(InputProcessor defaultProcessor)
-            {
+            public InputProcessor newInputProcessor(InputProcessor defaultProcessor) {
                 return outProcessor;
             }
         });
     }
 
-    public void setPostExecutionHook(Runnable runnable)
-    {
+    public void setPostExecutionHook(Runnable runnable) {
         postExecutionHook = runnable;
         descriptor = descriptor.postExecution(runnable);
     }
 
-    public Runnable getPostExecutionHook()
-    {
+    public Runnable getPostExecutionHook() {
         return postExecutionHook;
     }
 
     /**
      * Retive the output form the running process
+     *
      * @return a string reader for the process
      */
-    public Reader getOutput()
-    {
+    public Reader getOutput() {
         return new StringReader(outProcessor.getData());
     }
 
     /**
      * Attach input processor to the running process
      */
-    public void attachInputProcessor()
-    {
+    public void attachInputProcessor() {
         //descriptor = descriptor.
     }
 
     /**
      * Writes data to the running process
+     *
      * @return StringWirter
      */
-    public Writer getInput()
-    {
+    public Writer getInput() {
         return null;
     }
 
-    public void runAndWaitFor()
-    {
+    public void runAndWaitFor() {
         Future f = run();
-        while (!f.isDone() || f.isCancelled())
-        {
-            try
-            {
-                Thread.sleep(500);
-            } catch (InterruptedException e)
-            {
+        while (!f.isDone() || f.isCancelled()) {
+            try {
+//                Thread.sleep(500);
+                f.get();
+            } catch (InterruptedException e) {
+                Exceptions.printStackTrace(e);
+            } catch (ExecutionException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
     }
