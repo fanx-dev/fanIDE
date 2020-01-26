@@ -32,11 +32,11 @@ public class FanSrcFile {
     
     private List<FanType> types = new ArrayList<FanType>();
 
-    public static Map<String, FanSrcFile> getSrcFiles() {
+    public static synchronized Map<String, FanSrcFile> getSrcFiles() {
         return srcFiles;
     }
 
-    public static void setSrcFiles(Map<String, FanSrcFile> srcFiles) {
+    public static synchronized void setSrcFiles(Map<String, FanSrcFile> srcFiles) {
         FanSrcFile.srcFiles = srcFiles;
     }
 
@@ -44,7 +44,7 @@ public class FanSrcFile {
         return types;
     }
 
-    public static FanSrcFile findOrCreateOne(String path) throws Exception {
+    public static synchronized FanSrcFile findOrCreateOne(String path) throws Exception {
         FanSrcFile file = srcFiles.get(path);
         if (file == null) {
             file = new FanSrcFile();
@@ -77,18 +77,18 @@ public class FanSrcFile {
         this.isSource = isSource;
     }
 
-    public static void renameDoc(String oldPath, String newPath) {
+    public static synchronized void renameDoc(String oldPath, String newPath) {
         FanSrcFile doc = findByPath(oldPath);
         srcFiles.remove(oldPath);
         if (doc == null) return;
         srcFiles.put(newPath, doc);
     }
 
-    public static FanSrcFile findByPath(String path) {
+    public static synchronized FanSrcFile findByPath(String path) {
         return srcFiles.get(path);
     }
     
-    public void delete() {
+    public synchronized void delete() {
         srcFiles.remove(path);
         this.types.clear();
     }

@@ -19,8 +19,8 @@ import net.colar.netbeans.fan.indexer.FanIndex;
 public class Namespace {
     private static Namespace cur = new Namespace();
     
-    public Map<String, List<FanType>> pods = new HashMap<String, List<FanType>>();
-    Map<String, FanType> types = new HashMap<String, FanType>();
+    private Map<String, List<FanType>> pods = new HashMap<String, List<FanType>>();
+    private Map<String, FanType> types = new HashMap<String, FanType>();
     
     public static Namespace get() {
         return cur;
@@ -29,7 +29,7 @@ public class Namespace {
     private Namespace() {
     }
     
-    public void put(FanType type) {
+    public synchronized void put(FanType type) {
         String qname = type.getQualifiedName();
         types.put(qname, type);
         List<FanType> list = pods.get(type.getPod());
@@ -42,7 +42,7 @@ public class Namespace {
         FanIndex.get().put(type);
     }
     
-    public void remove(FanType type) {
+    public synchronized void remove(FanType type) {
         String qname = type.getQualifiedName();
         types.remove(qname);
         List<FanType> list = pods.get(type.getPod());
@@ -54,7 +54,7 @@ public class Namespace {
     }
     
     @SuppressWarnings("unchecked")
-    public List<String> findAllPodNames() {
+    public synchronized List<String> findAllPodNames() {
         List<String> list = new ArrayList<String>();
         for (Map.Entry<String, List<FanType>> e : pods.entrySet()) {
             list.add(e.getKey());
@@ -62,11 +62,11 @@ public class Namespace {
         return list;
     }
 
-    public boolean hasPod(String podName) {
+    public synchronized boolean hasPod(String podName) {
         return pods.containsKey(podName);
     }
     
-    public List<FanType> findPodTypes(String podName) {
+    public synchronized List<FanType> findPodTypes(String podName) {
         return pods.get(podName);
     }
     
@@ -77,11 +77,11 @@ public class Namespace {
      * @param qName
      * @return
      */
-    public FanType findByQualifiedName(String qName) {
+    public synchronized FanType findByQualifiedName(String qName) {
         return types.get(qName);
     }
 
-    public FanType findByPodAndType(String pod, String type) {
+    public synchronized FanType findByPodAndType(String pod, String type) {
         String qname = pod + "::" + type;
         return findByQualifiedName(qname);
     }

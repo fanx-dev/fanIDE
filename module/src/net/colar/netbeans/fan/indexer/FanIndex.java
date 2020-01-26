@@ -24,7 +24,7 @@ public class FanIndex
 
     public static FanIndex get() { return instance; }
     
-    public List<FanType> findPodTypes(String pod, String prefix) {
+    public synchronized List<FanType> findPodTypes(String pod, String prefix) {
         List<FanType> types = Namespace.get().findPodTypes(pod);
         List<FanType> found = new ArrayList<FanType>();
         for (FanType t : types) {
@@ -42,7 +42,7 @@ public class FanIndex
      * @param prefix
      * @return
      */
-    public List<FanType> findTypes(String type) {
+    public synchronized List<FanType> findTypes(String type) {
         List<FanType> types = findAllFantomTypes(type);
         List<FanType> found = new ArrayList<FanType>();
         for (FanType t : types) {
@@ -53,11 +53,11 @@ public class FanIndex
         return found;
     }
 
-    public List<FanType> findAllFantomTypes(String prefix) {
+    public synchronized List<FanType> findAllFantomTypes(String prefix) {
         return prefixMap.get(prefix);
     }
     
-    public void put(FanType type) {
+    public synchronized void put(FanType type) {
         String name = type.getSimpleName();
         for (int i=1; i<name.length(); ++i) {
             String key = name.substring(0, i);
@@ -70,7 +70,7 @@ public class FanIndex
         }
     }
     
-    public void remove(FanType type) {
+    public synchronized void remove(FanType type) {
         String name = type.getSimpleName();
         for (int i=1; i<name.length(); ++i) {
             String key = name.substring(0, i);
