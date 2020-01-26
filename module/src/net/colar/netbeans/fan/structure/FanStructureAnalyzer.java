@@ -10,7 +10,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.namespace.Namespace;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;
@@ -91,7 +90,7 @@ public class FanStructureAnalyzer implements StructureScanner {
                         ElementKind kind = m.isCtor() ? ElementKind.CONSTRUCTOR : ElementKind.METHOD;
                         FanStructureItem mItem = new FanStructureItem(slotVar.getNode(), kind, result);
                         String returnType = Namespace.getShortName(m.getTypeString());
-                        if (returnType == null || returnType.equals(FanIndexer.UNRESOLVED_TYPE) || returnType.equalsIgnoreCase("void")) {
+                        if (returnType == null || returnType.equals(FanResolvedType.UNRESOLVED_TYPE) || returnType.equalsIgnoreCase("void")) {
                             returnType = "";
                         }
                         // method params
@@ -102,11 +101,11 @@ public class FanStructureAnalyzer implements StructureScanner {
                                 params += ", ";
                             }
                             String pType = parameters.get(pname).getType().toTypeSig(false);
-                            if (pType.equals(FanIndexer.UNRESOLVED_TYPE)) {
+                            if (pType.equals(FanResolvedType.UNRESOLVED_TYPE)) {
                                 pType = "";
                             }
 
-                            if (pType.equals(FanIndexer.UNRESOLVED_TYPE)) {
+                            if (pType.equals(FanResolvedType.UNRESOLVED_TYPE)) {
                                 pType = "";
                             }
                             params += "<font color='#aaaaaa'>" + pType + "</font>";
@@ -123,7 +122,7 @@ public class FanStructureAnalyzer implements StructureScanner {
                     } else if (slotVar instanceof FanFieldScopeVar) {
                         FanStructureItem slotItem = new FanStructureItem(slotVar.getNode(), ElementKind.FIELD, result);
                         String type = slotVar.getType().toTypeSig(false);
-                        if (type.equals(FanIndexer.UNRESOLVED_TYPE)) {
+                        if (type.equals(FanResolvedType.UNRESOLVED_TYPE)) {
                             type = "";
                         }
                         handleModifiers(slotItem, slotVar.getModifiers());

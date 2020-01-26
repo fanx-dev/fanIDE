@@ -5,8 +5,8 @@ package net.colar.netbeans.fan.completion;
 
 import java.util.HashSet;
 import java.util.List;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.namespace.FanMethodParam;
 import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.namespace.Namespace;
@@ -73,7 +73,7 @@ public class FanVarProposal extends FanCompletionProposal
 				html = name;
 				prefix = name;
 				rHtml += Namespace.getShortName(slot.getReturnedType());
-				handle.setDoc(FanIndexer.getSlotDoc(slot));
+				handle.setDoc(IndexerHelper.getSlotDoc(slot));
 				if (slot.isPrivate())
 				{
 					modifiers.add(Modifier.PRIVATE);
@@ -138,7 +138,7 @@ public class FanVarProposal extends FanCompletionProposal
 					prefix += ")";
 				}
 				html += args + ")";
-				handle.setDoc(FanIndexer.getSlotDoc(slot));
+				handle.setDoc(IndexerHelper.getSlotDoc(slot));
 				if (slot.isPrivate())
 				{
 					modifiers.add(Modifier.PRIVATE);

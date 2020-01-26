@@ -16,7 +16,6 @@ import java.util.Vector;
 import java.util.concurrent.*;
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.namespace.FanMethodParam;
 import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
@@ -191,7 +190,6 @@ public class FanParserTask extends ParserResult {
     @SuppressWarnings(value = "unchecked")
     public void parse(boolean quickScan, int msTimeout) {
         long start = System.currentTimeMillis();
-        System.out.println("Starting parsing of: " + sourceName);
 
         parser.setQuickScan(quickScan);
         try {
@@ -284,7 +282,7 @@ public class FanParserTask extends ParserResult {
     @SuppressWarnings("unchecked")
     public void parseGlobalScope() {
         long start = new Date().getTime();
-        FanUtilities.logger.fine("Starting parsing scope of: " + sourceName);
+//        FanUtilities.logger.fine("Starting parsing scope of: " + sourceName);
         if (astRoot == null) {
             return;
         }
@@ -320,7 +318,7 @@ public class FanParserTask extends ParserResult {
                     AstNode scopeNode = FanLexAstUtils.getScopeNode(node.getRoot());
                     // We parse the type base first and add it to scope right away
                     // So that parseSlots() can later resolve this & super.
-                    System.out.print(name);
+                    //System.out.print(name);
                     var.parse();
                     Hashtable<String, FanAstScopeVarBase> vars = scopeNode.getAllScopeVars();
                     if (vars.containsKey(name)

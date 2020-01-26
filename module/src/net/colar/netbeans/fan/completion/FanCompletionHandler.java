@@ -15,10 +15,9 @@ import java.util.Vector;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import net.colar.netbeans.fan.indexer.FanIndex;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexer;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.types.FanResolvedType;
 import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.namespace.FanType;
@@ -144,7 +143,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
         switch (docType)
         {
             case POD:
-                doc = FanIndexer.getPodDoc(handle.getName());
+                doc = IndexerHelper.getPodDoc(handle.getName());
                 break;
             case TYPE:
                 doc = ((FanBasicElementHandle) handle).getDoc();

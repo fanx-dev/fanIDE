@@ -11,8 +11,8 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexer;
 import net.colar.netbeans.fan.namespace.FanMethodParam;
 import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.structure.FanBasicElementHandle;
@@ -131,7 +131,7 @@ public class FanSlotProposal extends FanCompletionProposal
             FanUtilities.logger.severe("Unknown Slot type: " + slot);
         }
         FanBasicElementHandle handle = new FanBasicElementHandle(name, kind);
-        handle.setDoc(FanIndexer.getSlotDoc(slot));
+        handle.setDoc(IndexerHelper.getSlotDoc(slot));
         element = handle;
 
         if (slot.isPrivate())

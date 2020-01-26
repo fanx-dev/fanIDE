@@ -5,8 +5,9 @@
 package net.colar.netbeans.fan.parser;
 
 import javax.swing.event.ChangeListener;
+import net.colar.netbeans.fan.indexer.FanIndexerFactory;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexer;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.spi.ParseException;
@@ -31,12 +32,12 @@ public class NBFanParser extends Parser {
         String taskClass = task.getClass().getName();
         boolean isIndexing = taskClass.startsWith("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater");
 
-        if (!FanIndexer.sysPodIsIndexed) {
+        if (!FanIndexerFactory.sysPodIsIndexed) {
             isIndexing = true;
         }
         
         String path = snapshot.getSource().getFileObject().getPath();
-        if (FanIndexer.isAllowedIndexing(snapshot.getSource().getFileObject())) {
+        if (IndexerHelper.isAllowedIndexing(snapshot.getSource().getFileObject())) {
             parse(snapshot, isIndexing);
         } else {
             FanUtilities.logger.info("Ignoring request to parse Fantom distro source file: " + path);
@@ -44,14 +45,13 @@ public class NBFanParser extends Parser {
     }
 
     public void parse(Snapshot snapshot, boolean isIndexing) {
-        System.out.println("> Parsing of "+snapshot.getSource().getFileObject().getPath());
+        FanUtilities.logger.info("Start NBFanParsing of "+snapshot.getSource().getFileObject().getPath()+ ", isIndexing:"+ isIndexing);
         result = new FanParserTask(snapshot);
         result.parse(isIndexing, 2000);
         result.parseGlobalScope();
         if (!isIndexing) {
             result.parseLocalScopes();
         }
-        System.out.println("< Parsing of "+snapshot.getSource().getFileObject().getPath());
     }
 
     @Override

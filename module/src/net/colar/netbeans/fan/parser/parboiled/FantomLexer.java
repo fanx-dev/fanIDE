@@ -3,6 +3,7 @@
  */
 package net.colar.netbeans.fan.parser.parboiled;
 
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.parboiled.BaseParser;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
@@ -15,7 +16,7 @@ import org.parboiled.annotations.SuppressSubnodes;
 @BuildParseTree
 public class FantomLexer extends BaseParser<AstNode> {
 
-    public boolean cancel;
+    protected boolean cancel;
     
     // ============ Simulate a lexer ===========================================
     // This should just create tokens for the items we want to highlight(color) in the IDE
@@ -398,7 +399,7 @@ public class FantomLexer extends BaseParser<AstNode> {
      */
     public void cancel()
     {
-        System.out.println("cancelling parser!");
+        FanUtilities.logger.fine("cancelling parser!");
         cancel = true;
     }
 

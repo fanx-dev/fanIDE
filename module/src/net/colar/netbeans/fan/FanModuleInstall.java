@@ -3,7 +3,6 @@
  */
 package net.colar.netbeans.fan;
 
-import net.colar.netbeans.fan.utils.FanNBLogging;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,10 +12,10 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import net.colar.netbeans.fan.actions.FanAction;
-import net.colar.netbeans.fan.indexer.FanIndexer;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.fantom.FanPlatform;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import org.openide.modules.ModuleInstall;
 import org.openide.util.Exceptions;
 
@@ -47,16 +46,10 @@ public class FanModuleInstall extends ModuleInstall {
     public void restored() {
         System.out.println("Starting up Fantom plugin.");
         // Initialize special logging as needed
-//        try {
-//            FanNBLogging.setupLogging();
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
+        FanUtilities.logger.setLevel(Level.ALL);
 
-        //start indexer
-        if (startIndexer && FanPlatform.isConfigured()) {
-            FanIndexerFactory.getIndexer().indexAll();
-        }
+        //showconfig
+        FanPlatform.isConfigured();
 
         super.restored();
     }
@@ -71,26 +64,11 @@ public class FanModuleInstall extends ModuleInstall {
         System.out.println("Shutting down Fantom plugin.");
         try {
 //            FanAction.shutdownTales();
-            FanIndexer.shutdown();
+//            FanIndexer.shutdown();
 //            Thread.sleep(250);
-//            JOTPersistanceManager.getInstance().destroy();
-//            JOTLogger.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return super.closing();
     }
-
-//    private void copyIsIntoFile(InputStream is, File prefFile) throws IOException
-//    {
-//        FileOutputStream out = new FileOutputStream(prefFile);
-//        byte[] buffer = new byte[10000];
-//        int read = -1;
-//        while ((read = is.read(buffer)) != -1)
-//        {
-//            out.write(buffer, 0, read);
-//        }
-//        out.close();
-//        is.close();
-//    }
 }

@@ -272,6 +272,7 @@ public class FanDebugPathProvider extends SourcePathProvider
             return fo.getURL().toString();
         } catch (FileStateInvalidException e)
         {
+            e.printStackTrace();
             return null;
         }
         
@@ -563,7 +564,7 @@ public class FanDebugPathProvider extends SourcePathProvider
         {
             for (ClassPath.Entry entry : cp.entries())
             {
-                FanUtilities.logger.fine(entry.toString());
+//                FanUtilities.logger.fine(entry.toString());
                 System.out.println(entry);
             }
         }

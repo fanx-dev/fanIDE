@@ -13,7 +13,6 @@ import java.util.prefs.Preferences;
 import javax.swing.text.StyledDocument;
 import net.colar.netbeans.fan.FanModuleInstall;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.test.mock.MockLookup;
@@ -103,7 +102,7 @@ public class NBTestUtilities {
         if(startIndexer)
         {
             // wait for indexer to be done
-            FanIndexerFactory.getIndexer().waitForEmptyFantomQueue();
+//            FanIndexerFactory.getIndexer().waitForEmptyFantomQueue();
         }
         return mi;
     }

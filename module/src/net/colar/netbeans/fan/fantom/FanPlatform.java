@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import net.colar.netbeans.fan.actions.FanExecution;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import javax.swing.JOptionPane;
+import net.colar.netbeans.fan.indexer.IndexerHelper;
 import net.colar.netbeans.fan.project.FanProject;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import net.colar.netbeans.fan.wizard.FanMainSettingsController;
@@ -289,7 +289,7 @@ public class FanPlatform {
     public static void update() {
         // called when FAN_HOME is changed/updated.
         updateFromSettings();
-        FanIndexerFactory.getIndexer().indexAll();
+        IndexerHelper.indexAllPods();
     }
 
     public String getPodsDir() {

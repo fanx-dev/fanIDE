@@ -1,42 +1,43 @@
 /*
- * Thibaut Colar Sep 2, 2009
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package net.colar.netbeans.fan.indexer;
 
 import net.colar.netbeans.fan.utils.FanUtilities;
+import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
-import org.netbeans.modules.parsing.spi.indexing.CustomIndexerFactory;
+import org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexer;
+import org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
 import org.openide.filesystems.FileObject;
 
 /**
- * Indexer Factory impl. Registered through layer.xml
  *
- * @author thibautc
  */
-public class FanIndexerFactory extends CustomIndexerFactory {
+public class FanIndexerFactory extends EmbeddingIndexerFactory{
 
+    private FanEmbeddingIndexer embeddingIndexer = new FanEmbeddingIndexer();
+    
+    public static boolean sysPodIsIndexed = false;
+    
+    /**
+     * Creates  new {@link Indexer}.
+     * @param indexing for which the indexer should be created
+     * @param snapshot for which the indexer should be created
+     * @return an indexer
+     */
+    public EmbeddingIndexer createIndexer (final Indexable indexable, final Snapshot snapshot) {
+        return embeddingIndexer;
+    }
+    
     public static final String NAME = "FanIndexer";
     public static final int VERSION = 4;
-    private static FanIndexer indexer = new FanIndexer();
 
     public FanIndexerFactory() {
         FanUtilities.logger.info("Fantom - Inited indexer Factory");
-    }
-
-    public static FanIndexer getIndexer() {
-        return indexer;
-    }
-
-    @Override
-    public CustomIndexer createIndexer() {
-        return indexer;
-    }
-
-    @Override
-    public boolean supportsEmbeddedIndexers() {
-        return false;
     }
 
     @Override
@@ -51,40 +52,36 @@ public class FanIndexerFactory extends CustomIndexerFactory {
 
     @Override
     public void filesDeleted(Iterable<? extends Indexable> itrbl, Context cntxt) {
-        for (Indexable idx : itrbl) {
-            String path = idx.getURL().getPath();
-            FanUtilities.logger.fine("File deleted: " + path);
-            indexer.requestDelete(path);
-        }
+//        for (Indexable idx : itrbl) {
+//            String path = idx.getURL().getPath();
+//            FanUtilities.logger.fine("File deleted: " + path);
+//            indexer.requestDelete(path);
+//        }
+        FanUtilities.logger.info("FanEmbeddingIndexerFactory: filesDeleted");
     }
 
     @Override
     public void filesDirty(Iterable<? extends Indexable> itrbl, Context cntxt) {
         // requestIndexing
-        indexer.index(itrbl, cntxt);
-    }
-
-    /**
-     * recursive
-     *
-     * @param root
-     * @param nb
-     * @return
-     */
-    public int scanFolder(FileObject root, int nb) {
-        FanUtilities.logger.fine("scanFolder");
-        return indexer.indexSrcFolder(root, nb);
+        //indexer.index(itrbl, cntxt);
+        FanUtilities.logger.info("FanEmbeddingIndexerFactory: filesDirty");
     }
 
     @Override
     public void scanFinished(Context cntxt) {
+        FanUtilities.logger.info("FanEmbeddingIndexerFactory: scanFinished");
+        sysPodIsIndexed = true;
     }
 
     @Override
     public boolean scanStarted(Context context) {
+        FanUtilities.logger.info("FanEmbeddingIndexerFactory: scanStarted");
+        
+        IndexerHelper.indexAllPods();
+        
         FileObject root = context.getRoot();
-        scanFolder(root, 0);
-        // what does the return mean ?
+        embeddingIndexer.indexSrcFolder(root, 0);
         return true;
     }
+    
 }

@@ -11,8 +11,6 @@ import java.util.Vector;
 import net.colar.netbeans.fan.parser.FanParserErrorKey;
 import net.colar.netbeans.fan.parser.FanParserTask;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.indexer.FanIndexer;
-import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.namespace.FanSlot;
 import net.colar.netbeans.fan.namespace.FanType;
 import net.colar.netbeans.fan.namespace.Namespace;
@@ -36,6 +34,7 @@ import net.colar.netbeans.fan.scope.FanTypeScopeVar;
  */
 public class FanResolvedType implements Cloneable
 {
+    public static final String UNRESOLVED_TYPE = "!!UNRESOLVED!!";
     // for unit testing
 
     public static String forcedThisType = null;
@@ -142,7 +141,7 @@ public class FanResolvedType implements Cloneable
      */
     public static FanResolvedType makeUnresolved(AstNode node)
     {
-        return new FanResolvedType(node, FanIndexer.UNRESOLVED_TYPE, null);
+        return new FanResolvedType(node, UNRESOLVED_TYPE, null);
     }
 
     /**

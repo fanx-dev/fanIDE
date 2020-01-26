@@ -46,7 +46,7 @@ public abstract class FantomCSLTestBase extends NbTestCase {
         if(startIndexer)
         {
             // wait for indexer to be done
-            FanIndexerFactory.getIndexer().waitForEmptyFantomQueue();
+//            FanIndexerFactory.getIndexer().waitForEmptyFantomQueue();
         }
         
         try {

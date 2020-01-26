@@ -168,9 +168,9 @@
                     <attr name="instanceClass" stringvalue="net.colar.netbeans.fan.editor.FanHighlightsFactory"/>
                 </file>
 
-                <file name="FanIndexerFactory.instance">
+<!--                <file name="FanIndexerFactory.instance">
                     <attr name="instanceClass" stringvalue="net.colar.netbeans.fan.indexer.FanIndexerFactory"/>
-                </file>
+                </file>-->
                 <folder name="GlyphGutterActions">
                     <file name="org-netbeans-modules-debugger-ui-actions-ToggleBreakpointAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/Debug/org-netbeans-modules-debugger-ui-actions-ToggleBreakpointAction.instance"/>
