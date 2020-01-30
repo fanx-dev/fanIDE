@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan;
 
+import net.colar.netbeans.fan.indexer.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
 import java.util.Collections;

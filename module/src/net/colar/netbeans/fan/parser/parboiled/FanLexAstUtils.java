@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.FanTokenID;
+import net.colar.netbeans.fan.indexer.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.NBFanParser;
 import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;

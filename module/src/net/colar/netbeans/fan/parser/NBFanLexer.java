@@ -4,7 +4,7 @@
  */
 package net.colar.netbeans.fan.parser;
 
-import net.colar.netbeans.fan.FanTokenID;
+import net.colar.netbeans.fan.indexer.FanTokenID;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;

@@ -12,7 +12,7 @@ import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import net.colar.netbeans.fan.FanLanguage;
-import net.colar.netbeans.fan.FanTokenID;
+import net.colar.netbeans.fan.indexer.FanTokenID;
 import net.colar.netbeans.fan.editor.FantomIndentUtils;
 import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
 import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;

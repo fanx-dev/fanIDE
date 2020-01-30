@@ -4,7 +4,7 @@
 package net.colar.netbeans.fan.parser.parboiled;
 
 import java.util.Hashtable;
-import net.colar.netbeans.fan.FanTokenID;
+import net.colar.netbeans.fan.indexer.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 
 /**

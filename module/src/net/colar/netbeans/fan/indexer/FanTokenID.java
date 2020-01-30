@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.colar.netbeans.fan;
+package net.colar.netbeans.fan.indexer;
 
 import net.colar.netbeans.fan.parser.NBFanLexer;
 import java.util.Collection;
+import net.colar.netbeans.fan.FanLanguage;
 import net.colar.netbeans.fan.FanLanguage;
 import net.colar.netbeans.fan.parser.NBFanLexer;
 import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens;

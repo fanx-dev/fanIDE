@@ -77,7 +77,7 @@ public class FanDeclarationFinder implements DeclarationFinder
         }
 
         // Not found
-        return null;
+        return DeclarationLocation.NONE;
     }
 
     @SuppressWarnings(value="unchecked")
