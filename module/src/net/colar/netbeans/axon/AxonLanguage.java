@@ -6,7 +6,7 @@ package net.colar.netbeans.axon;
 
 import java.util.Collections;
 import java.util.Set;
-import net.colar.netbeans.fan.indexer.FanTokenID;
+import net.colar.netbeans.fan.parser.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.lexer.Language;

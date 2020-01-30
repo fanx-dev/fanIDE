@@ -161,7 +161,7 @@
                     </folder>
                 </folder>
                 <file name="language.instance">
-                    <attr name="instanceCreate" methodvalue="net.colar.netbeans.fan.FanTokenID.language"/>
+                    <attr name="instanceCreate" methodvalue="net.colar.netbeans.fan.parser.FanTokenID.language"/>
                     <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
                 </file>
                 <file name="FanHighlightsFactory.instance">

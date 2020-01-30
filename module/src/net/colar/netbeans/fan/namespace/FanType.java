@@ -101,6 +101,7 @@ public class FanType extends FanElement {
             Map<String, FanSlot> all = new HashMap<String, FanSlot>();
             for (String type : inheritedTypes) {
                 FanType t = Namespace.get().findByQualifiedName(type);
+                if (t == null) continue;
                 Map<String, FanSlot> slots = t.getAllSlotMap();
                 for (Map.Entry<String, FanSlot> s : slots.entrySet()) {
                     all.put(s.getKey(), s.getValue());

@@ -6,7 +6,7 @@ package net.colar.netbeans.axon;
 
 import java.util.Collection;
 import net.colar.netbeans.axon.parboiled.AxonLexerTokens;
-import net.colar.netbeans.fan.indexer.FanTokenID;
+import net.colar.netbeans.fan.parser.FanTokenID;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.spi.lexer.LanguageHierarchy;
 import org.netbeans.spi.lexer.Lexer;

@@ -5,7 +5,7 @@ package net.colar.netbeans.fan.completion;
 
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.indexer.FanTokenID;
+import net.colar.netbeans.fan.parser.FanTokenID;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.parser.parboiled.AstKind;
 import net.colar.netbeans.fan.parser.parboiled.AstNode;

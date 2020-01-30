@@ -11,7 +11,7 @@ import java.util.Iterator;
 import net.colar.netbeans.axon.parboiled.AxonLexer;
 import net.colar.netbeans.axon.parboiled.AxonLexerTokens;
 import net.colar.netbeans.axon.parboiled.AxonLexerTokens.TokenName;
-import net.colar.netbeans.fan.indexer.FanTokenID;
+import net.colar.netbeans.fan.parser.FanTokenID;
 import net.colar.netbeans.fan.parser.parboiled.pred.NodeLabelPredicate;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.spi.lexer.Lexer;
