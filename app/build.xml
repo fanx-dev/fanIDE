@@ -2,61 +2,7 @@
 <!-- You may freely edit this file. See harness/README in the NetBeans platform -->
 <!-- for some information on what you could do (e.g. targets to override). -->
 <!-- If you delete this file and reopen the project it will be recreated. -->
-<project name="FanSuite" basedir=".">
-	<description>Builds the module suite FanSuite.</description>
-	<import file="nbproject/build-impl.xml"/>
-
-	<target name="FAN_releases" description="Build releases.">
-		<delete dir="build" includeemptydirs="true" includes="**/*"/>
-		<delete dir="release" includeemptydirs="true" includes="**/*"/>
-		<delete dir="dist" includeemptydirs="true" includes="**/*"/>
-		<ant target="nbms"/>
-		<ant target="build-zip"/>
-		<ant target="build-mac"/>
-		<copy file="dist/fantomide.zip" todir="release"/>
-		<!-- Neither tar or zip ant tasks deal with links properly-->
-	<!--Doinf native call
-	<tar tarfile="release/fansuite.app.tgz" basedir="dist" includes="fansuite.app/**" compression="gzip"/>
-	-->
-		<exec dir="dist" executable="tar">
-			<arg line="-czvf ../release/fantomide.app.tgz fantomide.app"/>
-		</exec>
-		<ant target="nbms"/>
-		<copy todir="release/plugin" overwrite="true" verbose="true">
-			<fileset dir="build/updates/"/>
-		</copy>
-	</target>
-
-
-
-	<target name="build" depends="build-brand,suite.build"/>
-
-	<target name="build-brand" depends="-init">
-		<propertyfile
-			file="${basedir}/branding/core/core.jar/org/netbeans/core/startup/Bundle.properties"
-			comment="Updated by build script">
-			<entry key="currentVersion" value="${app.title} ${app.version} " />
-		</propertyfile>
-
-		<propertyfile
-			file="${basedir}/branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties"
-			comment="Updated by build script">
-			<entry key="CTL_MainWindow_Title" value="${app.title} ${app.version}" />
-			<entry key="CTL_MainWindow_Title_No_Project" value="${app.title} ${app.version}" />
-		</propertyfile>
-
-		<propertyfile
-			file="${basedir}/branding/modules/org-netbeans-core.jar/org/netbeans/core/ui/Bundle.properties"
-			comment="Updated by build script">
-			<entry key="LBL_ProductInformation" value="${app.title}" />
-		</propertyfile>
-
-	</target>
-
-	<target name="build-launchers" depends="suite.build-launchers">
-            <!-- NB alone needs > 100MB of perm space, won't work wih default settings -->
-            <!-- Classloader unloading helps big time as well (permspace) -->
-		<replace file="build/launcher/etc/${app.name}.conf" token="-J-Xms24m -J-Xmx64m" value="-J-Xmx956m  -J-XX:MaxPermSize=356M -J-XX:+CMSClassUnloadingEnabled -J-XX:+CMSPermGenSweepingEnabled"/>
-	</target>
-
+<project name="app" basedir=".">
+    <description>Builds the module suite app.</description>
+    <import file="nbproject/build-impl.xml"/>
 </project>

@@ -10,18 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.parser.parboiled.AstKind;
-import net.colar.netbeans.fan.parser.parboiled.AstNode;
-import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
+import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
 import org.netbeans.modules.csl.api.ColoringAttributes;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.SemanticAnalyzer;
 import org.netbeans.modules.parsing.spi.Parser.Result;
 import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
-import org.parboiled.Node;
 
 /**
  * The semantic Analyzer looks at the structure(AST tree), and uses this to
@@ -42,13 +37,14 @@ public class FanSemanticAnalyzer extends SemanticAnalyzer {
 
     @Override
     public void run(Result result, SchedulerEvent event) {
-        FanParserTask res = (FanParserTask) result;
+        FanParserResult res = (FanParserResult) result;
 
-        Map<OffsetRange, Set<ColoringAttributes>> newHighlights = new HashMap<OffsetRange, Set<ColoringAttributes>>();
-        if (res.getParseNodeTree() != null) {
-            scanTree(res, res.getAstTree(), newHighlights);
-            highlights = newHighlights.size() == 0 ? null : newHighlights;
-        }
+        //TODO
+//        Map<OffsetRange, Set<ColoringAttributes>> newHighlights = new HashMap<OffsetRange, Set<ColoringAttributes>>();
+//        if (res.getParseNodeTree() != null) {
+//            scanTree(res, res.getAstTree(), newHighlights);
+//            highlights = newHighlights.size() == 0 ? null : newHighlights;
+//        }
     }
 
     @Override
@@ -61,102 +57,102 @@ public class FanSemanticAnalyzer extends SemanticAnalyzer {
         return Scheduler.EDITOR_SENSITIVE_TASK_SCHEDULER;
     }
 
-    /**
-     * Run though AST tree and highlight relevant items
-     *
-     * @param ast
-     * @param newHighlights
-     */
-    private void scanTree(FanParserTask result, AstNode node, Map<OffsetRange, Set<ColoringAttributes>> newHighlights) {
-        //System.out.println("Node Lbl: "+node.getLabel()+" "+TokenName.STRS.name());
-        if (node != null) {
-            switch (node.getKind()) {
-                case AST_EXPR_LIT_BASE:
-                    if (node.getType().isResolved()
-                            && node.getType().getQualifiedType().equalsIgnoreCase("sys::Str")) {
-                        addStrHighlights(result, newHighlights, node);
-                    }
-                    break;
-                case AST_TYPE_DEF:
-                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.CLASS_SET);
-                    break;
-                case AST_CTOR_DEF:
-                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.CONSTRUCTOR_SET);
-                    break;
-                case AST_METHOD_DEF:
-                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.METHOD_SET);
-                    break;
-                case AST_FIELD_DEF: // global field
-                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.GLOBAL_SET);
-                    break;
-                // static field ?
-                case AST_PARAM:
-                    //case AST_CTOR_CHAIN:
-                    addToHighlights(result, newHighlights, node, ColoringAttributes.PARAMETER_SET);
-                    break;
-            }
-        }
-
-        if (node != null) {
-            // recurse into subnodes
-            for (AstNode subNode : node.getChildren()) {
-                scanTree(result, subNode, newHighlights);
-            }
-        }
-    }
-
-    private void addIdToHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node, EnumSet<ColoringAttributes> colorAttributes) {
-        // We can't mess the enumset, so work of a copy (slower though)
-        Set<ColoringAttributes> newAttributes = EnumSet.copyOf(colorAttributes);
-        @SuppressWarnings("unchecked")
-        AstNode idNode = FanLexAstUtils.getFirstChild(node, new NodeKindPredicate(AstKind.AST_ID));
-        if (hasModifier(node, "static")) {
-            newAttributes.add(ColoringAttributes.STATIC);
-        } else if (hasModifier(node, "override")) {
-            newAttributes.add(ColoringAttributes.CUSTOM1);
-        }
-
-        addToHighlights(result, newHighlights, idNode, newAttributes);
-    }
-
-    private void addToHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node, Set<ColoringAttributes> colorAttributes) {
-        if (node != null) {
-            OffsetRange range = node.getRelevantTextRange();
-            if (range != null) {
-                newHighlights.put(range, colorAttributes);
-            }
-        }
-
-    }
-
-    private static boolean hasModifier(AstNode node, String modifier) {
-        if (node != null) {
-            for (AstNode subNode : node.getChildren()) {
-                if (subNode.getKind() == AstKind.AST_MODIFIER) {
-                    if (subNode.getNodeText(true).contains(modifier)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Highlight interpolated variables in Strings
-     */
-    private void addStrHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node) {
-        OffsetRange strRange = node.getRelevantTextRange();
-        String str = node.getNodeText(true);
-        //System.out.println("interpolation : " + str);
-        Matcher matcher = INTERPOLATION.matcher(str);
-        while (matcher.find()) {
-            int start = strRange.getStart() + matcher.start();
-            int end = strRange.getStart() + matcher.end();
-            OffsetRange range = new OffsetRange(start, end);
-            newHighlights.put(range, ColoringAttributes.CUSTOM2_SET);
-        }
-    }
+//    /**
+//     * Run though AST tree and highlight relevant items
+//     *
+//     * @param ast
+//     * @param newHighlights
+//     */
+//    private void scanTree(FanParserTask result, AstNode node, Map<OffsetRange, Set<ColoringAttributes>> newHighlights) {
+//        //System.out.println("Node Lbl: "+node.getLabel()+" "+TokenName.STRS.name());
+//        if (node != null) {
+//            switch (node.getKind()) {
+//                case AST_EXPR_LIT_BASE:
+//                    if (node.getType().isResolved()
+//                            && node.getType().getQualifiedType().equalsIgnoreCase("sys::Str")) {
+//                        addStrHighlights(result, newHighlights, node);
+//                    }
+//                    break;
+//                case AST_TYPE_DEF:
+//                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.CLASS_SET);
+//                    break;
+//                case AST_CTOR_DEF:
+//                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.CONSTRUCTOR_SET);
+//                    break;
+//                case AST_METHOD_DEF:
+//                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.METHOD_SET);
+//                    break;
+//                case AST_FIELD_DEF: // global field
+//                    addIdToHighlights(result, newHighlights, node, ColoringAttributes.GLOBAL_SET);
+//                    break;
+//                // static field ?
+//                case AST_PARAM:
+//                    //case AST_CTOR_CHAIN:
+//                    addToHighlights(result, newHighlights, node, ColoringAttributes.PARAMETER_SET);
+//                    break;
+//            }
+//        }
+//
+//        if (node != null) {
+//            // recurse into subnodes
+//            for (AstNode subNode : node.getChildren()) {
+//                scanTree(result, subNode, newHighlights);
+//            }
+//        }
+//    }
+//
+//    private void addIdToHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node, EnumSet<ColoringAttributes> colorAttributes) {
+//        // We can't mess the enumset, so work of a copy (slower though)
+//        Set<ColoringAttributes> newAttributes = EnumSet.copyOf(colorAttributes);
+//        @SuppressWarnings("unchecked")
+//        AstNode idNode = FanLexAstUtils.getFirstChild(node, new NodeKindPredicate(AstKind.AST_ID));
+//        if (hasModifier(node, "static")) {
+//            newAttributes.add(ColoringAttributes.STATIC);
+//        } else if (hasModifier(node, "override")) {
+//            newAttributes.add(ColoringAttributes.CUSTOM1);
+//        }
+//
+//        addToHighlights(result, newHighlights, idNode, newAttributes);
+//    }
+//
+//    private void addToHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node, Set<ColoringAttributes> colorAttributes) {
+//        if (node != null) {
+//            OffsetRange range = node.getRelevantTextRange();
+//            if (range != null) {
+//                newHighlights.put(range, colorAttributes);
+//            }
+//        }
+//
+//    }
+//
+//    private static boolean hasModifier(AstNode node, String modifier) {
+//        if (node != null) {
+//            for (AstNode subNode : node.getChildren()) {
+//                if (subNode.getKind() == AstKind.AST_MODIFIER) {
+//                    if (subNode.getNodeText(true).contains(modifier)) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+//
+//    /**
+//     * Highlight interpolated variables in Strings
+//     */
+//    private void addStrHighlights(FanParserTask result, Map<OffsetRange, Set<ColoringAttributes>> newHighlights, AstNode node) {
+//        OffsetRange strRange = node.getRelevantTextRange();
+//        String str = node.getNodeText(true);
+//        //System.out.println("interpolation : " + str);
+//        Matcher matcher = INTERPOLATION.matcher(str);
+//        while (matcher.find()) {
+//            int start = strRange.getStart() + matcher.start();
+//            int end = strRange.getStart() + matcher.end();
+//            OffsetRange range = new OffsetRange(start, end);
+//            newHighlights.put(range, ColoringAttributes.CUSTOM2_SET);
+//        }
+//    }
 
     @Override
     public void cancel() {

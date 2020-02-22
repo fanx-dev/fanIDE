@@ -16,6 +16,7 @@ import org.netbeans.spi.editor.highlighting.ZOrder;
  */
 public class FanHighlightsFactory implements HighlightsLayerFactory {
 
+    @Override
     public HighlightsLayer[] createLayers(Context context) {
         return new HighlightsLayer[]{
                     HighlightsLayer.create("fantom-embedding-highlight-layer",

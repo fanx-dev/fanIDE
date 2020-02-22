@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan.actions;
 
+import net.colar.netbeans.fan.execution.FanExecution;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.project.FanProject;
 import org.openide.util.Lookup;

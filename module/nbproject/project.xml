@@ -7,6 +7,15 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
+                    <code-name-base>org.netbeans.api.annotations.common</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>1</release-version>
+                        <specification-version>1.34</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.netbeans.api.debugger</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -110,6 +119,14 @@
                     <code-name-base>org.netbeans.modules.debugger.jpda.projects</code-name-base>
                     <run-dependency>
                         <specification-version>1.5.2</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.netbeans.modules.editor.document</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.16.0.3</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -278,6 +295,15 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.netbeans.spi.editor.hints</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>0</release-version>
+                        <specification-version>1.49.0.7.55</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.netbeans.spi.viewmodel</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -339,7 +365,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>7.9.1.1</specification-version>
+                        <specification-version>7.52</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -397,22 +423,22 @@
                     </test-dependency>
                 </test-type>
             </test-dependencies>
-            <public-packages/>
+            <public-packages>
+                <package>fan.parser</package>
+                <package>fan.std</package>
+                <package>fan.sys</package>
+                <package>fanjardist</package>
+                <package>fanx.emit</package>
+                <package>fanx.fcode</package>
+                <package>fanx.interop</package>
+                <package>fanx.main</package>
+                <package>fanx.test</package>
+                <package>fanx.tools</package>
+                <package>fanx.util</package>
+            </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/parboiled-core-1.0.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/parboiled-core-1.0.2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/asm-all-3.3.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/asm-all-3.3.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/parboiled-java-1.0.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/parboiled-java-1.0.2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/sys.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/sys.jar</binary-origin>
+                <runtime-relative-path>ext/parser.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/parser.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

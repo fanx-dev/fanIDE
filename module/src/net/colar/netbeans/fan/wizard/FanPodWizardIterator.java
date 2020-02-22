@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.event.ChangeListener;
+import net.colar.netbeans.fan.project.FanProjectFactory;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import net.colar.netbeans.fan.templates.TemplateUtils;
@@ -36,7 +37,7 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
      * Initialize panels representing individual wizard's steps and sets
      * various properties for them influencing wizard appearance.
      */
-    private WizardDescriptor.Panel packageChooserPanel;
+    //private WizardDescriptor.Panel packageChooserPanel;
 
     private WizardDescriptor.Panel[] getPanels()
     {
@@ -77,27 +78,33 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
         fan.mkdirs();
         File test = FileUtil.normalizeFile(new File(pf, "test"));
         test.mkdirs();
+        
         //build.fan
         FileObject fanFo = FileUtil.toFileObject(fan);
         FileObject testFo = FileUtil.toFileObject(test);
         FileObject buildFo = null;
-        FileObject buildTemplate = Templates.getTemplate(wizard);
+        FileObject podFo = null;
+        FileObject podTemplate = Templates.getTemplate(wizard);
 
         // Create main class
         if (panel.getMainClassName() != null)
         {
             String name = panel.getMainClassName();
             File mainFile = new File(fan, name + ".fan");
-            TemplateView view = new TemplateView(buildTemplate, name);
+            TemplateView view = new TemplateView(podTemplate, name);
             view.addVariable("doClass", Boolean.TRUE);
             view.addVariable("doMain", Boolean.TRUE);
-            FileObject license = FanUtilities.getRelativeFileObject(buildTemplate, "../../Licenses/FanDefaultLicense.txt");
+            FileObject license = FanUtilities.getRelativeFileObject(podTemplate
+                    , "../../Licenses/FanDefaultLicense.txt");
             view.addVariable("license", license.asText());
-            FileObject newTemplate = FanUtilities.getRelativeFileObject(buildTemplate, "../../Fantom/FantomFile");
+            FileObject newTemplate = FanUtilities.getRelativeFileObject(podTemplate
+                    , "../../Fantom/FantomFile");
             String templateText = newTemplate.asText();
-            //open it in editor
             TemplateUtils.createFromTemplate(view, templateText, mainFile);
+            
+            //open it in editor
             FanUtilities.openFileInEditor(mainFile);
+            
             // save main class in props
             File props = new File(pf.getAbsolutePath() + File.separator + FanProjectProperties.PROJ_PROPS_PATH);
             props.getParentFile().mkdirs();
@@ -106,27 +113,32 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
             FanProjectProperties.createFromScratch(map, props);
         }
 
-
         // Create the build file LAST, because as soon as that is created,
         // NB will recognize this as a project, so we want everything(props) to be ready by then
+        TemplateView view = new TemplateView(podTemplate, podName);
+        view.addVariable("desc", podDesc);
+        File podFile = new File(pf, FanProjectFactory.BUILD_FILE);
+        String podText = podTemplate.asText();
+        TemplateUtils.createFromTemplate(view, podText, podFile);
+        podFo = FileUtil.toFileObject(podFile);
+        
         if (createBuildFile)
         {
-            TemplateView view = new TemplateView(buildTemplate, podName);
-
-            view.addVariable("desc", podDesc);
-
+            TemplateView view2 = new TemplateView(podTemplate, podName);
+            view2.addVariable("desc", podDesc);
             File buildFile = new File(pf, "build.fan");
-
-            buildFo = FileUtil.toFileObject(buildFile);
-
-            FileObject license = FanUtilities.getRelativeFileObject(buildTemplate, "../../Licenses/FanDefaultLicense.txt");
-            view.addVariable("license", license.asText());
-
-            String buildText = buildTemplate.asText();
-
+            
+            FileObject license = FanUtilities.getRelativeFileObject(podTemplate
+                    , "../../Licenses/FanDefaultLicense.txt");
+            view2.addVariable("license", license.asText());
+            
+            FileObject newTemplate = FanUtilities.getRelativeFileObject(podTemplate
+                    , "../../Fantom/FantomBuild");
+            String buildText = newTemplate.asText();
             // create build.fan
-            TemplateUtils.createFromTemplate(view, buildText, buildFile);
-
+            TemplateUtils.createFromTemplate(view2, buildText, buildFile);
+            
+            buildFo = FileUtil.toFileObject(buildFile);
         }
 
         // Look for nested projects to open as well:
@@ -134,6 +146,7 @@ public final class FanPodWizardIterator implements WizardDescriptor.Instantiatin
         resultSet.add(pfFo);
         resultSet.add(fanFo);
         resultSet.add(testFo);
+        resultSet.add(podFo);
         if (buildFo != null)
         {
             resultSet.add(buildFo);

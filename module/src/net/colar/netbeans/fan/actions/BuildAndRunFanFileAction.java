@@ -5,6 +5,7 @@
 
 package net.colar.netbeans.fan.actions;
 
+import net.colar.netbeans.fan.execution.FanExecutionGroup;
 import net.colar.netbeans.fan.project.FanProject;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.openide.util.Lookup;

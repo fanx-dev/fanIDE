@@ -3,6 +3,9 @@
  */
 package net.colar.netbeans.fan.completion;
 
+import fan.parser.CNode;
+import fan.parser.CSlot;
+import fan.parser.CTypeDef;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
@@ -16,22 +19,9 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import net.colar.netbeans.fan.indexer.FanIndex;
 import net.colar.netbeans.fan.indexer.IndexerHelper;
-import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.types.FanResolvedType;
-import net.colar.netbeans.fan.namespace.FanSlot;
-import net.colar.netbeans.fan.namespace.FanType;
-import net.colar.netbeans.fan.namespace.Namespace;
-import net.colar.netbeans.fan.parser.parboiled.AstKind;
-import net.colar.netbeans.fan.parser.parboiled.AstNode;
-import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
-import net.colar.netbeans.fan.project.FanBuildFileHelper;
-import net.colar.netbeans.fan.scope.FanAstScopeVarBase;
-import net.colar.netbeans.fan.scope.FanFieldScopeVar;
-import net.colar.netbeans.fan.scope.FanMethodScopeVar;
-import net.colar.netbeans.fan.scope.FanTypeScopeVar;
-import net.colar.netbeans.fan.structure.FanBasicElementHandle;
+import net.colar.netbeans.fan.structure.FanElementHandle;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionHandler;
 import org.netbeans.modules.csl.api.CodeCompletionResult;
@@ -44,13 +34,12 @@ import org.openide.filesystems.FileObject;
 
 /**
  * Code Completion
+ *
  * @author thibautc
  */
-public class FanCompletionHandler implements CodeCompletionHandler
-{
+public class FanCompletionHandler implements CodeCompletionHandler {
 
-    private static enum DocTypes
-    {
+    private static enum DocTypes {
 
         NA,
         POD,
@@ -59,21 +48,18 @@ public class FanCompletionHandler implements CodeCompletionHandler
     };
     DocTypes docType = DocTypes.NA;
     String preamble = "";
-    public static final String[] ROOT_ITEMS =
-    {
-        "class", "mixin", "enum", "public", "internal", "abstract", "final", "const", "using"
-    };
+    public static final String[] ROOT_ITEMS
+            = {
+                "class", "mixin", "enum", "public", "internal", "abstract", "final", "const", "using"
+            };
 
     @Override
-    public CodeCompletionResult complete(CodeCompletionContext context)
-    {
+    public CodeCompletionResult complete(CodeCompletionContext context) {
         ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
 
-        try
-        {
+        try {
             String prefix = context.getPrefix();
-            if (prefix == null)
-            {
+            if (prefix == null) {
                 prefix = "";
             }
 
@@ -81,37 +67,35 @@ public class FanCompletionHandler implements CodeCompletionHandler
             int anchor = context.getCaretOffset();
             preamble = cpl.getPreamble();
             FanUtilities.logger.fine("preamb: " + preamble);
-            FanParserTask result = (FanParserTask) context.getParserResult();
-
-            AstNode rootNode = result.getAstTree();
-            int offset = context.getCaretOffset();
-            AstNode curNode = FanLexAstUtils.findASTNodeAt(rootNode, offset);
-
-            System.out.println("compl context: " + cpl.getCompletionType() + " preamb:" + preamble);
-
-            switch (cpl.getCompletionType())
-            {
-                case ROOT_LEVEL:
-                    proposeRootItems(proposals, anchor, prefix.toLowerCase());
-                    break;
-                case IMPORT_POD:
-                    proposeUsing(proposals, context, curNode);
-                    break;
-                case ID:
-                    proposeVars(proposals, context, prefix, curNode);
-                    docType = DocTypes.TYPE;
-                    break;
-                case CALL:
-                    proposeCalls(proposals, context, curNode);
-                    break;
-            }
-        } catch (Exception e)
-        {
+            FanParserResult result = (FanParserResult) context.getParserResult();
+            //TODO
+//            //AstNode rootNode = result.getAstTree();
+//            int offset = context.getCaretOffset();
+//            //AstNode curNode = FanLexAstUtils.findASTNodeAt(rootNode, offset);
+//
+//            System.out.println("compl context: " + cpl.getCompletionType() + " preamb:" + preamble);
+//
+//            switch (cpl.getCompletionType())
+//            {
+//                case ROOT_LEVEL:
+//                    proposeRootItems(proposals, anchor, prefix.toLowerCase());
+//                    break;
+//                case IMPORT_POD:
+//                    proposeUsing(proposals, context, curNode);
+//                    break;
+//                case ID:
+//                    proposeVars(proposals, context, prefix, curNode);
+//                    docType = DocTypes.TYPE;
+//                    break;
+//                case CALL:
+//                    proposeCalls(proposals, context, curNode);
+//                    break;
+//            }
+        } catch (Exception e) {
             e.printStackTrace();
-            FanParserTask result = (FanParserTask) context.getParserResult();
-            if (result != null)
-            {
-                result.addGlobalError("Completion error " + e, e);
+            FanParserResult result = (FanParserResult) context.getParserResult();
+            if (result != null) {
+                //result.addGlobalError("Completion error " + e, e);
             }
         }
 
@@ -137,86 +121,76 @@ public class FanCompletionHandler implements CodeCompletionHandler
     }
     }*/
     @Override
-    public String document(ParserResult result, ElementHandle handle)
-    {
+    public String document(ParserResult result, ElementHandle handle) {
         String doc = null;
-        switch (docType)
-        {
-            case POD:
-                doc = IndexerHelper.getPodDoc(handle.getName());
-                break;
-            case TYPE:
-                doc = ((FanBasicElementHandle) handle).getDoc();
-                break;
-            case SLOT:
-                doc = ((FanBasicElementHandle) handle).getDoc();
-                break;
-        }
+//        switch (docType)
+//        {
+//            case POD:
+//                doc = IndexerHelper.getPodDoc(handle.getName());
+//                break;
+//            case TYPE:
+//                doc = ((FanElementHandle) handle).getDoc();
+//                break;
+//            case SLOT:
+//                doc = ((FanElementHandle) handle).getDoc();
+//                break;
+//        }
         return doc;
     }
 
-    public String findPod(FileObject file)
-    {
-        return FanBuildFileHelper.getPodForPath(file.getPath());
-    }
+//    public String findPod(FileObject file) {
+//        return FanBuildFileHelper.getPodForPath(file.getPath());
+//    }
 
     @Override
-    public ElementHandle resolveLink(String link, ElementHandle handle)
-    {
+    public ElementHandle resolveLink(String link, ElementHandle handle) {
         //TODO: resolve links
-		/*System.out.println("Resolve link: "+link);
+        /*System.out.println("Resolve link: "+link);
         link="sys.File";
         return new ElementHandle.UrlHandle(link);*/
         return null;
     }
 
     @Override
-    public String getPrefix(ParserResult result, int arg1, boolean arg2)
-    {
+    public String getPrefix(ParserResult result, int arg1, boolean arg2) {
         return null;
     }
 
     @Override
-    public QueryType getAutoQuery(JTextComponent comp, String typedText)
-    {
+    public QueryType getAutoQuery(JTextComponent comp, String typedText) {
         if (typedText.length() == 0) {
             return QueryType.NONE;
         }
-        
-        if (typedText.charAt(typedText.length()-1) == '.') {
+
+        if (typedText.charAt(typedText.length() - 1) == '.') {
             return QueryType.COMPLETION;
         }
-        
+
         char c = typedText.charAt(0);
         if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
             return QueryType.COMPLETION;
         }
-        
+
         return QueryType.NONE;
     }
 
     @Override
-    public String resolveTemplateVariable(String arg0, ParserResult result, int arg2, String arg3, Map arg4)
-    {
+    public String resolveTemplateVariable(String arg0, ParserResult result, int arg2, String arg3, Map arg4) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public ParameterInfo parameters(ParserResult result, int arg1, CompletionProposal proposal)
-    {
+    public ParameterInfo parameters(ParserResult result, int arg1, CompletionProposal proposal) {
         return ParameterInfo.NONE;
     }
 
     /**
-    Root level (outside class/mixin/enum)
-    propose slot begining keywords (class,enum,mixin , public, abstract and so on)
-    also propose imports items (if within "using ...")
-    proposeImports(proposals);
+     * Root level (outside class/mixin/enum) propose slot begining keywords
+     * (class,enum,mixin , public, abstract and so on) also propose imports
+     * items (if within "using ...") proposeImports(proposals);
      */
-    private void proposeRootItems(ArrayList<CompletionProposal> proposals, int anchor, String prefix)
-    {
-        for (String item : ROOT_ITEMS)
-        {
+    private void proposeRootItems(ArrayList<CompletionProposal> proposals, int anchor, String prefix) {
+        for (String item : ROOT_ITEMS) {
             {
                 proposals.add(new FanKeywordProposal(item, anchor - prefix.length()));
             }
@@ -224,53 +198,48 @@ public class FanCompletionHandler implements CodeCompletionHandler
     }
 
     /**
-     * Complete imports (using)
-     * If not in an import do nothing and return false
-     * Forms of imports:
-     * using id('. id)* eos    // whole pod
-     * using id('. id)* '::' id eos   // Particular type
-     * using ([id])? id('.' id)* '::' id eos  // FFI
-     * using ([id])? id('.' id)* '::' (id | '$') as id eos  // with 'as'
+     * Complete imports (using) If not in an import do nothing and return false
+     * Forms of imports: using id('. id)* eos // whole pod using id('. id)* '::'
+     * id eos // Particular type using ([id])? id('.' id)* '::' id eos // FFI
+     * using ([id])? id('.' id)* '::' (id | '$') as id eos // with 'as'
+     *
      * @param proposals
      * @param anchor
      * @return
      */
-    private void proposePods(ArrayList<CompletionProposal> proposals, int anchor, String prefix)
-    {
-        List<String> names = Namespace.get().findAllPodNames();
-        if (prefix.length() == 0)
-        {
-            proposals.add(new FanImportProposal("[java] ", anchor - prefix.length(), true));
-        }
-        for (String name : names)
-        {
-            if (name.toLowerCase().startsWith(prefix) && !name.startsWith("__"))
-            {
-                proposals.add(new FanImportProposal(name, anchor - prefix.length(), false));
-                docType = DocTypes.POD;
-            }
-        }
+    private void proposePods(ArrayList<CompletionProposal> proposals, int anchor, String prefix) {
+        //TODO
+//        List<String> names = Namespace.get().findAllPodNames();
+//        if (prefix.length() == 0)
+//        {
+//            proposals.add(new FanImportProposal("[java] ", anchor - prefix.length(), true));
+//        }
+//        for (String name : names)
+//        {
+//            if (name.toLowerCase().startsWith(prefix) && !name.startsWith("__"))
+//            {
+//                proposals.add(new FanImportProposal(name, anchor - prefix.length(), false));
+//                docType = DocTypes.POD;
+//            }
+//        }
     }
 
     /**
      * Propose Types (class, enum, mixin)
+     *
      * @param podName null means all
      * @param proposals
      * @param anchor
      * @param prefix
      */
-    private void proposeTypes(String podName, ArrayList<CompletionProposal> proposals, int anchor, String prefix)
-    {
-        List<FanType> types;
-        if (podName == null)
-        {
+    private void proposeTypes(String podName, ArrayList<CompletionProposal> proposals, int anchor, String prefix) {
+        List<CTypeDef> types;
+        if (podName == null) {
             types = FanIndex.get().findAllFantomTypes(prefix);
-        } else
-        {
+        } else {
             types = FanIndex.get().findPodTypes(podName, prefix);
         }
-        for (FanType type : types)
-        {
+        for (CTypeDef type : types) {
             // TODO: filter out internals / private ?
             proposals.add(new FanTypeProposal(type, anchor - prefix.length(), null));
         }
@@ -279,31 +248,27 @@ public class FanCompletionHandler implements CodeCompletionHandler
 
     /**
      * Propose slots(functions, methods etc...) of a specific types.
+     *
      * @param pod
      * @param type
      * @param proposals
      * @param anchor
      * @param prefix
      */
-    private void proposeSlots(FanResolvedType type, ArrayList<CompletionProposal> proposals, int anchor, String prefix, AstNode node)
-    {
+    private void proposeSlots(CTypeDef type, ArrayList<CompletionProposal> proposals, int anchor, String prefix, CNode node) {
         /*if(type instanceof FanResolvedGenericType)
         {
         type = ((FanResolvedGenericType)type).getPhysicalType();
         }*/
         // Not using a cache here.
-        List<FanSlot> slots = type.getDbType().getAllSlots();
-        for (FanSlot slot : slots)
-        {
-            if (slot.getName().toLowerCase().startsWith(prefix))
-            {
+        fan.sys.List slots = type.slots().vals();
+        for (int i = 0; i < slots.size(); ++i) {
+            CSlot slot = (CSlot) slots.get(i);
+            if (slot.name().toLowerCase().startsWith(prefix)) {
                 // constructor are not marked as static ... but fot this purpose they are
-                boolean isStatic = slot.isStatic() || slot.isCtor();
-                if (type.isStaticContext() == isStatic)
-                {
-                    proposals.add(new FanSlotProposal(slot, anchor - prefix.length(), node, type));
-                    docType = DocTypes.SLOT;
-                }
+                //boolean isStatic = slot.isStatic() || slot.isCtor();
+                proposals.add(new FanSlotProposal(slot, anchor - prefix.length(), node, type));
+                docType = DocTypes.SLOT;
             }
         }
     }
@@ -311,8 +276,7 @@ public class FanCompletionHandler implements CodeCompletionHandler
     /**
      * Propose defined types (fan.sys) + whatever listed in using + current pod
      */
-    private void proposeDefinedTypes(ArrayList<CompletionProposal> proposals, int anchor, String prefix/*, FanRootScope rootScope*/)
-    {
+    private void proposeDefinedTypes(ArrayList<CompletionProposal> proposals, int anchor, String prefix/*, FanRootScope rootScope*/) {
         /*ArrayList<CompletionProposal> props = new ArrayList<CompletionProposal>();
         Hashtable<String, FanResolvedType> usings = rootScope.getUsing();
         for (String key : usings.keySet())
@@ -334,133 +298,129 @@ public class FanCompletionHandler implements CodeCompletionHandler
     }
 
     @SuppressWarnings("unchecked")
-    private void proposeUsing(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, AstNode node)
-    {
-        if (node.getKind() == AstKind.AST_USING_AS)
-        {
-            return; // no completion after "as"
-        }
-        FanParserTask result = (FanParserTask) context.getParserResult();
-        //Document doc = result.getSnapshot().getSource().getDocument(true);
-        AstNode curNode = FanLexAstUtils.findParentNode(node, AstKind.AST_USING);
-        int anchor = context.getCaretOffset();
-        if (curNode == null)
-        {
-            curNode = FanLexAstUtils.findParentNode(node, AstKind.AST_INC_USING);
-        }
-        if (curNode == null)
-        {
-            return;
-        }
-        AstNode idNode = FanLexAstUtils.getFirstChild(curNode, new NodeKindPredicate(AstKind.AST_ID));
-//      AstNode ffi = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_FFI));
-        //AstNode as = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_AS));
-        String id = "";
-        if (idNode != null)
-        {
-            id = idNode.getNodeText(true);
-        }
-
-        FanUtilities.logger.fine("Using ID: " + id);
-        String pod = null;
-        if (id.indexOf("::") != -1)
-        {
-            pod = id.substring(0, id.indexOf("::"));
-            id = id.substring(id.indexOf("::") + 2);
-        }
-
-        if (pod == null)
-        {
-            proposePods(proposals, anchor, id);
-        } else
-        {
-            proposeTypes(pod, proposals, anchor, id);
-        }
+    private void proposeUsing(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, CNode node) {
+//        if (node.getKind() == AstKind.AST_USING_AS)
+//        {
+//            return; // no completion after "as"
+//        }
+//        FanParserTask result = (FanParserTask) context.getParserResult();
+//        //Document doc = result.getSnapshot().getSource().getDocument(true);
+//        AstNode curNode = FanLexAstUtils.findParentNode(node, AstKind.AST_USING);
+//        int anchor = context.getCaretOffset();
+//        if (curNode == null)
+//        {
+//            curNode = FanLexAstUtils.findParentNode(node, AstKind.AST_INC_USING);
+//        }
+//        if (curNode == null)
+//        {
+//            return;
+//        }
+//        AstNode idNode = FanLexAstUtils.getFirstChild(curNode, new NodeKindPredicate(AstKind.AST_ID));
+////      AstNode ffi = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_FFI));
+//        //AstNode as = FanLexAstUtils.getFirstChildRecursive(curNode, new NodeKindPredicate(AstKind.AST_USING_AS));
+//        String id = "";
+//        if (idNode != null)
+//        {
+//            id = idNode.getNodeText(true);
+//        }
+//
+//        FanUtilities.logger.fine("Using ID: " + id);
+//        String pod = null;
+//        if (id.indexOf("::") != -1)
+//        {
+//            pod = id.substring(0, id.indexOf("::"));
+//            id = id.substring(id.indexOf("::") + 2);
+//        }
+//
+//        if (pod == null)
+//        {
+//            proposePods(proposals, anchor, id);
+//        } else
+//        {
+//            proposeTypes(pod, proposals, anchor, id);
+//        }
     }
 
     /**
-     * Propose options for a DOT_CALL ex:
-     * SomeClass._
-     * SomeClass.get_
-     * object.method()._
-     * Window{title="a"}._
+     * Propose options for a DOT_CALL ex: SomeClass._ SomeClass.get_
+     * object.method()._ Window{title="a"}._
+     *
      * @param proposals
      * @param context
      */
-    private void proposeCalls(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, AstNode node)
-    {
-        AstNode callNode = FanLexAstUtils.getCallNodeExpr(node);
-        // protect from NPE
-        if (callNode == null)
-        {
-            return;
-        }
-
-        FanResolvedType type = FanResolvedType.resolveCallLeftHandSide(node);
-
-        String txt = callNode.getNodeText(true);
-        System.out.println("Call text: " + txt + " type: " + type);
-        int offset = context.getCaretOffset();
-        String prefix = txt;
-        //TODO: could be ?., -> or ?->
-        int idx=0;
-        // TODO: kinda ugly -> look for AST_OP instead ??
-        if(prefix.startsWith("?->"))
-            idx = 3;
-        else if(prefix.startsWith("->"))
-            idx = 2;
-        else if(prefix.startsWith("?."))
-            idx = 2;
-        else if(prefix.startsWith("."))
-            idx = 1;
-        if (idx != 0)
-        {
-            prefix = prefix.substring(idx);
-        }
-        if (type != null && type.isResolved())
-        {
-            proposeSlots(type, proposals, offset, prefix, node);
-        }
+    private void proposeCalls(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, CNode node) {
+//        AstNode callNode = FanLexAstUtils.getCallNodeExpr(node);
+//        // protect from NPE
+//        if (callNode == null)
+//        {
+//            return;
+//        }
+//
+//        FanResolvedType type = FanResolvedType.resolveCallLeftHandSide(node);
+//
+//        String txt = callNode.getNodeText(true);
+//        System.out.println("Call text: " + txt + " type: " + type);
+//        int offset = context.getCaretOffset();
+//        String prefix = txt;
+//        //TODO: could be ?., -> or ?->
+//        int idx=0;
+//        // TODO: kinda ugly -> look for AST_OP instead ??
+//        if(prefix.startsWith("?->"))
+//            idx = 3;
+//        else if(prefix.startsWith("->"))
+//            idx = 2;
+//        else if(prefix.startsWith("?."))
+//            idx = 2;
+//        else if(prefix.startsWith("."))
+//            idx = 1;
+//        if (idx != 0)
+//        {
+//            prefix = prefix.substring(idx);
+//        }
+//        if (type != null && type.isResolved())
+//        {
+//            proposeSlots(type, proposals, offset, prefix, node);
+//        }
     }
 
-    private void proposeVars(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, String prefix, AstNode node)
-    {
-        for (FanAstScopeVarBase var : node.getAllScopeVars().values())
-        {
-            if (var.getName().startsWith(prefix))
-            {
-                CompletionProposal prop = null;
-                if (var instanceof FanTypeScopeVar)
-                {
-                    prop = new FanTypeProposal(var.getType().getDbType(), context.getCaretOffset() - prefix.length(), null);
-                } else if (var instanceof FanMethodScopeVar || var instanceof FanFieldScopeVar)
-                {
-                    FanFieldScopeVar fVar = ((FanFieldScopeVar) var);
-                    FanResolvedType slotBaseType = fVar.getType().resolveSlotBaseType(fVar.getName(), null);
-                    FanSlot slot = FanSlot.findByTypeAndName(slotBaseType.getQualifiedType(), fVar.getName());
-                    if (slot != null)
-                    {
-                        prop = new FanSlotProposal(slot, context.getCaretOffset() - prefix.length(), node, slotBaseType);
-                    }
-                }
-                if (prop == null)
-                {
-                    prop = new FanVarProposal(var, context.getCaretOffset() - prefix.length());
-                }
-                proposals.add(prop);
-            }
-        }
+    private void proposeVars(ArrayList<CompletionProposal> proposals, CodeCompletionContext context, String prefix, CNode node) {
+//        for (FanAstScopeVarBase var : node.getAllScopeVars().values())
+//        {
+//            if (var.getName().startsWith(prefix))
+//            {
+//                CompletionProposal prop = null;
+//                if (var instanceof FanTypeScopeVar)
+//                {
+//                    prop = new FanTypeProposal(var.getType().getDbType(), context.getCaretOffset() - prefix.length(), null);
+//                } else if (var instanceof FanMethodScopeVar || var instanceof FanFieldScopeVar)
+//                {
+//                    FanFieldScopeVar fVar = ((FanFieldScopeVar) var);
+//                    FanResolvedType slotBaseType = fVar.getType().resolveSlotBaseType(fVar.getName(), null);
+//                    FanSlot slot = FanSlot.findByTypeAndName(slotBaseType.getQualifiedType(), fVar.getName());
+//                    if (slot != null)
+//                    {
+//                        prop = new FanSlotProposal(slot, context.getCaretOffset() - prefix.length(), node, slotBaseType);
+//                    }
+//                }
+//                if (prop == null)
+//                {
+//                    prop = new FanVarProposal(var, context.getCaretOffset() - prefix.length());
+//                }
+//                proposals.add(prop);
+//            }
+//        }
     }
-    
+
     /**
-     * New NB 7.0beta 2 Completion Handler abstract method (changed method signature)
+     * New NB 7.0beta 2 Completion Handler abstract method (changed method
+     * signature)
+     *
      * @param dcmnt
      * @param i
      * @param i1
-     * @return 
+     * @return
      */
-    public Set<String> getApplicableTemplates(Document dcmnt, int i, int i1) 
-    {
+    public Set<String> getApplicableTemplates(Document dcmnt, int i, int i1) {
         return Collections.emptySet();
     }
 

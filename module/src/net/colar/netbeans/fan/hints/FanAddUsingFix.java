@@ -5,12 +5,10 @@
 
 package net.colar.netbeans.fan.hints;
 
-import java.util.List;
-import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.parser.parboiled.AstKind;
-import net.colar.netbeans.fan.parser.parboiled.AstNode;
-import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parser.parboiled.pred.NodeKindPredicate;
+import fan.parser.CompilationUnit;
+import fan.parser.Node;
+import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
+import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.RuleContext;
 
@@ -29,40 +27,46 @@ public class FanAddUsingFix implements HintFix
         this.using = usingString;
     }
     
+    @Override
     public String getDescription()
     {
         return "Add using for: "+using;
     }
 
+    @Override
     public void implement() throws Exception
     {
-        FanParserTask result = (FanParserTask) ctx.parserResult;
-        AstNode root = result.getAstTree();
-        // If no existing using statements found, will add at before first type def, otherwise before other usings
-        //TODO: add after last using rather than before first might make more sense - but trickier
+        FanParserResult result = (FanParserResult) ctx.parserResult;
+        
+        CompilationUnit unit = result.getCUnit();
         
         int insertIndex = 0;
-        AstNode node= FanLexAstUtils.getFirstChildRecursive(root, new NodeKindPredicate(AstKind.AST_USING));
-        if(node != null)
+        
+        BaseDocument doc = ctx.doc;
+        if(unit.usings().size() > 0)
         {
-            insertIndex = node.getStartIndex();
-            ctx.doc.insertString(insertIndex, "using "+using+"\n", null);
+            Node node = (Node)unit.usings().get(0);
+            insertIndex = node.loc().offset().intValue();
+            doc.insertString(insertIndex, "using "+using+"\n", null);
             return;
         }
         
         // no existing using, then add before first typedef
-        node = FanLexAstUtils.getFirstChildRecursive(root, new NodeKindPredicate(AstKind.AST_TYPE_DEF));
-        if(node!=null)
-            insertIndex = node.getStartIndex();
-
-        ctx.doc.insertString(insertIndex, "using "+using+"\n\n", null);
+        if (unit.types().size() > 0) {
+            Node node = (Node)unit.types().get(0);
+            insertIndex = node.loc().offset().intValue();
+            doc.insertString(insertIndex, "using "+using+"\n", null);
+            return;
+        }
     }
 
+    @Override
     public boolean isSafe()
     {
         return true;
     }
 
+    @Override
     public boolean isInteractive()
     {
         return false;

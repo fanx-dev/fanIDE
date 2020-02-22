@@ -3,58 +3,52 @@
  */
 package net.colar.netbeans.fan.completion;
 
-import fan.sys.Type;
+import fan.parser.CTypeDef;
 import java.util.Collections;
 import net.colar.netbeans.fan.indexer.IndexerHelper;
-import net.colar.netbeans.fan.structure.FanBasicElementHandle;
+import net.colar.netbeans.fan.structure.FanElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.openide.util.ImageUtilities;
-import net.colar.netbeans.fan.namespace.FanType;
 
 /**
- * Propose a Type such as Str or Int
- * ForcedName is used for using with a "As" clause, if null just use type.name()
+ * Propose a Type such as Str or Int ForcedName is used for using with a "As"
+ * clause, if null just use type.name()
+ *
  * @author thibautc
  */
-public class FanTypeProposal extends FanCompletionProposal
-{
+public class FanTypeProposal extends FanCompletionProposal {
 
-	private final String pod;
+    private final String pod;
 
-	public FanTypeProposal(FanType type, int anchor, String forcedName)
-	{
-		Boolean isJava=false;
-		this.pod = type.getPod();
-		
-		this.name = type.getSimpleName();
-		if (forcedName != null)
-		{
-			this.name = forcedName;
-		}
-		this.anchor = anchor;
-		this.modifiers = Collections.emptySet();
-		this.kind = ElementKind.CLASS;
-		icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
-		if (isJava)
-		{
-			icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
-		}
-		FanBasicElementHandle handle = new FanBasicElementHandle(name, kind);
-		handle.setDoc(IndexerHelper.getDoc(type));
-		element = handle;
-	}
-        
-	@Override
-	public String getInsertPrefix()
-	{
-		return name;
-	}
+    public FanTypeProposal(CTypeDef type, int anchor, String forcedName) {
+        Boolean isJava = false;
+        this.pod = type.podName();
 
-	@Override
-	public String getRhsHtml(HtmlFormatter formater)
-	{
-		return "[" + (pod == null ? "??" : pod) + "]";
-	}
+        this.name = type.name();
+        if (forcedName != null) {
+            this.name = forcedName;
+        }
+        this.anchor = anchor;
+        this.modifiers = Collections.emptySet();
+        this.kind = ElementKind.CLASS;
+        icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
+        if (isJava) {
+            icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
+        }
+        FanElementHandle handle = new FanElementHandle(name, kind);
+        //handle.setDoc(type.doc().toStr());
+        element = handle;
+    }
+
+    @Override
+    public String getInsertPrefix() {
+        return name;
+    }
+
+    @Override
+    public String getRhsHtml(HtmlFormatter formater) {
+        return "[" + (pod == null ? "??" : pod) + "]";
+    }
 
 }

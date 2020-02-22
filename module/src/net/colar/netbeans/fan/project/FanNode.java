@@ -5,6 +5,8 @@
 package net.colar.netbeans.fan.project;
 
 import java.awt.Image;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import javax.swing.Action;
@@ -18,6 +20,7 @@ import net.colar.netbeans.fan.actions.RunFanFile;
 import net.colar.netbeans.fan.actions.RunFanPodAction;
 import net.colar.netbeans.fan.actions.RunFanShellAction;
 import net.colar.netbeans.fan.actions.RunFanTest;
+import org.netbeans.api.annotations.common.StaticResource;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
@@ -34,91 +37,58 @@ import org.openide.util.lookup.ProxyLookup;
 
 /**
  * Fan project individual Node (used within logical view)
+ *
  * @author tcolar
  */
-public class FanNode extends FilterNode
-{
+public class FanNode extends FilterNode {
 
-    public static final Pattern MAIN_METHOD = Pattern.compile("\\s+main\\([^)]*\\)\\s*\\{");
-    public static final Pattern TEST_METHOD = Pattern.compile("Void\\s+test\\S*\\([^)]*\\)\\s*\\{");
-    public static final String ATTR_NODE_FILEOBJECT = "NODE_FILEOBJECT";
-    boolean isPod = false;
-    boolean isRoot = false;
+    @StaticResource()
+    public static final String FAN_FILE_ICON = "net/colar/netbeans/fan/resources/fanFile.png";
+
+    //private static final Pattern MAIN_METHOD = Pattern.compile("\\s+main\\([^)]*\\)\\s*\\{");
+    //private static final Pattern TEST_METHOD = Pattern.compile("Void\\s+test\\S*\\([^)]*\\)\\s*\\{");
+    //private static final String ATTR_NODE_FILEOBJECT = "NODE_FILEOBJECT";
+    //private boolean isPod = false;
+    protected boolean isRoot = false;
     //boolean isRunnable = false;
-    boolean isTestFolder = false;
+    private boolean isTestFolder = false;
     private final FileObject file;
     private String icon;
     private String desc;
-    private Vector<Action> actions;
+    private List<Action> actions;
 
-    public FanNode(Project project, Node originalNode, org.openide.nodes.Children children, FileObject file)
-    {
-        super(originalNode, children, new ProxyLookup(new Lookup[]
-                {
-                    Lookups.singleton(project),
-                    originalNode.getLookup()
-                }));
+    public FanNode(Project project, Node originalNode, org.openide.nodes.Children children, FileObject file) {
+        super(originalNode, children, new ProxyLookup(new Lookup[]{
+            Lookups.singleton(project),
+            originalNode.getLookup()
+        }));
         this.file = file;
         // customize the node
-        if (file.isFolder())
-        {
-            //Customize interesting nodes according to folder/file type.
-            if (file.getFileObject("build.fan") != null)
-            {
-                isPod = true;
-            }
-            if (isPod)
-            {
-                setIcon("net/colar/netbeans/fan/resources/fan.png");
-            } else if (getName().equalsIgnoreCase("fan"))
-            {
-//                setIcon("net/colar/netbeans/fan/project/resources/folderFan.png");
-//                desc = "<b>Fan Sources</b>";
-            } else if (file.getName().equalsIgnoreCase("java"))
-            {
-//                setIcon("net/colar/netbeans/fan/project/resources/folderJava.png");
-//                desc = "<b>Java Sources</b>";
-            } else if (file.getName().equalsIgnoreCase("test"))
-            {
-//                setIcon("net/colar/netbeans/fan/project/resources/folderTest.png");
-//                desc = "<b>Unit Tests</b>";
-            }
-        } else
-        {
-            if (file.getNameExt().equalsIgnoreCase("build.fan"))
-            {
-                //isRunnable = true;
-                setIcon("net/colar/netbeans/fan/project/resources/fanBuild.png");
-//                desc = "<b>build.fan</b>";
-            } else if (file.getExt().equalsIgnoreCase("fan"))
-            {
-                setIcon("net/colar/netbeans/fan/project/resources/fanFile.png");
-            } else if (file.getExt().equalsIgnoreCase("fwt"))
-            {
-                setIcon("net/colar/netbeans/fan/project/resources/fanFwt.png");
+        if (!file.isFolder()) {
+            if (file.getExt().equalsIgnoreCase("fan")) {
+                setIcon(FAN_FILE_ICON);
+            } else if (file.getExt().equalsIgnoreCase("fwt")) {
+                setIcon(FAN_FILE_ICON);
             }
 
-            if (file.getExt().equalsIgnoreCase("fan"))
-            {
+            if (file.getExt().equalsIgnoreCase("fan")) {
                 //isRunnable = isRunnable(file);
                 isTestFolder = isTesteable(file);
             }
         }
-        //System.out.println("Node: " + file.getPath() + " " + (isRoot ? "project" : "") + (isPod ? "pod" : "")+(isRunnable ? "runnable" : ""));
     }
 
     /**
      * Return list of actions available for this node.
+     *
      * @param popup
      * @return
      */
     @Override
-    public Action[] getActions(boolean popup)
-    {
-        actions = new Vector<Action>();
+    public Action[] getActions(boolean popup) {
+        actions = new ArrayList<>();
 
-        if (isRoot || isPod)
-        {
+        if (isRoot) {
             // project level actions
             putAction(CommonProjectActions.newFileAction());
             putAction(null);
@@ -141,21 +111,17 @@ public class FanNode extends FilterNode
             putAction(null);
             putAction(CommonProjectActions.setAsMainProjectAction());
             putAction(CommonProjectActions.closeProjectAction());
-        } else
-        {
+        } else {
             // Folder actions
-            if (file.isFolder())
-            {
+            if (file.isFolder()) {
                 putAction(CommonProjectActions.newFileAction());
                 putAction(SystemAction.get(FindAction.class));
                 putAction(null);
                 putAction(SystemAction.get(PasteAction.class));
-            } else
-            // item actions
+            } else // item actions
             {
                 putAction(SystemAction.get(OpenAction.class));
-                if (isTestFolder)
-                {
+                if (isTestFolder) {
                     putAction(ProjectSensitiveActions.projectCommandAction(RunFanTest.COMMAND_TEST_FILE, "Run test", null));
                     putAction(ProjectSensitiveActions.projectCommandAction(BuildAndRunFanTestAction.COMMAND_BUILD_RUN_FAN_TEST, "Build & Run test", null));
                     putAction(null);
@@ -164,11 +130,9 @@ public class FanNode extends FilterNode
                     putAction(ProjectSensitiveActions.projectCommandAction(RunFanFile.COMMAND_RUN_FAN_SCRIPT, "Run as script", null));
                     putAction(ProjectSensitiveActions.projectCommandAction(BuildAndRunFanFileAction.COMMAND_BUILD_RUN_FAN_SCRIPT, "Build & Run as script", null));
                     putAction(null);
-                }
-                else
-                {
-                //if (isRunnable)
-                //{
+                } else {
+                    //if (isRunnable)
+                    //{
                     putAction(ProjectSensitiveActions.projectCommandAction(RunFanClass.COMMAND_RUN_FAN_CLASS, "Run class", null));
                     putAction(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_RUN_SINGLE, "Build & Run class", null));
                     putAction(ProjectSensitiveActions.projectCommandAction(RunFanFile.COMMAND_RUN_FAN_SCRIPT, "Run as script", null));
@@ -177,7 +141,7 @@ public class FanNode extends FilterNode
                     putAction(ProjectSensitiveActions.projectCommandAction(RunFanTest.COMMAND_TEST_FILE, "Run test", null));
                     putAction(ProjectSensitiveActions.projectCommandAction(BuildAndRunFanTestAction.COMMAND_BUILD_RUN_FAN_TEST, "Build & Run test", null));
                     putAction(null);
-                //}
+                    //}
                 }
             }
 
@@ -195,8 +159,7 @@ public class FanNode extends FilterNode
         putAction(SystemAction.get(ToolsAction.class));
         putAction(SystemAction.get(FileSystemAction.class));
 
-        if (isRoot || isPod)
-        { // put props last always
+        if (isRoot) { // put props last always
             putAction(null);
             putAction(CommonProjectActions.customizeProjectAction());
         }
@@ -204,31 +167,25 @@ public class FanNode extends FilterNode
     }
 
     @Override
-    public Image getIcon(int arg0)
-    {
-        if (icon == null)
-        {
-            return super.getIcon(arg0);
+    public Image getIcon(int type) {
+        if (icon == null) {
+            return super.getIcon(type);
         }
         return ImageUtilities.loadImage(icon);
     }
 
     @Override
-    public Image getOpenedIcon(int arg0)
-    {
-        return getIcon(arg0);
+    public Image getOpenedIcon(int type) {
+        return getIcon(type);
     }
 
-    protected void setIcon(String ic)
-    {
+    protected void setIcon(String ic) {
         icon = ic;
     }
 
     @Override
-    public String getHtmlDisplayName()
-    {
-        if (desc == null)
-        {
+    public String getHtmlDisplayName() {
+        if (desc == null) {
             return super.getHtmlDisplayName();
         }
         return desc;
@@ -246,9 +203,7 @@ public class FanNode extends FilterNode
         }
         return result;
     }*/
-
-    private boolean isTesteable(FileObject file)
-    {
+    private boolean isTesteable(FileObject file) {
         /*boolean result = false;
         try
         {
@@ -258,16 +213,75 @@ public class FanNode extends FilterNode
         {
         }*/
         String path = file.getPath();
-        return path.indexOf("/test/")!=-1 || path.indexOf("\\test\\")!=-1;
+        return path.indexOf("/test/") != -1 || path.indexOf("\\test\\") != -1;
     }
 
-    private void putAction(Action action)
-    {
+    private void putAction(Action action) {
         actions.add(action);
     }
-    
-    public String getFileName()
-    {
-        return file.getNameExt();
+
+//    public String getFileName() {
+//        return file.getNameExt();
+//    }
+    /**
+     * Project (master) node.
+     *
+     * @author tcolar
+     */
+    public static class FanProjectNode extends FanNode {
+
+        public FanProjectNode(Project project, Node originalNode, FileObject file) {
+            super(project, originalNode, new FanNodeChildren(project, originalNode), file);
+            setIcon(FanProject.CUSTOMER_ICON);
+            isRoot = true;
+        }
+
+    }
+
+    /**
+     * Children Nodes of FanNode Nothing too special here, just lookup the
+     * children
+     *
+     * @author tcolar
+     */
+    public static class FanNodeChildren extends FilterNode.Children {
+
+        private final Project project;
+
+        FanNodeChildren(Project project, Node projectNode) {
+            super(projectNode);
+            this.project = project;
+        }
+
+        @Override
+        protected Node[] createNodes(Node object) {
+            Node origChild = object;
+            FileObject fob = origChild.getLookup().lookup(FileObject.class);
+
+            if (fob != null) {
+                if (fob.getName().startsWith(".")) {
+                    return new Node[0];
+                }
+                org.openide.nodes.Children children = FilterNode.Children.LEAF;
+                if (fob.isFolder()) {
+                    if (fob.getName().equals("nbproject")) {
+                        return new Node[0];
+                    }
+                    else {
+                        children = new FanNodeChildren(project, origChild);
+                    }
+                }
+
+                FanNode nd = new FanNode(project,
+                        origChild,
+                        children,
+                        fob);
+
+                Node[] nds = new Node[1];
+                nds[0] = nd;
+                return nds;
+            }
+            return new Node[0];
+        }
     }
 }

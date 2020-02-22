@@ -45,8 +45,6 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
         errorLabel = new javax.swing.JLabel();
         debugLabel = new javax.swing.JLabel();
         debugField = new javax.swing.JTextField();
-        execLabel = new javax.swing.JLabel();
-        execField = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
 
@@ -79,15 +77,6 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
             }
         });
 
-        execLabel.setText(org.openide.util.NbBundle.getMessage(FanMainSettingsPanel.class, "FanMainSettingsPanel.execLabel.text")); // NOI18N
-
-        execField.setText(org.openide.util.NbBundle.getMessage(FanMainSettingsPanel.class, "FanMainSettingsPanel.execField.text")); // NOI18N
-        execField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                execFieldKeyReleased(evt);
-            }
-        });
-
         jTextArea1.setEditable(false);
         jTextArea1.setColumns(20);
         jTextArea1.setForeground(new java.awt.Color(194, 135, 27));
@@ -108,7 +97,6 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(debugLabel)
-                            .addComponent(execLabel)
                             .addComponent(homeLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -118,8 +106,7 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
                                 .addComponent(homeBrowse))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(debugField, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(20, 20, 20))
-                            .addComponent(execField, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE))))
+                                .addGap(20, 20, 20)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -134,13 +121,9 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(debugLabel)
                     .addComponent(debugField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(execLabel)
-                    .addComponent(execField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(40, 40, 40)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 104, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
                 .addComponent(errorLabel)
                 .addContainerGap())
         );
@@ -166,17 +149,10 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
 		controller.changed();
 	}//GEN-LAST:event_debugFieldKeyReleased
 
-	private void execFieldKeyReleased(java.awt.event.KeyEvent evt)//GEN-FIRST:event_execFieldKeyReleased
-	{//GEN-HEADEREND:event_execFieldKeyReleased
-		controller.changed();
-	}//GEN-LAST:event_execFieldKeyReleased
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField debugField;
     private javax.swing.JLabel debugLabel;
     private javax.swing.JLabel errorLabel;
-    private javax.swing.JTextField execField;
-    private javax.swing.JLabel execLabel;
     private javax.swing.JButton homeBrowse;
     private javax.swing.JTextField homeField;
     private javax.swing.JLabel homeLabel;
@@ -230,19 +206,9 @@ public class FanMainSettingsPanel extends javax.swing.JPanel
 		return debugField.getText();
 	}
 
-	String getRunOptions()
-	{
-		return execField.getText();
-	}
-
 	void setDebugPort(String port)
 	{
 		debugField.setText(port);
-	}
-
-	void setRunOptions(String options)
-	{
-		execField.setText(options);
 	}
         
 }

@@ -4,9 +4,9 @@
  */
 package net.colar.netbeans.fan;
 
-import net.colar.netbeans.fan.parser.FanTokenID;
+import net.colar.netbeans.fan.lexer.FanTokenId;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.parser.NBFanParser;
+import net.colar.netbeans.fan.parser.FanParser;
 import java.util.Collections;
 import java.util.Set;
 import net.colar.netbeans.fan.completion.FanCompletionHandler;
@@ -16,7 +16,7 @@ import net.colar.netbeans.fan.hints.FanHintsProvider;
 import net.colar.netbeans.fan.editor.FanFormatter;
 import net.colar.netbeans.fan.indexer.FanIndexerFactory;
 import net.colar.netbeans.fan.structure.FanSemanticAnalyzer;
-import net.colar.netbeans.fan.structure.FanStructureAnalyzer;
+import net.colar.netbeans.fan.structure.FanStructureScanner;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.csl.api.CodeCompletionHandler;
@@ -59,7 +59,7 @@ public class FanLanguage extends DefaultLanguageConfig
     @Override
     public Language getLexerLanguage()
     {
-        return FanTokenID.language();
+        return FanTokenId.getLanguage();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class FanLanguage extends DefaultLanguageConfig
     @Override
     public Parser getParser()
     {
-        return new NBFanParser();
+        return new FanParser();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class FanLanguage extends DefaultLanguageConfig
     @Override
     public StructureScanner getStructureScanner()
     {
-        return new FanStructureAnalyzer();
+        return new FanStructureScanner();
     }
 
     @Override

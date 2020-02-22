@@ -24,7 +24,6 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="debugLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="execLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="homeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -38,7 +37,6 @@
                               <Component id="debugField" min="-2" pref="60" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="execField" pref="336" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -60,14 +58,9 @@
                   <Component id="debugLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="debugField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="execLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="execField" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
               <Component id="jScrollPane1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="104" max="32767" attributes="0"/>
+              <EmptySpace pref="110" max="32767" attributes="0"/>
               <Component id="errorLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -130,23 +123,6 @@
       </Properties>
       <Events>
         <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="debugFieldKeyReleased"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JLabel" name="execLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/colar/netbeans/fan/wizard/Bundle.properties" key="FanMainSettingsPanel.execLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="execField">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/colar/netbeans/fan/wizard/Bundle.properties" key="FanMainSettingsPanel.execField.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-      <Events>
-        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="execFieldKeyReleased"/>
       </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane1">

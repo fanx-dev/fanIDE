@@ -12,22 +12,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Logger;
 import net.colar.netbeans.fan.fantom.FanPlatform;
-import net.colar.netbeans.fan.namespace.FanConst;
-import net.colar.netbeans.fan.namespace.FanElement;
-import net.colar.netbeans.fan.namespace.FanMethodParam;
-import net.colar.netbeans.fan.namespace.FanSlot;
-import net.colar.netbeans.fan.namespace.FanSrcFile;
-import net.colar.netbeans.fan.namespace.FanType;
-import net.colar.netbeans.fan.namespace.Namespace;
-import net.colar.netbeans.fan.parser.FanParserTask;
-import net.colar.netbeans.fan.parser.NBFanParser;
-import net.colar.netbeans.fan.parser.parboiled.AstNode;
-import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.scope.FanAstScopeVarBase;
-import net.colar.netbeans.fan.scope.FanMethodScopeVar;
-import net.colar.netbeans.fan.scope.FanScopeMethodParam;
-import net.colar.netbeans.fan.scope.FanTypeScopeVar;
-import net.colar.netbeans.fan.types.FanResolvedType;
+import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
+import net.colar.netbeans.fan.parser.FanParser;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Source;
@@ -60,21 +46,22 @@ public class FanEmbeddingIndexer extends EmbeddingIndexer {
         log.fine("FanEmbeddingIndexer: " + path);
         // Index the parsed doc
 //        indexSrc(path, result);
-        FanParserTask fanResult = (FanParserTask) parserResult;
-        IndexerHelper.doIndexSrc(path, fanResult.getRootScope());
+        FanParserResult fanResult = (FanParserResult) parserResult;
+        //IndexerHelper.doIndexSrc(path, fanResult.getRootScope());
     }
     
     public static boolean checkIfNeedsReindexing(String path, long tstamp) {
-        FanSrcFile file = FanSrcFile.findByPath(path);
-        if (file == null) {
-            return true;
-        }
-        if (file.getTstamp() < tstamp) {
-            return true;
-        }
-        return false;
+        //TODO
+//        FanSrcFile file = FanSrcFile.findByPath(path);
+//        if (file == null) {
+//            return true;
+//        }
+//        if (file.getTstamp() < tstamp) {
+//            return true;
+//        }
+//        return false;
+        return true;
     }
-    
     
     private void parseAndIndexSrc(String path) {
         if (!FanPlatform.isConfigured()) {
@@ -87,7 +74,6 @@ public class FanEmbeddingIndexer extends EmbeddingIndexer {
             return;
         }
 
-        long then = new Date().getTime();
         log.info("Indexing requested for: " + path);
         // Get a snaphost of the source
         File f = new File(path);
@@ -96,23 +82,18 @@ public class FanEmbeddingIndexer extends EmbeddingIndexer {
         Source source = Source.create(fo);
         Snapshot snapshot = source.createSnapshot();
         // Parse the snaphot
-        NBFanParser parser = new NBFanParser();
+        FanParser parser = new FanParser();
         try {
-            parser.parse(snapshot, true);
+            parser.parse(snapshot);
         } catch (Throwable e) {
             log.throwing("Parsing failed for: " + path, "indexSrc", e);
             return;
         }
-        Result result = parser.getResult();
-        long now = new Date().getTime();
-        log.fine("Indexing - parsing done in " + (now - then) + " ms for: " + path);
+        Result result = parser.getResult(null);
         // Index the parsed doc
 //        indexSrc(path, result);
-        FanParserTask fanResult = (FanParserTask) result;
-        IndexerHelper.doIndexSrc(path, fanResult.getRootScope());
-
-        now = new Date().getTime();
-        log.fine("Indexing completed in " + (now - then) + " ms for: " + path);
+//        FanParserTask fanResult = (FanParserTask) result;
+//        IndexerHelper.doIndexSrc(path, fanResult.getRootScope());
     }
 
     
@@ -133,7 +114,8 @@ public class FanEmbeddingIndexer extends EmbeddingIndexer {
                     if (checkIfNeedsReindexing(child.getPath(), child.lastModified().getTime())) {
                         log.info("ReIndexing: " + root.getPath());
                         nb++;
-                        parseAndIndexSrc(child.getPath());
+                        //TODO
+                        //parseAndIndexSrc(child.getPath());
                     }
                 }
             }

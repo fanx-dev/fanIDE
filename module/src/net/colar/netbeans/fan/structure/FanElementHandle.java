@@ -1,12 +1,13 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package net.colar.netbeans.fan.structure;
 
+import fan.sys.FanObj;
 import java.util.HashSet;
 import java.util.Set;
-import net.colar.netbeans.fan.parser.parboiled.AstNode;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.Modifier;
@@ -16,72 +17,74 @@ import org.netbeans.modules.parsing.api.Source;
 import org.openide.filesystems.FileObject;
 
 /**
- * Element Handle impl.
- * Used by structureAnalyzer
+ * Element Handle impl. Used by structureAnalyzer
+ *
  * @author tcolar
  */
-public class FanElementHandle implements ElementHandle
-{
+public class FanElementHandle implements ElementHandle {
 
-	private final ParserResult result;
-	private final Source source;
-	private final AstNode node;
-	private ElementKind kind;
-	private OffsetRange offsetRange;
-	private Set<Modifier> modifiers = new HashSet<Modifier>();
+    private Source source;
+    private fan.parser.CNode node;
+    private ElementKind kind;
+    private OffsetRange offsetRange;
+    private Set<Modifier> modifiers = new HashSet<Modifier>();
+    private String name;
 
-	public FanElementHandle(ElementKind kind, AstNode node, ParserResult result, OffsetRange range)
-	{
-		this.node = node;
-		this.result = result;
-		this.source = result.getSnapshot().getSource();
-		this.kind = kind;
-		this.offsetRange = range;
-	}
+    public FanElementHandle(ElementKind kind, fan.parser.CNode node, ParserResult result, OffsetRange range) {
+        this.node = node;
+        this.source = result.getSnapshot().getSource();
+        this.kind = kind;
+        this.offsetRange = range;
+        this.name = (String)FanObj.trap(node, "name");
+    }
+    
+    public FanElementHandle(String name, ElementKind kind) {
+        this.kind = kind;
+        this.name = name;
+    }
 
-	public FileObject getFileObject()
-	{
-		return source.getFileObject();
-	}
+    @Override
+    public FileObject getFileObject() {
+        return source.getFileObject();
+    }
 
-	public String getMimeType()
-	{
-		return source.getMimeType();
-	}
+    @Override
+    public String getMimeType() {
+        return source.getMimeType();
+    }
 
-	public String getName()
-	{
-		return node.getNodeText(true);
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	public String getIn()
-	{
-		return "";
-	}
+    @Override
+    public String getIn() {
+        return "";
+    }
 
-	public ElementKind getKind()
-	{
-		return kind;
-	}
+    @Override
+    public ElementKind getKind() {
+        return kind;
+    }
 
-	public Set<Modifier> getModifiers()
-	{
-		return modifiers;
-	}
+    @Override
+    public Set<Modifier> getModifiers() {
+        return modifiers;
+    }
 
-	public void setModifiers(Set<Modifier> modifiers)
-	{
-		this.modifiers = modifiers;
-	}
+    public void setModifiers(Set<Modifier> modifiers) {
+        this.modifiers = modifiers;
+    }
 
-	public boolean signatureEquals(ElementHandle arg0)
-	{
-		return false;
-	}
+    @Override
+    public boolean signatureEquals(ElementHandle arg0) {
+        return false;
+    }
 
-	public OffsetRange getOffsetRange(ParserResult result)
-	{
-		return offsetRange;
-	}
+    @Override
+    public OffsetRange getOffsetRange(ParserResult result) {
+        return offsetRange;
+    }
 
 }

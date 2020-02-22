@@ -7,6 +7,7 @@ package net.colar.netbeans.fan.utils;
 import java.io.File;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
+import net.colar.netbeans.fan.project.FanProjectFactory;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -136,7 +137,7 @@ public class FanUtilities
         }
         while (folder != null)
         {
-            File f = new File(folder, "build.fan");
+            File f = new File(folder, FanProjectFactory.BUILD_FILE);
             if (f.exists())
             {
                 return FileUtil.normalizeFile(folder);

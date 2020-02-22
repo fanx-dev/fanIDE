@@ -5,12 +5,12 @@
 
 package net.colar.netbeans.fan.indexer;
 
+import fan.parser.CNamespace;
+import fan.parser.CTypeDef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.colar.netbeans.fan.namespace.FanType;
-import net.colar.netbeans.fan.namespace.Namespace;
 
 /**
  * Indexer queries (for Java types) - reuisng builtin java indexer (lucene)
@@ -20,19 +20,26 @@ import net.colar.netbeans.fan.namespace.Namespace;
 public class FanIndex
 {
     private static FanIndex instance = new FanIndex();
-    private Map<String, List<FanType>> prefixMap = new HashMap<String, List<FanType>>();
+    private Map<String, List<CTypeDef>> prefixMap = new HashMap<String, List<CTypeDef>>();
+    
+    private CNamespace namespace;
 
     public static FanIndex get() { return instance; }
     
-    public synchronized List<FanType> findPodTypes(String pod, String prefix) {
-        List<FanType> types = Namespace.get().findPodTypes(pod);
-        List<FanType> found = new ArrayList<FanType>();
-        for (FanType t : types) {
-            if (t.getSimpleName().startsWith(prefix)) {
+    public synchronized List<CTypeDef> findPodTypes(String pod, String prefix) {
+        fan.sys.List types = namespace.findPod(pod).types();
+        List<CTypeDef> found = new ArrayList<CTypeDef>();
+        for (int i=0; i<types.size(); ++i) {
+            CTypeDef t = (CTypeDef)types.get(i);
+            if (t.name().startsWith(prefix)) {
                 found.add(t);
             }
         }
         return found;
+    }
+    
+    public synchronized List<String> findPod(String prefix) {
+        return null;
     }
 
     /**
@@ -42,39 +49,39 @@ public class FanIndex
      * @param prefix
      * @return
      */
-    public synchronized List<FanType> findTypes(String type) {
-        List<FanType> types = findAllFantomTypes(type);
-        List<FanType> found = new ArrayList<FanType>();
-        for (FanType t : types) {
-            if (t.getSimpleName().equals(type)) {
+    public synchronized List<CTypeDef> findTypes(String type) {
+        List<CTypeDef> types = findAllFantomTypes(type);
+        List<CTypeDef> found = new ArrayList<CTypeDef>();
+        for (CTypeDef t : types) {
+            if (t.name().equals(type)) {
                 found.add(t);
             }
         }
         return found;
     }
 
-    public synchronized List<FanType> findAllFantomTypes(String prefix) {
+    public synchronized List<CTypeDef> findAllFantomTypes(String prefix) {
         return prefixMap.get(prefix);
     }
     
-    public synchronized void put(FanType type) {
-        String name = type.getSimpleName();
+    public synchronized void put(CTypeDef type) {
+        String name = type.name();
         for (int i=1; i<name.length(); ++i) {
             String key = name.substring(0, i);
-            List<FanType> list = prefixMap.get(key);
+            List<CTypeDef> list = prefixMap.get(key);
             if (list == null) {
-                list = new ArrayList<FanType>();
+                list = new ArrayList<CTypeDef>();
                 prefixMap.put(key, list);
             }
             list.add(type);
         }
     }
     
-    public synchronized void remove(FanType type) {
-        String name = type.getSimpleName();
+    public synchronized void remove(CTypeDef type) {
+        String name = type.name();
         for (int i=1; i<name.length(); ++i) {
             String key = name.substring(0, i);
-            List<FanType> list = prefixMap.get(key);
+            List<CTypeDef> list = prefixMap.get(key);
             if (list != null) {
                 list.remove(type);
             }

@@ -19,9 +19,9 @@ import org.netbeans.spi.viewmodel.UnknownTypeException;
  */
 public class FanDebugViewModel implements NodeModel
 {
-	public static final String ICON_FAN="net/colar/netbeans/fan/project/resources/fanFile.png";
-	public static final String ICON_FWT="net/colar/netbeans/fan/project/resources/fanFwt.png";
-	public static final String ICON_JAVA="net/colar/netbeans/fan/project/resources/java.png";
+	public static final String ICON_FAN="net/colar/netbeans/fan/resources/fanFile.png";
+	public static final String ICON_FWT="net/colar/netbeans/fan/resources/fanFile.png";
+	public static final String ICON_JAVA="net/colar/netbeans/fan/resources/java.png";
 
 	static{FanUtilities.logger.info("Fantom - Init "+FanDebugViewModel.class.getName());}
 

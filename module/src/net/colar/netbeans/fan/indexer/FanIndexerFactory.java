@@ -77,7 +77,7 @@ public class FanIndexerFactory extends EmbeddingIndexerFactory{
     public boolean scanStarted(Context context) {
         FanUtilities.logger.info("FanEmbeddingIndexerFactory: scanStarted");
         
-        IndexerHelper.indexAllPods();
+        //IndexerHelper.indexAllPods();
         
         FileObject root = context.getRoot();
         embeddingIndexer.indexSrcFolder(root, 0);

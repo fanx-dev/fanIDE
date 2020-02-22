@@ -5,8 +5,8 @@
 package net.colar.netbeans.fan.editor;
 
 import net.colar.netbeans.fan.FanLanguage;
-import net.colar.netbeans.fan.parser.FanTokenID;
-import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;
+import net.colar.netbeans.fan.lexer.FanTokenId;
+import net.colar.netbeans.fan.lexer.FanTokenId.TokenKind;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;
@@ -19,12 +19,11 @@ import org.netbeans.api.editor.mimelookup.MimeLookup;
 
 /**
  * Provide syntax highlighting for DSL's (embedded language)
- * 
+ *
  * @author tcolar
  */
 @ServiceProvider(service = LanguageProvider.class)
-public class FanDslEmbeddingProvider extends LanguageProvider
-{
+public class FanDslEmbeddingProvider extends LanguageProvider {
 
     public static final String DSL_OPEN = "<|";
     public static final String DSL_CLOSE = "|>";
@@ -34,38 +33,30 @@ public class FanDslEmbeddingProvider extends LanguageProvider
     Language sql;
 
     @Override
-    public Language<?> findLanguage(String mimeType)
-    {
-        if (FanLanguage.FAN_MIME_TYPE.equals (mimeType))
-            return FanTokenID.language();
+    public Language<?> findLanguage(String mimeType) {
+        if (FanLanguage.FAN_MIME_TYPE.equals(mimeType)) {
+            return FanTokenId.getLanguage();
+        }
         return null;
     }
 
     @Override
-    @SuppressWarnings(value="unchecked")
-    public LanguageEmbedding<?> findLanguageEmbedding(Token<?> token, LanguagePath lp, InputAttributes ia)
-    {
-        if (jscript == null)
-        {
+    @SuppressWarnings(value = "unchecked")
+    public LanguageEmbedding<?> findLanguageEmbedding(Token<?> token, LanguagePath lp, InputAttributes ia) {
+        if (jscript == null) {
             jscript = MimeLookup.getLookup(FanHighlightsContainer.JAVASCRIPT_MIME_TYPE).lookup(Language.class);
         }
-        if (sql == null)
-        {
+        if (sql == null) {
             // NOTE: Required adding (non public/friend) SQL editor (specific revision)
-            sql = /*SQLTokenId.language();*/
-						MimeLookup.getLookup(FanHighlightsContainer.SQL_MIME_TYPE).lookup(Language.class);
+            sql
+                    = /*SQLTokenId.language();*/ MimeLookup.getLookup(FanHighlightsContainer.SQL_MIME_TYPE).lookup(Language.class);
         }
-        if (token != null && token.id() != null && token.text() != null)
-        {
-            if (token.id().name().equalsIgnoreCase(TokenName.DSL.name()))
-            {
-                if (jscript!=null && token.text().toString().startsWith(DSL_CLIENT_ID + DSL_OPEN))
-                {
+        if (token != null && token.id() != null && token.text() != null) {
+            if (token.id().name().equalsIgnoreCase(TokenKind.dsl.name())) {
+                if (jscript != null && token.text().toString().startsWith(DSL_CLIENT_ID + DSL_OPEN)) {
                     int start = DSL_CLIENT_ID.length() + DSL_OPEN.length();
                     return LanguageEmbedding.create(jscript, start, DSL_CLOSE.length());
-                }
-                else if (sql!=null && token.text().toString().startsWith(DSL_SQL_ID + DSL_OPEN))
-                {
+                } else if (sql != null && token.text().toString().startsWith(DSL_SQL_ID + DSL_OPEN)) {
                     int start = DSL_SQL_ID.length() + DSL_OPEN.length();
                     return LanguageEmbedding.create(sql, start, DSL_CLOSE.length());
                 }

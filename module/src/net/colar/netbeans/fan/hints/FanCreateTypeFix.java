@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.hints;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
-import net.colar.netbeans.fan.parser.FanParserTask;
+import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
 import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.openide.windows.WindowManager;
@@ -29,19 +29,22 @@ public class FanCreateTypeFix implements HintFix
         this.name = typeName;
     }
 
+    @Override
     public String getDescription()
     {
         return "Create new type: " + name;
     }
 
+    @Override
     public void implement() throws Exception
     {
         // Need to use eventqueueu to avoid AWT threading warning/bugs
         EventQueue.invokeLater(new Runnable()
         {
+            @Override
             public void run()
             {
-                FanParserTask result = (FanParserTask) ctx.parserResult;
+                FanParserResult result = (FanParserResult) ctx.parserResult;
                 String folder = FileUtil.toFile(result.getSourceFile().getParent()).getAbsolutePath();
 
                 Frame win = WindowManager.getDefault().getMainWindow();
@@ -53,11 +56,13 @@ public class FanCreateTypeFix implements HintFix
         });
     }
 
+    @Override
     public boolean isSafe()
     {
         return true;
     }
 
+    @Override
     public boolean isInteractive()
     {
         return true;

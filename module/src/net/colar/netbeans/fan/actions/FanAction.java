@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan.actions;
 
+import net.colar.netbeans.fan.execution.FanExecution;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
@@ -11,9 +12,9 @@ import javax.swing.JOptionPane;
 import net.colar.netbeans.fan.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.fantom.FanPlatform;
-import net.colar.netbeans.fan.fantom.FanPlatformSettings;
-import net.colar.netbeans.fan.project.FanBuildFileHelper;
+import net.colar.netbeans.fan.project.FanProjectFactory;
 import net.colar.netbeans.fan.project.FanProject;
+import net.colar.netbeans.fan.project.FanProjectFactory;
 import net.colar.netbeans.fan.project.FanProjectProperties;
 import org.netbeans.api.debugger.jpda.DebuggerStartException;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
@@ -150,7 +151,14 @@ public abstract class FanAction {
             fanExec.setDisplayName(getProjectName(lookup));
             fanExec.setWorkingDirectory(path);
             FanPlatform.getInstance().buildFanCall(project, fanExec, false, null);
-            fanExec.addCommandArg(FanPlatform.FANT_CLASS);
+            
+            if (FanPlatform.isFanx()) {
+                fanExec.addCommandArg(FanPlatform.FAN_CLASS);
+                fanExec.addCommandArg(FanPlatform.FANT_CLASS);
+            }
+            else {
+                fanExec.addCommandArg(FanPlatform.FANT_CLASS_OLD);
+            }
             fanExec.addCommandArg(target);
             return fanExec;
         }
@@ -179,7 +187,7 @@ public abstract class FanAction {
 //        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
 //        boolean tales = props.isIsTalesProject();
         if (file != null) {
-            FileObject buildFile = file.getFileObject(FanBuildFileHelper.BUILD_FILE);
+            FileObject buildFile = file.getFileObject(FanProjectFactory.BUILD_FILE);
             if (buildFile != null) {
                 String path = FileUtil.toFile(file).getAbsolutePath();
                 FanExecution fanExec = new FanExecution();
@@ -187,8 +195,16 @@ public abstract class FanAction {
                 fanExec.setWorkingDirectory(path);
                 FanPlatform.getInstance().buildFanCall(project, fanExec, false, "");
                 fanExec.addCommandArg(FanPlatform.FAN_CLASS);
-                fanExec.addCommandArg(FanBuildFileHelper.BUILD_FILE);
-                fanExec.addCommandArg(target);
+                
+                if (FanPlatform.isFanx()) {
+                    fanExec.addCommandArg("build::Main");
+                    fanExec.addCommandArg(FanProjectFactory.BUILD_FILE);
+                }
+                else {
+                    fanExec.addCommandArg(FanProjectFactory.BUILD_FILE_OLD);
+                    fanExec.addCommandArg(target);
+                }
+                
                 return fanExec;
             }
         }
@@ -248,7 +264,7 @@ public abstract class FanAction {
             DataObject gdo = activatedNodes[0].getLookup().lookup(DataObject.class);
             if (gdo != null && gdo.getPrimaryFile() != null) {
                 file = gdo.getPrimaryFile();
-                if (FanProject.isProject(file)) {
+                if (FanProjectFactory.isFanProject(file)) {
                     return file;
                 }
             }
@@ -257,7 +273,7 @@ public abstract class FanAction {
         // so use the "main" one
         // use "main project", if fan project
         Project prj = OpenProjects.getDefault().getMainProject();
-        if (prj != null && FanProject.isProject(prj.getProjectDirectory())) {
+        if (prj != null && FanProjectFactory.isFanProject(prj.getProjectDirectory())) {
             return OpenProjects.getDefault().getMainProject().getProjectDirectory();
         }
         // try to fall back to the selected item project folder
@@ -273,8 +289,7 @@ public abstract class FanAction {
         public void run() {
             // start JPDA
             FanUtilities.logger.info("Starting JPDA");
-            String portStr = FanPlatformSettings.getInstance().get(FanPlatformSettings.PREF_DEBUG_PORT, "8008");
-            int port = new Integer(portStr).intValue();
+            int port = FanPlatform.debugPort();
             try {
                 for (int i = 0; i != 15 && !shutdown; i++) {
                     // TODO: this is kinda ugly - Use JPDASupport instead ??

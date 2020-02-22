@@ -2,56 +2,8 @@
 <!-- You may freely edit this file. See harness/README in the NetBeans platform -->
 <!-- for some information on what you could do (e.g. targets to override). -->
 <!-- If you delete this file and reopen the project it will be recreated. -->
-<project name="net.colar.netbeans.fan" default="antlr-tokens-to-nb" basedir=".">
+<project name="net.colar.netbeans.fan" default="netbeans" basedir=".">
 	<description>Builds, tests, and runs the project net.colar.netbeans.fan.</description>
 	<import file="nbproject/build-impl.xml"/>
-
-	<property name="prjDir" location="."/>
-	<property name="classpath" value="build/classes;NetBeansProjects/fantomidemodule/lib"/>
-
-	<property name="all_jars_path" value="${nbplatform.active.dir}/ide/modules/"/>
-
-	<path id="project.class.path">
-		<fileset dir="${nbplatform.active.dir}/ide/modules/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/platform/modules/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/java/modules/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/java/modules/ext/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/platform/modules/ext/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/platform/lib/" includes="*.jar"/>
-		<fileset dir="${nbplatform.active.dir}/platform/core/" includes="*.jar"/>
-		<fileset dir="lib" includes="*.jar"/>
-		<pathelement path="${classpath}"/>
-		<pathelement path="/tmp/fantom/classes"/>
-	</path>
-
-	<!--<target name="jar" depends="init,compile,jar-prep" unless="is.jar.uptodate">
-		<echo message="jar: ${nbplatform.active.dir}"/>
-		taskdef name="csljar" classname="org.netbeans.modules.csl.CslJar" classpath="ext/nbantext.jar;ext/cslanttask.jar;${classpath}"/>
-		<csljar jarfile="${cluster}/${module.jar}" compress="${build.package.compress}" index="${build.package.index}" manifest="${manifest.mf}" stamp="${cluster}/.lastModified">
-			<fileset dir="${build.classes.dir}"/>
-		</csljar>
-	</target>-->
-
-	<target name="test" depends="compile, test-build" description="JOT Unit tests">
-		<delete dir="/tmp/fantom"/>
-		<mkdir dir="/tmp/fantom/classes"/>
-		<copy todir="/tmp/fantom/classes">
-			<fileset dir="build/classes"/>
-			<fileset dir="build/test/unit/classes"/>
-		</copy>
-		<copy todir="/tmp/fantom">
-			<fileset dir="test/unit/data"/>
-		</copy>
-		<java classname="net.jot.testing.JOTTester" classpathref="project.class.path" dir="/tmp/fantom/">
-			<jvmarg value="-Xmx600m"/>
-			<jvmarg value="-XX:MaxPermSize=350M"/>
-			<!-- First arg(required) is to your classes (to be tested) folder -->
-			<arg value="classes"/>
-			<arg value="-includePackages=net.colar.netbeans.fan.test.*" />
-			<arg value="-stopOnFailure=false" />
-			<!--<arg value="-debug"/>-->
-			<!--<arg value="-outputTo=/tmp/jottest.html"/>-->
-		</java>
-	</target>
 
 </project>

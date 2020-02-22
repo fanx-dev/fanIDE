@@ -21,115 +21,100 @@ import org.netbeans.spi.project.ui.support.ProjectCustomizer.Category;
 
 /**
  * Project/Pod propeties
+ *
  * @author thibautc
  */
-public class FanCustomizedProperties implements CustomizerProvider
-{
-	private ProjectCustomizer.CategoryComponentProvider panelProvider;
-	private final FanProject project;
-	private Category[] categories;
-	Map<Category, JPanel> panels = new HashMap<Category, JPanel>();
+public class FanCustomizedProperties implements CustomizerProvider {
 
-	public FanCustomizedProperties(FanProject project)
-	{
-		this.project = project;
-	}
+    private ProjectCustomizer.CategoryComponentProvider panelProvider;
+    private final FanProject project;
+    private Category[] categories;
+    Map<Category, JPanel> panels = new HashMap<Category, JPanel>();
 
-	public void init()
-	{
-		Category settings = Category.create(
-			"Pod Settings",
-			"Pod Settings",
-			null,
-			(Category[])null);
-		// ! panel order used in actionPerformed !
-		categories = new Category[]
-		{
-			settings,
-		};
+    public FanCustomizedProperties(FanProject project) {
+        this.project = project;
+    }
 
-		FanProjectProperties props=project.getLookup().lookup(FanProjectProperties.class);
-		FanProjectPropertiesPanel settingsPanel=new FanProjectPropertiesPanel();
-		if(props!=null)
-		{
-			settingsPanel.setMainMethod(props.getMainMethod());
-			settingsPanel.setBuildTarget(props.getBuildTarget());
-			settingsPanel.setArgs(props.getArgs());
-			settingsPanel.setJvm(props.getJvmArgs());
+    public void init() {
+        Category settings = Category.create(
+                "Pod Settings",
+                "Pod Settings",
+                null,
+                (Category[]) null);
+        // ! panel order used in actionPerformed !
+        categories = new Category[]{
+            settings,};
+
+        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
+        FanProjectPropertiesPanel settingsPanel = new FanProjectPropertiesPanel();
+        if (props != null) {
+            settingsPanel.setMainMethod(props.getMainMethod());
+            settingsPanel.setBuildTarget(props.getBuildTarget());
+            settingsPanel.setArgs(props.getArgs());
+            settingsPanel.setJvm(props.getJvmArgs());
 //			settingsPanel.setIsTales(props.isIsTalesProject());
-		}
-		
-		panels.put(settings, settingsPanel);
+        }
 
-		panelProvider = new PanelProvider(panels);
-	}
+        panels.put(settings, settingsPanel);
 
-	public void showCustomizer()
-	{
-		init();
+        panelProvider = new PanelProvider(panels);
+    }
 
-		OptionListener listener = new OptionListener(project);
-		Dialog dialog = ProjectCustomizer.createCustomizerDialog(categories, panelProvider,
-			null, listener, null);
-		dialog.addWindowListener(listener);
+    public void showCustomizer() {
+        init();
 
-		dialog.setTitle(ProjectUtils.getInformation(project).getDisplayName());
+        OptionListener listener = new OptionListener(project);
+        Dialog dialog = ProjectCustomizer.createCustomizerDialog(categories, panelProvider,
+                null, listener, null);
+        dialog.addWindowListener(listener);
 
-		dialog.setVisible(true);
-	}
+        dialog.setTitle(ProjectUtils.getInformation(project).getDisplayName());
 
-	private static class PanelProvider implements ProjectCustomizer.CategoryComponentProvider
-	{
+        dialog.setVisible(true);
+    }
 
-		private Map panels;
-		private JPanel EMPTY_PANEL = new JPanel();
+    private static class PanelProvider implements ProjectCustomizer.CategoryComponentProvider {
 
-		public PanelProvider(Map panels)
-		{
-			this.panels = panels;
-		}
+        private Map panels;
+        private JPanel EMPTY_PANEL = new JPanel();
 
-		public JComponent create(ProjectCustomizer.Category category)
-		{
-			JComponent panel = (JComponent) panels.get(category);
-			return panel == null ? EMPTY_PANEL : panel;
-		}
-	}
+        public PanelProvider(Map panels) {
+            this.panels = panels;
+        }
 
-	private class OptionListener extends WindowAdapter implements ActionListener
-	{
+        public JComponent create(ProjectCustomizer.Category category) {
+            JComponent panel = (JComponent) panels.get(category);
+            return panel == null ? EMPTY_PANEL : panel;
+        }
+    }
 
-		private Project project;
+    private class OptionListener extends WindowAdapter implements ActionListener {
 
-		OptionListener(Project project)
-		{
-			this.project = project;
-		}
+        private Project project;
 
-		public void actionPerformed(ActionEvent e)
-		{
-			if(e.getActionCommand().equals("OK"))
-			{
-				FanProjectProperties props=project.getLookup().lookup(FanProjectProperties.class);
-				if(props != null)
-				{
-					FanProjectPropertiesPanel settingsPanel=(FanProjectPropertiesPanel)panels.get(categories[0]);
-					props.setMainMethod(settingsPanel.getMainMethod());
-					props.setBuildTarget(settingsPanel.getBuildTarget());
-                                        props.setArgs(settingsPanel.getArgs());
-                                        props.setJvmArgs(settingsPanel.getJvm());
+        OptionListener(Project project) {
+            this.project = project;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            if (e.getActionCommand().equals("OK")) {
+                FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
+                if (props != null) {
+                    FanProjectPropertiesPanel settingsPanel = (FanProjectPropertiesPanel) panels.get(categories[0]);
+                    props.setMainMethod(settingsPanel.getMainMethod());
+                    props.setBuildTarget(settingsPanel.getBuildTarget());
+                    props.setArgs(settingsPanel.getArgs());
+                    props.setJvmArgs(settingsPanel.getJvm());
 //                                        props.setIsTalesProject(settingsPanel.getIsTales());
-					props.save();
-				}
-			}
-		}
+                    props.save();
+                }
+            }
+        }
 
-		public void windowClosed(WindowEvent e)
-		{
-		}
+        public void windowClosed(WindowEvent e) {
+        }
 
-		public void windowClosing(WindowEvent e)
-		{
-		}
-	}
+        public void windowClosing(WindowEvent e) {
+        }
+    }
 }

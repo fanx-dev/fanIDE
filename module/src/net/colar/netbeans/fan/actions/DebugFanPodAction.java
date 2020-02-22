@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan.actions;
 
+import net.colar.netbeans.fan.execution.FanExecutionGroup;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;

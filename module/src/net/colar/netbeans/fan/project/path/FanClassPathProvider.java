@@ -88,6 +88,7 @@ public class FanClassPathProvider implements ClassPathProvider, PropertyChangeLi
         sourcePath = ClassPathSupport.createClassPath(srcRoots.toArray(new FileObject[srcRoots.size()]));
     }
 
+    @Override
     public void propertyChange(PropertyChangeEvent arg0) {
     }
 
@@ -101,6 +102,7 @@ public class FanClassPathProvider implements ClassPathProvider, PropertyChangeLi
         return cps;
     }
 
+    @Override
     public ClassPath findClassPath(FileObject file, String type) {
         //System.out.println(getClass().getName() + " -> findclasspath " + file + " " + type);
         ClassPath result = null;

@@ -47,7 +47,7 @@ public class FanBkptActionProvider extends ActionsProviderSupport implements Pro
 	{
 		boolean enabled = EditorContextDispatcher.getDefault().getCurrentLine() != null;
 		setEnabled(ActionsManager.ACTION_TOGGLE_BREAKPOINT, enabled);
-		FanUtilities.logger.info("Fan - BkptProvider enabling");
+		//FanUtilities.logger.info("Fan - BkptProvider enabling");
 	}
 
 	@Override

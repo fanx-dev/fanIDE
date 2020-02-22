@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan.project;
 
+import net.colar.netbeans.fan.project.FanNode.FanProjectNode;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.LogicalViewProvider;
@@ -17,28 +18,25 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
 /**
- * Logical view for Fan project
- * Logical View provides the nodeTree for displaying project files tree in "project" tab of netbeans
- * So we can show/hide and group files ina  logical way.
+ * Logical view for Fan project Logical View provides the nodeTree for
+ * displaying project files tree in "project" tab of netbeans So we can
+ * show/hide and group files ina logical way.
+ *
  * @author thibautc
  */
-public class FanLogicalView implements LogicalViewProvider
-{
+public class FanLogicalView implements LogicalViewProvider {
 
-    public static final String REGISTERED_NODE_LOCATION =
-            "Projects/net-colar-netbeans-fan-project-FanProject/Nodes";
+    public static final String REGISTERED_NODE_LOCATION
+            = "Projects/net-colar-netbeans-fan-project-FanProject/Nodes";
     private final FanProject project;
 
-    public FanLogicalView(FanProject project)
-    {
+    public FanLogicalView(FanProject project) {
         this.project = project;
     }
 
     @Override
-    public Node createLogicalView()
-    {
-        try
-        {
+    public Node createLogicalView() {
+        try {
             FileObject dir = project.getProjectDirectory();
 
             //Get the DataObject that represents it:
@@ -51,8 +49,7 @@ public class FanLogicalView implements LogicalViewProvider
             //This FilterNode will be our project node:
             return new FanProjectNode(project, originalObj, dir);
 
-        } catch (DataObjectNotFoundException donfe)
-        {
+        } catch (DataObjectNotFoundException donfe) {
             Exceptions.printStackTrace(donfe);
             //Fallback: the directory couldn't be created -
             //read-only filesystem or something evil happened:
@@ -62,25 +59,22 @@ public class FanLogicalView implements LogicalViewProvider
 
     /**
      * Find the Node for a given file
+     *
      * @param root
      * @param target
-     * @return 
+     * @return
      */
     @Override
-    public Node findPath(Node root, Object target)
-    {
+    public Node findPath(Node root, Object target) {
         Project prj = root.getLookup().lookup(Project.class);
-        if (prj == null)
-        {
+        if (prj == null) {
             return null;
         }
 
-        if (target instanceof FileObject)
-        {
+        if (target instanceof FileObject) {
             FileObject fo = (FileObject) target;
             Project owner = FileOwnerQuery.getOwner(fo);
-            if (!prj.equals(owner))
-            {
+            if (!prj.equals(owner)) {
                 return null;
             }
 
@@ -94,39 +88,31 @@ public class FanLogicalView implements LogicalViewProvider
     /**
      * Find the subNode within the node that matches the path (relative path)
      * Note: recursive
+     *
      * @param node
      * @param path
-     * @return 
+     * @return
      */
-    public static Node findMatchingNode(Node node, String path)
-    {
-        if (path == null)
-        {
+    public static Node findMatchingNode(Node node, String path) {
+        if (path == null) {
             return null;
         }
 
         String[] parts = path.split("/");
-        if (parts.length == 0)
-        {
+        if (parts.length == 0) {
             return null;
         }
 
-        for (Node nd : node.getChildren().getNodes(true))
-        {
+        for (Node nd : node.getChildren().getNodes(true)) {
             String name = nd.getDisplayName();
-            if (name.equals(parts[0]))
-            {
-                if (parts.length == 1)
-                {
+            if (name.equals(parts[0])) {
+                if (parts.length == 1) {
                     // that was the last part of the path to match -> we found our node.
                     return nd;
-                } else
-                {
-                    if (path.indexOf("/") == path.length())
-                    {
+                } else {
+                    if (path.indexOf("/") == path.length()) {
                         return nd; // directory, ignore extra slash
-                    } else
-                    {
+                    } else {
                         // matches so far, keep digging down the path (recurse)
                         return findMatchingNode(nd, path.substring(path.indexOf("/") + 1));
                     }

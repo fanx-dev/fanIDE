@@ -12,10 +12,7 @@ import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import net.colar.netbeans.fan.FanLanguage;
-import net.colar.netbeans.fan.parser.FanTokenID;
 import net.colar.netbeans.fan.editor.FantomIndentUtils;
-import net.colar.netbeans.fan.parser.parboiled.FanLexAstUtils;
-import net.colar.netbeans.fan.parser.parboiled.FantomLexerTokens.TokenName;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
@@ -28,192 +25,60 @@ import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.api.IndentUtils;
 
 /**
- * Impl. of keystrokeHandler
- * Provides support for closing bracket/quote insertion and the likes
- * Also deals with trying to guess/insert proper indentation.
+ * Impl. of keystrokeHandler Provides support for closing bracket/quote
+ * insertion and the likes Also deals with trying to guess/insert proper
+ * indentation.
+ *
  * @author tcolar
  */
-public class FanKeyStrokeHandler implements KeystrokeHandler
-{
+public class FanKeyStrokeHandler implements KeystrokeHandler {
+
     /* Array of special patterns that will cause increased intent on the next line
      * if/else/while/for/try/finaly/catch without blocks({})
      * Switch items (case / default)
      * Note .*?  = match anything NON-greedily
      */
-
-    public static Pattern[] INDENT_AFTER_PATTERNS =
-    {
-        // single line if
-        Pattern.compile("^\\s*if\\s*\\(.*?\\)[^{]*$"),
-        // single line else
-        Pattern.compile("^\\s*else\\s*(if\\s*\\(.*?\\))?[^{]*$"),
-        // switch: case / default
-        Pattern.compile("^\\s*case\\s*[^:]*:\\s*$"),
-        Pattern.compile("^\\s*default\\s*:\\s*$"),
-        // try catch finaly
-        Pattern.compile("^\\s*try\\s*$"),
-        Pattern.compile("^\\s*finally\\s*$"),
-        Pattern.compile("^\\s*catch(\\(.*?\\))?\\s*$"),
-        // while
-        Pattern.compile("^\\s*while\\s*\\(.*?\\)[^{]*$"),
-        // for
-        Pattern.compile("^\\s*for\\s*\\(.*?\\)[^{]*$"),
-    };
+    public static Pattern[] INDENT_AFTER_PATTERNS
+            = {
+                // single line if
+                Pattern.compile("^\\s*if\\s*\\(.*?\\)[^{]*$"),
+                // single line else
+                Pattern.compile("^\\s*else\\s*(if\\s*\\(.*?\\))?[^{]*$"),
+                // switch: case / default
+                Pattern.compile("^\\s*case\\s*[^:]*:\\s*$"),
+                Pattern.compile("^\\s*default\\s*:\\s*$"),
+                // try catch finaly
+                Pattern.compile("^\\s*try\\s*$"),
+                Pattern.compile("^\\s*finally\\s*$"),
+                Pattern.compile("^\\s*catch(\\(.*?\\))?\\s*$"),
+                // while
+                Pattern.compile("^\\s*while\\s*\\(.*?\\)[^{]*$"),
+                // for
+                Pattern.compile("^\\s*for\\s*\\(.*?\\)[^{]*$"),};
     /**
-     * Items that should indent one level less that line above
-     * If not immeditaly following a bracket
+     * Items that should indent one level less that line above If not immeditaly
+     * following a bracket
      */
-    private static Pattern[] DEINDENT_PATTERNS =
-    {
-        // LEAVE THOSE TWO (case/default) FIRST
-        Pattern.compile("^\\s*case\\s*[^:]*:\\s*"),
-        Pattern.compile("^\\s*default\\s*:\\s*"),
-        Pattern.compile("^\\s*else"),
-        Pattern.compile("^\\s*catch"),
-        Pattern.compile("^\\s*finally"),
-    // those could follow a bracket? unlikely
-    };
-    // keep track of last auto-insertion (ie: closing brackets)
-    // so if user backspace right away we remove that as well.
-    private int lastInsertStart;
-    private int lastInsertSize;
+    private static Pattern[] DEINDENT_PATTERNS
+            = {
+                // LEAVE THOSE TWO (case/default) FIRST
+                Pattern.compile("^\\s*case\\s*[^:]*:\\s*"),
+                Pattern.compile("^\\s*default\\s*:\\s*"),
+                Pattern.compile("^\\s*else"),
+                Pattern.compile("^\\s*catch"),
+                Pattern.compile("^\\s*finally"), // those could follow a bracket? unlikely
+            };
 
     @Override
-    public boolean beforeCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException
-    {
-        lastInsertSize = 0; //reset at each keypressed
-        BaseDocument doc = (BaseDocument) document;
-        if (!isInsertMatchingEnabled(doc))
-        {
-            return false;
-        }
-
-        String toInsert = "";
-        char prev = ' ';
-        if (caretOffset > 0)
-        {
-            prev = doc.getText(caretOffset - 1, 1).charAt(0);
-        }
-        char next = ' ';
-        if (caretOffset < doc.getLength() - 1)
-        {
-            next = doc.getText(caretOffset, 1).charAt(0);
-        }
-        Token<? extends FanTokenID> token = FanLexAstUtils.getFanTokenAt(document, caretOffset);
-
-        // If User types "over" closing item we closed automaticaly, skip it
-        FanTokenID tokenId = token.id();
-        //String txt = token.text().toString().trim();
-        if (token != null)
-        {
-            //For str,uri : if backquoted -> don't skip
-            //System.out.println("prev: "+prev);
-            //System.out.println("next: "+next);
-            //System.out.println("car: "+car);
-            //System.out.println("tk: "+token.id().name());
-            if ((car == '"' && tokenId.matches(TokenName.STRS) && next == '"' && prev != '\\')
-                    || (car == '"' && tokenId.matches(TokenName.STRS) && next == '"' && prev != '\\')
-                    || (car == '`' && tokenId.matches(TokenName.URI) && next == '`' && prev != '\\')
-                    || //(car == '`' && ord == FanLexer.INC_URI && next=='`' && prev!='\\') ||
-                    (car == '\'' && tokenId.matches(TokenName.CHAR_) && next == '\'')
-                    || (car == ']' && tokenId.matches(TokenName.SQ_BRACKET_R))
-                    || (car == ')' && tokenId.matches(TokenName.PAR_R))
-                    || (car == '}' && tokenId.matches(TokenName.BRACKET_R)))
-            {
-                // just skip the existing same characters
-                target.getCaret().setDot(caretOffset + 1);
-                return true;
-            }
-        }
-        // Same but dual characters
-        if (/*(car == '/' && prev=='*' && token.id().ordinal() == FanLexer.MULTI_COMMENT) ||*/(car == '>' && prev == '|' && tokenId.matches(TokenName.DSL)))
-        {
-            // remove previous char and then skip existing one
-            doc.remove(caretOffset - 1, 1);
-            target.getCaret().setDot(caretOffset + 1);
-            return true;
-        }
-
-        // If within those tokens, don't do anything special
-        if (tokenId.matches(TokenName.DSL)
-                || tokenId.matches(TokenName.CHAR_)
-                || tokenId.matches(TokenName.DOC)
-                || tokenId.matches(TokenName.UNIXLINE)
-                || tokenId.matches(TokenName.COMMENT)
-                || //token.id().ordinal() == FanLexer.INC_COMMENT ||
-                //token.id().ordinal() == FanLexer.INC_DSL ||
-                //token.id().ordinal() == FanLexer.INC_STR ||
-                //token.id().ordinal() == FanLexer.INC_URI ||
-                //token.id().ordinal() == FanLexer.LINE_COMMENT ||
-                //token.id().ordinal() == FanLexer.MULTI_COMMENT ||
-                //token.id().ordinal() == FanLexer.QUOTSTR ||
-                tokenId.matches(TokenName.STRS)
-                || tokenId.matches(TokenName.URI))
-        {
-            return false;
-        }
-
-        // Automatically add closing item/brace when opening one entered
-        switch (car)
-        {
-            case '{':
-                toInsert = "}";
-                break;
-            case '(':
-                toInsert = ")";
-                break;
-            case '[':
-                toInsert = "]";
-                break;
-            case '`':
-                toInsert = "`";
-                break;
-            case '\'':
-                toInsert = "'";
-                break;
-            case '"':
-                // If third quote in row(""") then don't close (quoted string)
-                if (caretOffset > 2)
-                {
-                    String prev2 = doc.getText(caretOffset - 2, 2);
-                    if (prev2.equals("\"\""))
-                    {
-                        break;
-                    }
-                }
-                toInsert = "\"";
-                break;
-            // dual characters
-            case '|':
-                if (prev == '<')
-                {
-                    toInsert = "|>";
-                }
-                break;
-            /*case '*':
-            if (prev=='/')
-            {
-            toInsert = "* /";
-            }
-            break;*/
-        }
-        // do the insertion job
-        if (toInsert.length() > 0)
-        {
-            doc.insertString(caretOffset, toInsert, null);
-            target.getCaret().setDot(caretOffset);
-            if (toInsert.length() > 0)
-            {
-                lastInsertStart = caretOffset;
-                lastInsertSize = toInsert.length();
-            }
-        }
+    public boolean beforeCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException {
         return false;
     }
 
     @Override
-    public boolean afterCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException
-    {
+    public boolean afterCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException {
+        
+        System.out.println("afterCharInserted");
+        
         // deal with fixing identation for special cases (switch, if etc...)
         BaseDocument doc = (BaseDocument) document;
         int indentSize = FantomIndentUtils.getIndentSize(document);
@@ -222,8 +87,7 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
         String line = doc.getText(lineBegin, lineEnd - lineBegin);
         int above = -1;
         String prevLine = "";
-        if (lineBegin > 1)
-        {
+        if (lineBegin > 1) {
             above = Utilities.getFirstNonEmptyRow(doc, lineBegin - 1, false);
             int prevBegin = Utilities.getRowStart(doc, above);
             int prevEnd = Utilities.getRowEnd(doc, above);
@@ -233,32 +97,23 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
         int origIndent = indent;
 
         // If user enters { after one of the identing patterns, we need to dedent
-        if (car == '{' && line.trim().startsWith("{") && above > -1)
-        {
-            for (int i = 0; i != INDENT_AFTER_PATTERNS.length; i++)
-            {
-                if (INDENT_AFTER_PATTERNS[i].matcher(prevLine).matches())
-                {
+        if (car == '{' && line.trim().startsWith("{") && above > -1) {
+            for (int i = 0; i != INDENT_AFTER_PATTERNS.length; i++) {
+                if (INDENT_AFTER_PATTERNS[i].matcher(prevLine).matches()) {
                     // fix indent to be same as prevline
                     indent = GsfUtilities.getLineIndent(doc, above);
                     break;
                 }
             }
-        } else
-        {
+        } else {
             //Check some special patterns, decrease indent of current line (ex - default:)
             // except if immediatly following a closing bracket
-            if (!prevLine.trim().endsWith("}"))
-            {
-                for (int i = 0; i != DEINDENT_PATTERNS.length; i++)
-                {
-                    if (DEINDENT_PATTERNS[i].matcher(line).matches())
-                    {
+            if (!prevLine.trim().endsWith("}")) {
+                for (int i = 0; i != DEINDENT_PATTERNS.length; i++) {
+                    if (DEINDENT_PATTERNS[i].matcher(line).matches()) {
                         // special (poor) check to see if it's the first case/default of a switch
-                        if ( ! (i <= 1 && prevLine.trim().endsWith("{")))
-                        {
-                            if (above >= 0)
-                            {
+                        if (!(i <= 1 && prevLine.trim().endsWith("{"))) {
+                            if (above >= 0) {
                                 // start indent as same as previous non empty line
                                 indent = GsfUtilities.getLineIndent(doc, above);
                             }
@@ -272,57 +127,40 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
         }
         // set the indentation
         // this seem to be slow (calls lexer many times ?), so do only when needed
-        if (indent != origIndent)
-        {
+        if (indent != origIndent) {
             GsfUtilities.setLineIndentation(doc, caretOffset, indent);
         }
         return false;
     }
 
     @Override
-    public boolean charBackspaced(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException
-    {
-        BaseDocument doc = (BaseDocument) document;
-        if (!isInsertMatchingEnabled(doc))
-        {
-            return false;
-        }
-
-        // If we just auto-added chars in beforeCharInserted() and the user
-        // press backspace right away(no moving), we remove them now.
-        if (lastInsertSize > 0 && caretOffset == lastInsertStart)
-        {
-            doc.remove(caretOffset, lastInsertSize);
-        }
-
+    public boolean charBackspaced(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException {
         return false;
     }
 
     @Override
-    public int beforeBreak(Document document, int caretOffset, JTextComponent target) throws BadLocationException
-    {
-        Token tkNext = FanLexAstUtils.getFanTokenAt(document, caretOffset);
-        int offset = caretOffset == 0 ? 0 : caretOffset - 1;
+    public int beforeBreak(Document document, int caretOffset, JTextComponent target) throws BadLocationException {
+        System.out.println("beforeBreak");
+//        Token tkNext = FanLexAstUtils.getFanTokenAt(document, caretOffset);
+//        int offset = caretOffset == 0 ? 0 : caretOffset - 1;
         // Get token BEFORE line break
-        Token tk = FanLexAstUtils.getFanTokenAt(document, offset);
-        //If within DSL, STR, URI don't indent anything as they can be multiline
-        // unless they are complete (next token is !=)
-        if (tkNext != null && tk != null)
-        {
-            int ord = tk.id().ordinal();
-            int ord2 = tkNext.id().ordinal();
-            String nm = tk.id().name();
-            if ((nm.equals(TokenName.DSL.name()) && ord2 == ord)
-                    | (nm.equals(TokenName.STRS.name()) && ord2 == ord)
-                    | //(ord == FanLexer.QUOTSTR && ord2==ord) |
-                    (nm.equals(TokenName.URI.name()) && ord2 == ord))
-            //ord == FanLexer.INC_DSL |
-            //ord == FanLexer.INC_STR |
-            //ord == FanLexer.INC_URI)
-            {
-                return -1;
-            }
-        }
+//        Token tk = FanLexAstUtils.getFanTokenAt(document, offset);
+//        //If within DSL, STR, URI don't indent anything as they can be multiline
+//        // unless they are complete (next token is !=)
+//        if (tkNext != null && tk != null) {
+//            int ord = tk.id().ordinal();
+//            int ord2 = tkNext.id().ordinal();
+//            String nm = tk.id().name();
+//            if ((nm.equals(TokenName.DSL.name()) && ord2 == ord)
+//                    | (nm.equals(TokenName.STRS.name()) && ord2 == ord)
+//                    | //(ord == FanLexer.QUOTSTR && ord2==ord) |
+//                    (nm.equals(TokenName.URI.name()) && ord2 == ord)) //ord == FanLexer.INC_DSL |
+//            //ord == FanLexer.INC_STR |
+//            //ord == FanLexer.INC_URI)
+//            {
+//                return -1;
+//            }
+//        }
 
         // Deal with indentation
         String NL = "\n";
@@ -339,13 +177,11 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
 
         String line = null;
         String prevLine = null;
-        if (lineBegin > -1 && lineEnd > lineBegin)
-        {
+        if (lineBegin > -1 && lineEnd > lineBegin) {
             line = doc.getText(lineBegin, lineEnd - lineBegin);
         }
 
-        if (prevLineBegin > -1 && prevLineEnd > prevLineBegin)
-        {
+        if (prevLineBegin > -1 && prevLineEnd > prevLineBegin) {
             prevLine = doc.getText(prevLineBegin, prevLineEnd - prevLineBegin);
         }
 
@@ -354,34 +190,28 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
 
         // standard indent (same as the line we pressed return on)
         int indent = 0;
-        if (lineBegin > 0)
-        {
+        if (lineBegin > 0) {
             indent = IndentUtils.lineIndent(document, lineBegin) / FantomIndentUtils.getIndentSize(document);
         }
 
         int dotOffset = 0;
         String insert = "";
-        if (line != null)
-        {
+        if (line != null) {
             String trimmedLine = line.trim();
             // If within doc -> insert the ** on next line
             // insert only if the current doc line is not empty("**") - except for first one (empty ok)
             boolean isFirstDocLine = prevLine == null || !prevLine.trim().startsWith("**");
-            if (trimmedLine.startsWith("**") && (isFirstDocLine || trimmedLine.length() > 3))
-            {
+            if (trimmedLine.startsWith("**") && (isFirstDocLine || trimmedLine.length() > 3)) {
                 insert = "** ";
-            } else if (lineHead.trim().endsWith("{"))
-            {
-                if (lineTail.trim().startsWith("}"))
-                {
+            } else if (lineHead.trim().endsWith("{")) {
+                if (lineTail.trim().startsWith("}")) {
                     String extraIndent = FantomIndentUtils.createIndentString(document, indent);
                     insert = NL + extraIndent;
                     dotOffset = -(1 + extraIndent.length());
                 }
 
-                indent ++;
-            } else
-            {
+                indent++;
+            } else {
                 // increase indent of next line for special patterns, see getSpecialIndentSize()
                 indent += getSpecialIndentSize(lineHead);
             }
@@ -399,6 +229,7 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
 
     /**
      * Helps finding matching opening/closing items (ex: {})
+     *
      * @param document
      * @param caretOffset
      * @return
@@ -406,95 +237,91 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
     @Override
     @SuppressWarnings("unchecked")
     public OffsetRange findMatching(
-            Document document, int caretOffset)
-    {
-        TokenSequence ts = FanLexAstUtils.getFanTokenSequence(document);
-        int searchOffset = 2; // start after rightToken
-
-        // Prefer matching the token to the right of caret
-        Token<? extends FanTokenID> token = FanLexAstUtils.getFanTokenAt(document, caretOffset + 1);
-        if (token == null)
-        {
-            // if rightToken is null, use left token
-            token = FanLexAstUtils.getFanTokenAt(document, caretOffset);
-            searchOffset =
-                    1; // start after leftToken
-        } else
-        {
-            FanTokenID id = token.id();
-            // if rightToken is not 'matcheable', use left token
-            if (!id.matches(TokenName.PAR_L) && !id.matches(TokenName.PAR_R)
-                    && !id.matches(TokenName.SQ_BRACKET_L) && !id.matches(TokenName.SQ_BRACKET_R)
-                    && !id.matches(TokenName.BRACKET_L) && !id.matches(TokenName.BRACKET_R))
-            {
-                token = FanLexAstUtils.getFanTokenAt(document, caretOffset);
-                searchOffset =
-                        1; // start after leftToken
-            }
-
-        }
-
-        if (token != null)
-        {
-            FanTokenID id = token.id();
-            //String txt = token.text().toString().trim();
-            //Ok, now try to find the matching token
-            if (id.matches(TokenName.PAR_L))
-            {
-                ts.move(caretOffset + searchOffset);// start after opening char
-                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.PAR_L, TokenName.PAR_R);
-            } else if (id.matches(TokenName.PAR_R))
-            {
-                ts.move(caretOffset + searchOffset - 1);// start before opening char (since going backward)
-                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.PAR_L, TokenName.PAR_R);
-            } else if (id.matches(TokenName.BRACKET_L))
-            {
-                ts.move(caretOffset + searchOffset);
-                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.BRACKET_L, TokenName.BRACKET_R);
-            } else if (id.matches(TokenName.BRACKET_R))
-            {
-                ts.move(caretOffset + searchOffset - 1);
-                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.BRACKET_L, TokenName.BRACKET_R);
-            } else if (id.matches(TokenName.SQ_BRACKET_L))
-            {
-                ts.move(caretOffset + searchOffset);
-                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.SQ_BRACKET_L, TokenName.SQ_BRACKET_R);
-            } else if (id.matches(TokenName.SQ_BRACKET_R))
-            {
-                ts.move(caretOffset + searchOffset - 1);
-                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.SQ_BRACKET_L, TokenName.SQ_BRACKET_R);
-            }
-        }
+            Document document, int caretOffset) {
+//        TokenSequence ts = FanLexAstUtils.getFanTokenSequence(document);
+//        int searchOffset = 2; // start after rightToken
+//
+//        // Prefer matching the token to the right of caret
+//        Token<? extends FanTokenID> token = FanLexAstUtils.getFanTokenAt(document, caretOffset + 1);
+//        if (token == null)
+//        {
+//            // if rightToken is null, use left token
+//            token = FanLexAstUtils.getFanTokenAt(document, caretOffset);
+//            searchOffset =
+//                    1; // start after leftToken
+//        } else
+//        {
+//            FanTokenID id = token.id();
+//            // if rightToken is not 'matcheable', use left token
+//            if (!id.matches(TokenName.PAR_L) && !id.matches(TokenName.PAR_R)
+//                    && !id.matches(TokenName.SQ_BRACKET_L) && !id.matches(TokenName.SQ_BRACKET_R)
+//                    && !id.matches(TokenName.BRACKET_L) && !id.matches(TokenName.BRACKET_R))
+//            {
+//                token = FanLexAstUtils.getFanTokenAt(document, caretOffset);
+//                searchOffset =
+//                        1; // start after leftToken
+//            }
+//
+//        }
+//
+//        if (token != null)
+//        {
+//            FanTokenID id = token.id();
+//            //String txt = token.text().toString().trim();
+//            //Ok, now try to find the matching token
+//            if (id.matches(TokenName.PAR_L))
+//            {
+//                ts.move(caretOffset + searchOffset);// start after opening char
+//                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.PAR_L, TokenName.PAR_R);
+//            } else if (id.matches(TokenName.PAR_R))
+//            {
+//                ts.move(caretOffset + searchOffset - 1);// start before opening char (since going backward)
+//                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.PAR_L, TokenName.PAR_R);
+//            } else if (id.matches(TokenName.BRACKET_L))
+//            {
+//                ts.move(caretOffset + searchOffset);
+//                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.BRACKET_L, TokenName.BRACKET_R);
+//            } else if (id.matches(TokenName.BRACKET_R))
+//            {
+//                ts.move(caretOffset + searchOffset - 1);
+//                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.BRACKET_L, TokenName.BRACKET_R);
+//            } else if (id.matches(TokenName.SQ_BRACKET_L))
+//            {
+//                ts.move(caretOffset + searchOffset);
+//                return FanLexAstUtils.findRangeFromOpening(document, ts, TokenName.SQ_BRACKET_L, TokenName.SQ_BRACKET_R);
+//            } else if (id.matches(TokenName.SQ_BRACKET_R))
+//            {
+//                ts.move(caretOffset + searchOffset - 1);
+//                return FanLexAstUtils.findRangeFromClosing(document, ts, TokenName.SQ_BRACKET_L, TokenName.SQ_BRACKET_R);
+//            }
+//        }
         //default - no match
         return OffsetRange.NONE;
     }
 
     @Override
-    public List<OffsetRange> findLogicalRanges(ParserResult arg0, int arg1)
-    {
+    public List<OffsetRange> findLogicalRanges(ParserResult arg0, int arg1) {
         // not impl yet.
         // what is this used for ?   - provide using FanStructureAnalyzer ??
         return Collections.emptyList();
     }
 
     @Override
-    public int getNextWordOffset(Document arg0, int arg1, boolean arg2)
-    {
+    public int getNextWordOffset(Document arg0, int arg1, boolean arg2) {
         // not impl, default will be fine.
         return -1;
     }
 
     /**
      * wether brcaket matching is turned on
+     *
      * @param doc
      * @return
      */
-    public boolean isInsertMatchingEnabled(BaseDocument doc)
-    {
+    public boolean isInsertMatchingEnabled(BaseDocument doc) {
         // Default: true
         EditorOptions options = EditorOptions.get(FanLanguage.FAN_MIME_TYPE);
-        if (options != null)
-        {
+        if (options != null) {
             return options.getMatchBrackets();
         }
 
@@ -502,17 +329,15 @@ public class FanKeyStrokeHandler implements KeystrokeHandler
     }
 
     /**
-     * Return how much extra ident we will need for special patterns
-     * such as for / if /case etc...
+     * Return how much extra ident we will need for special patterns such as for
+     * / if /case etc...
+     *
      * @param lineText
      * @return
      */
-    private int getSpecialIndentSize(String lineText)
-    {
-        for (int i = 0; i != INDENT_AFTER_PATTERNS.length; i++)
-        {
-            if (INDENT_AFTER_PATTERNS[i].matcher(lineText).matches())
-            {
+    private int getSpecialIndentSize(String lineText) {
+        for (int i = 0; i != INDENT_AFTER_PATTERNS.length; i++) {
+            if (INDENT_AFTER_PATTERNS[i].matcher(lineText).matches()) {
                 return 1;
             }
 

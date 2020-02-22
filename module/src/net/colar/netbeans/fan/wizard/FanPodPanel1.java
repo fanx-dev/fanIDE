@@ -80,6 +80,11 @@ public final class FanPodPanel1 extends JPanel
 
         buildFileCheckbox.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(buildFileCheckbox, org.openide.util.NbBundle.getMessage(FanPodPanel1.class, "FanPodPanel1.buildFileCheckbox.text")); // NOI18N
+        buildFileCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buildFileCheckboxActionPerformed(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(podDescLabel, org.openide.util.NbBundle.getMessage(FanPodPanel1.class, "FanPodPanel1.podDescLabel.text")); // NOI18N
 
@@ -143,7 +148,7 @@ public final class FanPodPanel1 extends JPanel
             }
         });
 
-        errorLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        errorLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         errorLabel.setForeground(new java.awt.Color(255, 0, 0));
         org.openide.awt.Mnemonics.setLocalizedText(errorLabel, org.openide.util.NbBundle.getMessage(FanPodPanel1.class, "FanPodPanel1.errorLabel.text")); // NOI18N
 
@@ -298,6 +303,10 @@ public final class FanPodPanel1 extends JPanel
 	{//GEN-HEADEREND:event_nameFieldActionPerformed
 		// TODO add your handling code here:
 	}//GEN-LAST:event_nameFieldActionPerformed
+
+    private void buildFileCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buildFileCheckboxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buildFileCheckboxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;
