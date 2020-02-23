@@ -68,9 +68,9 @@ public class FanDebugPathProvider extends SourcePathProvider {
     private String[] sourceRoots;
     private String[] originalRoots;
 
-    public FanDebugPathProvider() {
-        pcs = new PropertyChangeSupport(this);
-    }
+//    public FanDebugPathProvider() {
+//        pcs = new PropertyChangeSupport(this);
+//    }
 
     public FanDebugPathProvider(ContextProvider contextProvider) {
         if (!FanPlatform.isConfigured()) {
@@ -153,7 +153,7 @@ public class FanDebugPathProvider extends SourcePathProvider {
      */
     @Override
     public String getURL(String relativePath, boolean global) {
-        System.out.println("getURL: " + relativePath);
+        System.out.println("getURL: " + relativePath + ", global:"+global);
         if (relativePath.startsWith("/")) {
             relativePath = relativePath.substring(1);
         }
@@ -161,6 +161,12 @@ public class FanDebugPathProvider extends SourcePathProvider {
         //FanUtilities.logger.fine("+++ Initial path: " + relativePath);
         String path = null;
         if (relativePath != null && (relativePath.endsWith(".fan") || relativePath.endsWith(".fwt"))) {
+            
+            path = getURLPath(relativePath, null, false);
+            if (path != null) {
+                return path;
+            }
+
             // This is how the path looks, when coming from JPDA java breakpoint ("fan/myPod/Main.fan)
             if (relativePath.startsWith("fan" + "/")) {
                 path = relativePath.substring(relativePath.indexOf("/") + 1);
@@ -208,7 +214,7 @@ public class FanDebugPathProvider extends SourcePathProvider {
      * @return
      */
     private String getURLPath(String relativePath, String pod, boolean global) {
-        System.out.println("getURLPath: " + relativePath + ",pod:"+pod);
+        //System.out.println("getURLPath: " + relativePath + ",pod:"+pod);
         //System.out.println(getClass().getName() + " getUrl :" + relativePath);
         relativePath = normalize(relativePath);
         if (FanUtilities.isWindowsOS()) {

@@ -55,11 +55,10 @@ public class FanProject implements Project, ProjectInformation {
             new FanCustomizedProperties(this),
             new FanProjectProperties(this),
             new FanClassPathProvider(this),
-            new FanDebugPathProvider(),
+            //new FanDebugPathProvider(),
             new ProjectOpenedHookImpl(),
             new RecommendedTemplatesImpl(),
-            state,
-            props,});
+            });
         rp = new RequestProcessor("Resolver thread for " + dir.getName() + " Fan Project", Thread.MIN_PRIORITY,
                 true);
         name = FanProjectFactory.getPodName(FileUtil.toFile(dir));
@@ -155,7 +154,7 @@ public class FanProject implements Project, ProjectInformation {
             "Templates/Other/xhtml.xhtml",
             "Templates/Other/SQLTemplate.sql",
             "Templates/Classes/Class.java",
-            "Templates/Axon/AxonTemplate.axon",};
+            };
 
         @Override
         public String[] getPrivilegedTemplates() {

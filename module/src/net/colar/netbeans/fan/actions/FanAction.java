@@ -97,11 +97,11 @@ public abstract class FanAction {
 
     private FanExecution runPodAction(Lookup lookup, boolean debug, String clazz) 
     {
-        FileObject file = findTargetProject(lookup);
+        //FileObject file = findTargetProject(lookup);
         FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
-        if (file != null) {
-            String podName = file.getName();
-            String path = FileUtil.toFile(file.getParent()).getAbsolutePath();
+        if (true) {
+            String podName = this.getProject().getName();
+            String path = FileUtil.toFile(this.getProject().getProjectDirectory()).getAbsolutePath();
             // see if user specified custom main method
             String target = clazz == null ?
                     podName + "::" + FanProjectProperties.getProperties(project).getMainMethod()
@@ -142,9 +142,9 @@ public abstract class FanAction {
     }
 
     protected FanExecution testFileAction(Lookup lookup, String testClass) {
-        FileObject file = findTargetProject(lookup);
+        FileObject file = project.getProjectDirectory();//findTargetProject(lookup);
         if (file != null) {
-            String podName = file.getName();
+            String podName = project.getName();
             String path = FileUtil.toFile(file).getAbsolutePath();
             // see if user specified custom main method
             String target = podName + (testClass == null ? "" : "::" + testClass);
@@ -167,9 +167,14 @@ public abstract class FanAction {
     }
 
     public String getProjectName(Lookup lookup) {
-        FileObject f = findTargetProject(lookup);
-        if (f != null) return f.getName();
-        return null;
+//        String name = null;
+//        FileObject f = findTargetProject(lookup);
+//        if (f != null) {
+//            name = f.getName();
+//        }
+//        FanUtilities.logger.fine("getProjectName:"+name);
+//        return name;
+        return project.getName();
     }
 
     /**
@@ -186,7 +191,7 @@ public abstract class FanAction {
                 target = newTarget;
             }
         }
-        FileObject file = findTargetProject(lookup);
+        FileObject file = project.getProjectDirectory();//findTargetProject(lookup);
 //        FanProjectProperties props = project.getLookup().lookup(FanProjectProperties.class);
 //        boolean tales = props.isIsTalesProject();
         if (file != null) {
@@ -260,29 +265,29 @@ public abstract class FanAction {
      * @param lookup
      * @return
      */
-    private FileObject findTargetProject(Lookup lookup) {
-        FileObject file = null;
-        Node[] activatedNodes = getSelectedNodes();
-        if (activatedNodes != null && activatedNodes.length > 0) {
-            DataObject gdo = activatedNodes[0].getLookup().lookup(DataObject.class);
-            if (gdo != null && gdo.getPrimaryFile() != null) {
-                file = gdo.getPrimaryFile();
-                if (FanProjectFactory.isFanProject(file)) {
-                    return file;
-                }
-            }
-        }
-        // If we get there, current selected item is NOT a project
-        // so use the "main" one
-        // use "main project", if fan project
-        Project prj = OpenProjects.getDefault().getMainProject();
-        if (prj != null && FanProjectFactory.isFanProject(prj.getProjectDirectory())) {
-            return OpenProjects.getDefault().getMainProject().getProjectDirectory();
-        }
-        // try to fall back to the selected item project folder
-        return file == null ? null
-                : FileUtil.toFileObject(FanUtilities.getPodFolderForPath(file.getPath()));
-    }
+//    private FileObject findTargetProject(Lookup lookup) {
+//        FileObject file = null;
+//        Node[] activatedNodes = getSelectedNodes();
+//        if (activatedNodes != null && activatedNodes.length > 0) {
+//            DataObject gdo = activatedNodes[0].getLookup().lookup(DataObject.class);
+//            if (gdo != null && gdo.getPrimaryFile() != null) {
+//                file = gdo.getPrimaryFile();
+//                if (FanProjectFactory.isFanProject(file)) {
+//                    return file;
+//                }
+//            }
+//        }
+//        // If we get there, current selected item is NOT a project
+//        // so use the "main" one
+//        // use "main project", if fan project
+//        Project prj = OpenProjects.getDefault().getMainProject();
+//        if (prj != null && FanProjectFactory.isFanProject(prj.getProjectDirectory())) {
+//            return OpenProjects.getDefault().getMainProject().getProjectDirectory();
+//        }
+//        // try to fall back to the selected item project folder
+//        return file == null ? null
+//                : FileUtil.toFileObject(FanUtilities.getPodFolderForPath(file.getPath()));
+//    }
 
 //    /**
 //     * If this is a tales project, open the browser .. if not, do nothing.

@@ -190,7 +190,11 @@ public class FanNode extends FilterNode {
         }
         return desc;
     }
-
+    
+    public void setDesc(String s) {
+        desc = s;
+    }
+    
     /*private boolean isRunnable(FileObject file)
     {
         boolean result = false;
@@ -230,9 +234,10 @@ public class FanNode extends FilterNode {
      */
     public static class FanProjectNode extends FanNode {
 
-        public FanProjectNode(Project project, Node originalNode, FileObject file) {
+        public FanProjectNode(FanProject project, Node originalNode, FileObject file) {
             super(project, originalNode, new FanNodeChildren(project, originalNode), file);
             setIcon(FanProject.CUSTOMER_ICON);
+            setDesc(project.getName());
             isRoot = true;
         }
 
