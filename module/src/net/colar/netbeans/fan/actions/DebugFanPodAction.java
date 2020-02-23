@@ -16,6 +16,7 @@ import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.netbeans.spi.project.ActionProvider;
 import org.openide.util.Lookup;
+import net.colar.netbeans.fan.execution.FanJpdaThread;
 
 /**
  *
@@ -33,6 +34,8 @@ public class DebugFanPodAction extends FanAction {
   public String getCommandId() {
     return COMMAND_DEBUG_FAN_POD;
   }
+  
+  private static FanJpdaThread jpdaThread;
 
   @Override
   public void invokeAction(Lookup context) throws IllegalArgumentException {
@@ -46,9 +49,20 @@ public class DebugFanPodAction extends FanAction {
             ExecutionService.newService(
             group,
             // don't allow rerun because with the JPDA debugger part it would not work
-            descriptor.controllable(false), getProjectName(context));
+            //descriptor.controllable(false), 
+            descriptor,
+            getProjectName(context));
 
     service.run();
+    
+    if (true) {
+        if (jpdaThread != null && jpdaThread.isAlive()) {
+            jpdaThread.shutdown();
+            jpdaThread.interrupt();
+        }
+        jpdaThread = new FanJpdaThread(group);
+        jpdaThread.start();
+    }
   }
 
   @Override

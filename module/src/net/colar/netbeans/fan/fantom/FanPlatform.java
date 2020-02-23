@@ -221,7 +221,8 @@ public class FanPlatform {
         if (enableDebug) {
             // java debugger
             fanExec.addCommandArg("-Xdebug");
-            fanExec.addCommandArg("-Xrunjdwp:transport=dt_socket,address=" + debugPort + ",server=y,suspend=y");
+            //fanExec.addCommandArg("-Xrunjdwp:transport=dt_socket,address=" + debugPort + ",server=y,suspend=y");
+            fanExec.addCommandArg("-agentlib:jdwp=transport=dt_socket,address=" + debugPort + ",server=y,suspend=y");
             // fan debug
             fanExec.addCommandArg("-Dfan.debug=true");
         }

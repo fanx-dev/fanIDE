@@ -16,14 +16,15 @@ import org.openide.filesystems.URLMapper;
 
 /**
  * Helper utilities for debugger / breapoints manager.
+ *
  * @author thibautc
  */
 public class FanDebugHelper {
 
     /**
-     * Create a fan Breakpoint
-     * Fan directory structure does not matches the java packages created by Fan
-     * So I had to be a little creative with pathing.
+     * Create a fan Breakpoint Fan directory structure does not matches the java
+     * packages created by Fan So I had to be a little creative with pathing.
+     *
      * @param url
      * @param lineNb
      * @return
@@ -67,21 +68,25 @@ public class FanDebugHelper {
             bp.setHidden(false);
             bp.setSourceName(name);
             bp.setSuspend(LineBreakpoint.SUSPEND_ALL);
-            FanUtilities.logger.fine("bp class:" + bp.getPreferredClassName());
-            FanUtilities.logger.fine("bp sourceName:" + bp.getSourceName());
-            FanUtilities.logger.fine("bp lineNb:" + bp.getLineNumber());
-            FanUtilities.logger.fine("bp cond:" + bp.getCondition());
-            FanUtilities.logger.fine("bp printText:" + bp.getPrintText());
-            FanUtilities.logger.fine("bp groupName:" + bp.getGroupName());
-            FanUtilities.logger.fine("bp vMessage:" + bp.getValidityMessage());
-            FanUtilities.logger.fine("bp sourcePath:" + bp.getSourcePath());
-            FanUtilities.logger.fine("bp url:" + bp.getURL());
+
+            if (true) {
+                FanUtilities.logger.fine("bp class:" + bp.getPreferredClassName());
+                FanUtilities.logger.fine("bp sourceName:" + bp.getSourceName());
+                FanUtilities.logger.fine("bp lineNb:" + bp.getLineNumber());
+                FanUtilities.logger.fine("bp cond:" + bp.getCondition());
+                FanUtilities.logger.fine("bp printText:" + bp.getPrintText());
+                FanUtilities.logger.fine("bp groupName:" + bp.getGroupName());
+                FanUtilities.logger.fine("bp vMessage:" + bp.getValidityMessage());
+                FanUtilities.logger.fine("bp sourcePath:" + bp.getSourcePath());
+                FanUtilities.logger.fine("bp url:" + bp.getURL());
+            }
         }
         return bp;
     }
 
     /**
      * The file name alone: example: Main.fan
+     *
      * @param url
      * @return
      */
@@ -94,8 +99,8 @@ public class FanDebugHelper {
     }
 
     /**
-     * The path without the 'fan' folder
-     * ex: Main.fan  or mydir/Main.fan
+     * The path without the 'fan' folder ex: Main.fan or mydir/Main.fan
+     *
      * @param url
      * @return
      */
@@ -114,18 +119,21 @@ public class FanDebugHelper {
 
     /**
      * The pod name for the url.
+     *
      * @param url
      * @return
      */
     private static String getPod(Project prj) {
-        String pod = prj.getProjectDirectory().getName();
-        FanUtilities.logger.fine("~~~ Pod: " + pod);
-        return pod;
+        return ((FanProject)prj).getName();
+//        String pod = prj.getProjectDirectory().getName();
+        //FanUtilities.logger.fine("~~~ Pod: " + pod);
+//        return pod;
     }
 
     /**
-     * Breakpoint class filter
-     * ex: fan.Debug.Main*
+     * Breakpoint class filter ex: fan.Debug.Main
+     *
+     *
      * @param pod
      * @param path
      * @return

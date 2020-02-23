@@ -47,7 +47,7 @@ public class FanParser extends Parser {
     }
     
     public void parse (Snapshot snapshot) {
-        FanUtilities.logger.fine("parser:" + snapshot);
+        FanUtilities.logger.fine("parser:" + snapshot.getSource());
         
         this.snapshot = snapshot;
         Reader reader = new StringReader(snapshot.getText().toString ());

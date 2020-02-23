@@ -40,8 +40,8 @@ class FanLexer implements Lexer<FanTokenId> {
         String code = sb.toString();
         codeLength = code.length();
         
-        System.out.println("allStr:"+code);
-        System.out.println("code len:"+code.length());
+//        System.out.println("allStr:"+code);
+//        System.out.println("code len:"+code.length());
         
         CompilerLog support = CompilerLog.make();
         this.tokenizer = Tokenizer.make(support, Loc.makeUninit(), code, true, true, false);
@@ -58,7 +58,7 @@ class FanLexer implements Lexer<FanTokenId> {
             return null;
         }
         
-        if (true) {
+        if (false) {
             System.out.println("=== token:"+ token.kind() +
                     ", offset:"+token.loc.offset+ ", len:" + token.loc.len +
                     ", lastPos:" + lastPos + ", codeLength:"+codeLength + ", val:" + token.val);

@@ -26,6 +26,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 
@@ -37,7 +38,7 @@ public abstract class FanAction {
 
     public final ExecutionDescriptor descriptor = new ExecutionDescriptor().frontWindow(true).controllable(true).inputVisible(true).showProgress(true).showSuspended(true);
     private final FanProject project;
-    private FanJpdaThread jpdaThread = null;
+//    private FanJpdaThread jpdaThread = null;
 //    protected static Future<Integer> talesHandle;
 
     public FanAction(FanProject project) {
@@ -117,14 +118,14 @@ public abstract class FanAction {
 
             fanExec.addCommandArg(FanPlatform.FAN_CLASS);
             fanExec.addCommandArg(target);
-            if (debug) {
-                if (jpdaThread != null && jpdaThread.isAlive()) {
-                    jpdaThread.shutdown();
-                    jpdaThread.interrupt();
-                }
-                jpdaThread = new FanJpdaThread();
-                jpdaThread.start();
-            }
+//            if (debug) {
+//                if (jpdaThread != null && jpdaThread.isAlive()) {
+//                    jpdaThread.shutdown();
+//                    jpdaThread.interrupt();
+//                }
+//                jpdaThread = new FanJpdaThread();
+//                jpdaThread.start();
+//            }
 
             // Add project custom "run" arguments
             if (props != null) {
@@ -166,7 +167,9 @@ public abstract class FanAction {
     }
 
     public String getProjectName(Lookup lookup) {
-        return findTargetProject(lookup).getName();
+        FileObject f = findTargetProject(lookup);
+        if (f != null) return f.getName();
+        return null;
     }
 
     /**
@@ -279,41 +282,6 @@ public abstract class FanAction {
         // try to fall back to the selected item project folder
         return file == null ? null
                 : FileUtil.toFileObject(FanUtilities.getPodFolderForPath(file.getPath()));
-    }
-
-    class FanJpdaThread extends Thread implements Runnable {
-
-        private volatile boolean shutdown = false;
-
-        @Override
-        public void run() {
-            // start JPDA
-            FanUtilities.logger.info("Starting JPDA");
-            int port = FanPlatform.debugPort();
-            try {
-                for (int i = 0; i != 15 && !shutdown; i++) {
-                    // TODO: this is kinda ugly - Use JPDASupport instead ??
-                    try {
-                        JPDADebugger debugger = JPDADebugger.attach("localhost", port, new Object[0]);
-                        // if connected, then we are good
-                        return;
-                    } catch (DebuggerStartException e) {
-                        FanUtilities.logger.fine("Failed connecting to debugger, will try again: " + e);
-                        if (i == 14) {
-                            FanUtilities.logger.throwing("Failed connecting to Debugger", "fan jpda", e);
-                        }
-                    }
-//                    Thread.yield();
-                    Thread.sleep(1000);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void shutdown() {
-            shutdown = true;
-        }
     }
 
 //    /**

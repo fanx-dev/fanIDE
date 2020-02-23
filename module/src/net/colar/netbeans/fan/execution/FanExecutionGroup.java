@@ -46,10 +46,17 @@ public class FanExecutionGroup implements Callable<Process> {
      * @return
      * @throws Exception
      */
+    @Override
     public Process call() throws Exception {
         FanExecutionGrpThread thread = new FanExecutionGrpThread();
         thread.start();
         return thread.getGroupProcess();
+    }
+    
+    private int curCmd = 0;
+    private volatile int runState = 0;
+    public boolean isLaunchFinished() {
+        return runState > 0;
     }
 
     // #########################################################################
@@ -58,18 +65,18 @@ public class FanExecutionGroup implements Callable<Process> {
      */
     class FanExecutionGrpThread extends Thread {
 
-        int exitValue = -1;
-        volatile boolean done = false;
+        private int exitValue = -1;
+        private volatile boolean done = false;
         // Using Piped Streams to append each subprocess output into one common
         // output for the whole execution group
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        PipedInputStream globalInput = new PipedInputStream();
-        PipedOutputStream globalOutput;
+        private ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        private PipedInputStream globalInput = new PipedInputStream();
+        private PipedOutputStream globalOutput;
         // Whole procfess (all commands)
-        Process process = new FanExecGrpProcess();
+        private Process process = new FanExecGrpProcess();
         // Currently running subprocess
-        Process curSubprocess = null;
-
+        private Process curSubprocess = null;
+        
         public FanExecutionGrpThread() {
             try {
                 globalOutput = new PipedOutputStream(globalInput);
@@ -81,32 +88,32 @@ public class FanExecutionGroup implements Callable<Process> {
         @Override
         public void run() {
             done = false;
-            for (FanExecution cmd : cmds) {
+            for (curCmd=0; curCmd<cmds.size(); ++curCmd) {
                 try {
+                    FanExecution cmd = cmds.get(curCmd);
                     ExternalProcessBuilder processBuilder = cmd.buildProcess();
                     // We send errorStream into outputStream -> simpler handling
                     processBuilder.redirectErrorStream(true);
                     curSubprocess = processBuilder.call();
                     final InputStream processStream = curSubprocess.getInputStream();
                     /*
-					 * Start Internal thread that reads all the subprocess output
-					 * and append it to the global output stream
+                    * Start Internal thread that reads all the subprocess output
+                    * and append it to the global output stream
                      */
-                    new Thread(
-                            new Runnable() {
-
+                    new Thread(){
                         public void run() {
                             int i = 0;
                             try {
                                 while ((i = processStream.read()) != -1) {
                                     globalOutput.write(i);
                                     globalOutput.flush();
+                                    if (runState == 0 && curCmd == cmds.size()-1) runState = 1;
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
-                    }).start();
+                    }.start();
                     // End internal stream reader thread
 
                     curSubprocess.waitFor();
