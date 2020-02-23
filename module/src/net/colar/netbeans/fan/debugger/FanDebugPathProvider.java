@@ -355,10 +355,12 @@ public class FanDebugPathProvider extends SourcePathProvider {
      */
     @Override
     public synchronized String getSourceRoot(String url) {
+        System.out.println("getSourceRoot:"+url);
         FileObject fo;
         try {
             fo = URLMapper.findFileObject(new java.net.URL(url));
         } catch (java.net.MalformedURLException ex) {
+            ex.printStackTrace();
             fo = null;
         }
 

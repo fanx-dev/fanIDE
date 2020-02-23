@@ -1,7 +1,6 @@
 /*
  * Thibaut Colar Aug 21, 2009
  */
-
 package net.colar.netbeans.fan.project.path;
 
 import java.beans.PropertyChangeListener;
@@ -14,41 +13,37 @@ import org.openide.filesystems.FileObject;
  *
  * @author thibautc
  */
-public class FanPathResourceImpl implements PathResourceImplementation
-{
-	private URL[] roots;
+class FanPathResourceImpl implements PathResourceImplementation {
 
-	public FanPathResourceImpl(FileObject file)
-	{
-		try
-		{
-			roots = new URL[1];
-			roots[0] = file.getURL();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			roots = new URL[0];
-		}
-	}
+    private URL[] roots;
 
-	public URL[] getRoots()
-	{
-		//System.out.println(getClass().getName()+" -> getroots");
-		return roots;
-	}
+    public FanPathResourceImpl(FileObject file) {
+        try {
+            roots = new URL[1];
+            roots[0] = file.getURL();
+        } catch (Exception e) {
+            e.printStackTrace();
+            roots = new URL[0];
+        }
+    }
 
-	public ClassPathImplementation getContent()
-	{
-		//System.out.println(getClass().getName()+" -> getContent ");
-		return null;
-	}
+    @Override
+    public URL[] getRoots() {
+        //System.out.println(getClass().getName()+" -> getroots");
+        return roots;
+    }
 
-	public void addPropertyChangeListener(PropertyChangeListener arg0)
-	{
-	}
+    @Override
+    public ClassPathImplementation getContent() {
+        //System.out.println(getClass().getName()+" -> getContent ");
+        return null;
+    }
 
-	public void removePropertyChangeListener(PropertyChangeListener arg0)
-	{
-	}
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener arg0) {
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener arg0) {
+    }
 }

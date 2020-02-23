@@ -64,7 +64,7 @@ public class FanClassPathProvider implements ClassPathProvider, PropertyChangeLi
         // No need for that, already added by NB platform
         // causes error if added again.
         // Jdk sources
-		/*
+        /*
          * JavaPlatform platform =
          * JavaPlatformManager.getDefault().getDefaultPlatform(); if (platform
          * != null) { ClassPath cp = platform.getSourceFolders(); if (cp !=

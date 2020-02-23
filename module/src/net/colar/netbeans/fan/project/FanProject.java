@@ -8,7 +8,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Properties;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import net.colar.netbeans.fan.debugger.FanDebugPathProvider;
 import net.colar.netbeans.fan.project.path.FanClassPathProvider;
 import org.netbeans.api.annotations.common.StaticResource;
 import org.netbeans.api.java.classpath.ClassPath;
