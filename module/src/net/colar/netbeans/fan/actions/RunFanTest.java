@@ -6,7 +6,7 @@ package net.colar.netbeans.fan.actions;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.project.FanProject;
 import org.netbeans.spi.project.ActionProvider;
 import org.openide.filesystems.FileObject;

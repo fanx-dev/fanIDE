@@ -9,6 +9,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.lexer.FanTokenId;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.modules.csl.api.Formatter;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.spi.Context;
@@ -33,11 +34,6 @@ public class FanFormatter implements Formatter {
 //    public static final TokenName[] INSIGNIFICANT_TOKENS = {TokenName.WHITESPACE, TokenName.LF,
 //        TokenName.COMMENT, TokenName.DOC};
     
-    public static int getIndentSize(Document document)
-    {
-        return new Integer(FanPlatformSettings.getInstance().get(FanPlatformSettings.PREF_FMT_IDENT_SIZE, "2")).intValue();
-    }
-
     @Override
     public boolean needsParserResult() {
         return false;
@@ -55,7 +51,7 @@ public class FanFormatter implements Formatter {
 
     @Override
     public int indentSize() {
-        return getIndentSize(null); // Fan convention
+        return FanUtilities.getIndentSize(null); // Fan convention
     }
 
     @Override

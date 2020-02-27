@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 import net.colar.netbeans.fan.indexer.FanIndex;
-import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
+import net.colar.netbeans.fan.parser.FanParserResult;
 import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.csl.api.Hint;
 import org.netbeans.modules.csl.api.HintFix;

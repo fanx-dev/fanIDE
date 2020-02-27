@@ -4,7 +4,7 @@
  */
 package net.colar.netbeans.fan.editor;
 
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.lexer.FanTokenId;
 import net.colar.netbeans.fan.lexer.FanTokenId.TokenKind;
 import org.netbeans.api.lexer.InputAttributes;

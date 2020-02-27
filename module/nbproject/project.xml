@@ -363,6 +363,14 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.openide.filesystems.nb</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>9.17</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.openide.loaders</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -441,19 +449,7 @@
                     </test-dependency>
                 </test-type>
             </test-dependencies>
-            <public-packages>
-                <package>fan.parser</package>
-                <package>fan.std</package>
-                <package>fan.sys</package>
-                <package>fanjardist</package>
-                <package>fanx.emit</package>
-                <package>fanx.fcode</package>
-                <package>fanx.interop</package>
-                <package>fanx.main</package>
-                <package>fanx.test</package>
-                <package>fanx.tools</package>
-                <package>fanx.util</package>
-            </public-packages>
+            <public-packages/>
             <class-path-extension>
                 <runtime-relative-path>ext/parser.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/parser.jar</binary-origin>

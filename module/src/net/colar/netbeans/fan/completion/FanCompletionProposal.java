@@ -3,6 +3,8 @@
  */
 package net.colar.netbeans.fan.completion;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import org.netbeans.modules.csl.api.CompletionProposal;
@@ -20,7 +22,7 @@ public abstract class FanCompletionProposal implements CompletionProposal {
     protected int anchor;
     protected ElementHandle element;
     protected String name;
-    protected Set<Modifier> modifiers;
+    protected Set<Modifier> modifiers = Collections.emptySet();
     protected ElementKind kind;
     protected ImageIcon icon;
     private int prio = 5;
@@ -65,13 +67,7 @@ public abstract class FanCompletionProposal implements CompletionProposal {
 
     @Override
     public String getRhsHtml(HtmlFormatter formater) {
-        if (element != null) {
-            String in = element.getIn();
-            if (in != null) {
-                formater.appendText(null);
-            }
-        }
-        return formater.getText();
+        return getLhsHtml(formater);
     }
 
     @Override

@@ -6,11 +6,18 @@
 package net.colar.netbeans.fan.indexer;
 
 import fan.parser.CNamespace;
+import fan.parser.CPod;
 import fan.parser.CTypeDef;
+import fan.parser.FPodNamespace;
+import fan.parser.Loc;
+import fan.parser.TypeMixin;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.colar.netbeans.fan.fantom.FanPlatform;
+import net.colar.netbeans.fan.utils.FanUtilities;
 
 /**
  * Indexer queries (for Java types) - reuisng builtin java indexer (lucene)
@@ -23,12 +30,79 @@ public class FanIndex
     private Map<String, List<CTypeDef>> prefixMap = new HashMap<String, List<CTypeDef>>();
     
     private CNamespace namespace;
-
+    private boolean indexInited = false;
+    
+    private fan.parser.CNamespace getNamespace() {
+        if (!FanPlatform.isConfigured()) {
+            return null;
+        }
+        if (namespace == null) {
+            String dir = FanPlatform.getInstance().getFanHome().getPath() + "/lib/fan";
+            fan.std.File dirF = fan.std.File.os(dir);
+            namespace = fan.parser.FPodNamespace.make(dirF);
+        }
+        return namespace;
+    }
+    
+    
     public static FanIndex get() { return instance; }
     
+    public synchronized void indexNamespace() {
+        final fan.parser.CNamespace ns = getNamespace();
+        if (ns == null) return;
+        if (indexInited) {
+            ns.checkUpdate();
+            return;
+        }
+        indexInited = true;
+        
+        new Thread() {
+            @Override
+            public void run() {
+                doIndexNamespace(ns);
+            }
+        }.start();
+    }
+    
+    private void doIndexNamespace(fan.parser.CNamespace ns) {
+
+        if (ns instanceof FPodNamespace) {
+            fan.std.File file = ((FPodNamespace)ns).dir;
+            if (file != null) {
+                fan.sys.List list = file.list();
+                for (int i=0; i<list.size(); ++i) {
+                    fan.std.File podFile = (fan.std.File)list.get(i);
+                    String podName = podFile.basename();
+                    try {
+                        synchronized(this) {
+                            CPod pod = namespace.resolvePod(podName, Loc.makeUninit());
+
+                            FanUtilities.logger.fine("index pod:"+pod.name());
+
+                            fan.sys.List types = pod.types();
+                            
+                            for (int j=0; j<types.size(); ++j) {
+                                CTypeDef type = (CTypeDef)types.get(j);
+                                if (fan.parser.TypeMixin$.isSynthetic(type)) continue;
+                                FanIndex.get().put(type);
+                            }
+                        }
+                    } catch (Exception e) {
+                        FanUtilities.logger.warning("load pod error:"+podName);
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+    
     public synchronized List<CTypeDef> findPodTypes(String pod, String prefix) {
-        fan.sys.List types = namespace.findPod(pod).types();
         List<CTypeDef> found = new ArrayList<CTypeDef>();
+        CNamespace namespace = getNamespace();
+        if (namespace == null) return found;
+        
+        fan.sys.List types = namespace.resolvePod(pod, Loc.makeUninit()).types();
+        
         for (int i=0; i<types.size(); ++i) {
             CTypeDef t = (CTypeDef)types.get(i);
             if (t.name().startsWith(prefix)) {
@@ -39,7 +113,23 @@ public class FanIndex
     }
     
     public synchronized List<String> findPod(String prefix) {
-        return null;
+        List<String> res = new ArrayList<>();
+        CNamespace namespace = getNamespace();
+        if (namespace == null) return res;
+        
+        if (namespace instanceof FPodNamespace) {
+            fan.std.File file = ((FPodNamespace)namespace).dir;
+            if (file != null) {
+                fan.sys.List list = file.list();
+                for (int i=0; i<list.size(); ++i) {
+                    fan.std.File podFile = (fan.std.File)list.get(i);
+                    if (podFile.basename().startsWith(prefix)) {
+                        res.add(podFile.basename());
+                    }
+                }
+            }
+        }
+        return res;
     }
 
     /**
@@ -61,7 +151,9 @@ public class FanIndex
     }
 
     public synchronized List<CTypeDef> findAllFantomTypes(String prefix) {
-        return prefixMap.get(prefix);
+        List<CTypeDef> res = prefixMap.get(prefix);
+        if (res == null) return Collections.emptyList();
+        return res;
     }
     
     public synchronized void put(CTypeDef type) {

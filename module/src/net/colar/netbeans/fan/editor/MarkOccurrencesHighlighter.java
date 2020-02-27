@@ -67,13 +67,16 @@ public class MarkOccurrencesHighlighter implements CaretListener {
                 public void run() {
                     try {
                         String selection = comp.getSelectedText();
-                        if (selection != null) {
-                            Pattern p = Pattern.compile(selection);
-                            Matcher m = p.matcher(comp.getText());
-                            while (m.find() == true) {
-                                int startOffset = m.start();
-                                int endOffset = m.end();
+                        if (selection != null && selection.length() < 128) {
+                            int pos = 0;
+                            int len = selection.length();
+                            String text = comp.getText();
+                            while (pos < text.length()) {
+                                int startOffset = text.indexOf(selection, pos);
+                                if (startOffset == -1) break;
+                                int endOffset = startOffset+len;
                                 bag.addHighlight(startOffset, endOffset, defaultColors);
+                                pos += len;
                             }
                         }
                     } catch (Exception e) {

@@ -30,14 +30,16 @@ public class FanTypeProposal extends FanCompletionProposal {
             this.name = forcedName;
         }
         this.anchor = anchor;
-        this.modifiers = Collections.emptySet();
         this.kind = ElementKind.CLASS;
         icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/resources/fan.png", false);
         if (isJava) {
             icon = ImageUtilities.loadImageIcon("net/colar/netbeans/fan/project/resources/java.png", false);
         }
         FanElementHandle handle = new FanElementHandle(name, kind);
-        //handle.setDoc(type.doc().toStr());
+        
+        if (type.doc() != null) {
+            handle.setDoc(type.doc().toStr());
+        }
         element = handle;
     }
 

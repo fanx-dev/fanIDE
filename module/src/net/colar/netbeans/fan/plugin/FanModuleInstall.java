@@ -1,7 +1,7 @@
 /*
  * Thibaut Colar Dec 18, 2009
  */
-package net.colar.netbeans.fan;
+package net.colar.netbeans.fan.plugin;
 
 import fanjardist.Main;
 import net.colar.netbeans.fan.utils.FanUtilities;

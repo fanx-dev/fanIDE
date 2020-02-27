@@ -50,10 +50,11 @@ public class FanDebugHelper {
                 bp.setSourcePath(path);
                 bp.setPrintText(path);
             } else {
-                bp.setSourcePath("fan/" + pod + "/" + name);
-                bp.setPrintText("[" + pod + "] " + "/" + path);
                 String filter = getClassFilter(pod, name);
                 bp.setPreferredClassName(filter);
+                //bp.setSourcePath("fan/" + pod + "/" + name);
+                bp.setSourcePath(path);
+                bp.setPrintText(path);
                 /*
                  * SourcePath is required to match path in jar (LineBreakPointImpl check this)
                  * so we have no choice but to give that path rather than the 'real' path
@@ -61,7 +62,6 @@ public class FanDebugHelper {
                  * given this 'jar' path.
                  * The binary path is fan.{podname}.{typename}
                  */
-                bp.setSourcePath("fan/" + pod + "/" + name);
             }
 
             bp.setStratum("Fan");
@@ -69,7 +69,7 @@ public class FanDebugHelper {
             bp.setSourceName(name);
             bp.setSuspend(LineBreakpoint.SUSPEND_ALL);
 
-            if (true) {
+            if (false) {
                 FanUtilities.logger.fine("bp class:" + bp.getPreferredClassName());
                 FanUtilities.logger.fine("bp sourceName:" + bp.getSourceName());
                 FanUtilities.logger.fine("bp lineNb:" + bp.getLineNumber());
@@ -108,10 +108,10 @@ public class FanDebugHelper {
         FileObject fo = getUrlFo(url);
         String relativePath = url;
         if (fo != null) {
-            FileObject srcFolder = prjDir;
-            if (srcFolder != null) {
-                prjDir = srcFolder;
-            }
+//            FileObject srcFolder = prjDir;
+//            if (srcFolder != null) {
+//                prjDir = srcFolder;
+//            }
             relativePath = FileUtil.getRelativePath(prjDir, fo);
         }
         return relativePath;
@@ -124,7 +124,7 @@ public class FanDebugHelper {
      * @return
      */
     private static String getPod(Project prj) {
-        return ((FanProject)prj).getName();
+        return ((FanProject) prj).getName();
 //        String pod = prj.getProjectDirectory().getName();
         //FanUtilities.logger.fine("~~~ Pod: " + pod);
 //        return pod;

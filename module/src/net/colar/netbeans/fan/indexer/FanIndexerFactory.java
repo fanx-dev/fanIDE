@@ -21,8 +21,6 @@ public class FanIndexerFactory extends EmbeddingIndexerFactory{
 
     private FanEmbeddingIndexer embeddingIndexer = new FanEmbeddingIndexer();
     
-    public static boolean sysPodIsIndexed = false;
-    
     /**
      * Creates  new {@link Indexer}.
      * @param indexing for which the indexer should be created
@@ -30,6 +28,7 @@ public class FanIndexerFactory extends EmbeddingIndexerFactory{
      * @return an indexer
      */
     public EmbeddingIndexer createIndexer (final Indexable indexable, final Snapshot snapshot) {
+        FanUtilities.logger.info("createIndexer");
         return embeddingIndexer;
     }
     
@@ -70,17 +69,14 @@ public class FanIndexerFactory extends EmbeddingIndexerFactory{
     @Override
     public void scanFinished(Context cntxt) {
         FanUtilities.logger.info("FanEmbeddingIndexerFactory: scanFinished");
-        sysPodIsIndexed = true;
     }
 
     @Override
     public boolean scanStarted(Context context) {
         FanUtilities.logger.info("FanEmbeddingIndexerFactory: scanStarted:" + context.getRootURI());
         
-        //IndexerHelper.indexAllPods();
-        
         FileObject root = context.getRoot();
-        //embeddingIndexer.indexSrcFolder(root, 0);
+        IndexerHelper.index(root);
         return true;
     }
     

@@ -110,7 +110,7 @@ public final class FanProjectFactory implements ProjectFactory2 {
             }
             String[] fs = line.split("=", 2);
             if (fs.length != 2) {
-                System.out.println("ERROR read:" + line);
+                //System.out.println("ERROR read:" + line);
                 continue;
             }
             String key = fs[0].trim();

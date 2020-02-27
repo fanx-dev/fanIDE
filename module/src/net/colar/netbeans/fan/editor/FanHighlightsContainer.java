@@ -11,7 +11,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.utils.FantomConstants;
 import org.netbeans.api.editor.mimelookup.MimeLookup;

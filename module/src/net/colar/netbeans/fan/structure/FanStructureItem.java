@@ -19,6 +19,7 @@ import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.StructureItem;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.openide.filesystems.FileObject;
 
 /**
  * Implementation of a StructureItem Represents an item(ex: class) as found by
@@ -48,15 +49,21 @@ public class FanStructureItem implements StructureItem {
         // then we find those tokens by index in tokenStream (from lexer)
         // from that we can find start and end location of struct. text in source file.
         Loc range = node.loc();
-        start = range.offset().intValue();
-        stop = start + range.len().intValue();
-        this.handle = new FanElementHandle(kind, node, result, new OffsetRange(start, stop));
+        start = (int)range.offset;
+        stop = start + (int)range.len;
+        
+        FileObject file = null;
+        if (result.getSnapshot().getSource() != null) {
+            file = result.getSnapshot().getSource().getFileObject();
+        }
+        this.handle = new FanElementHandle(kind, node, file);
         
         if (node instanceof fan.parser.TypeDef) {
             fan.parser.TypeDef type = (fan.parser.TypeDef)node;
             for (int j=0; j<type.slotDefs().size(); ++j) {
                 SlotDef slot = (SlotDef)type.slotDefs().get(j);
                 if (slot.isGetter() || slot.isSetter() || slot.isOverload()) continue;
+                if (slot.isSynthetic()) continue;
 
                 ElementKind skind = (slot instanceof fan.parser.FieldDef) ? ElementKind.FIELD : ElementKind.METHOD;
                 FanStructureItem sitem = new FanStructureItem(slot, skind, result);
@@ -72,7 +79,7 @@ public class FanStructureItem implements StructureItem {
 
     @Override
     public String getSortText() {
-        return getName();
+        return "";
     }
 
     @Override

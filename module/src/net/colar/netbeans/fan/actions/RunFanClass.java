@@ -4,7 +4,7 @@
  */
 package net.colar.netbeans.fan.actions;
 
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.project.FanProject;
 import org.netbeans.spi.project.ActionProvider;
 import org.openide.loaders.DataObject;

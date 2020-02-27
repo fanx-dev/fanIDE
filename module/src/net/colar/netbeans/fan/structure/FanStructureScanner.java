@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.text.Document;
 import net.colar.netbeans.fan.parser.FanParser;
+import net.colar.netbeans.fan.parser.FanParserResult;
 import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
@@ -27,9 +28,16 @@ import org.netbeans.modules.csl.api.StructureScanner.Configuration;
 import org.netbeans.modules.csl.spi.ParserResult;
 
 public class FanStructureScanner implements StructureScanner {
+    public static final String CODE_FOLDS = "codeblocks";
+    public static final String DOC_FOLDS = "comments";
+    public static final String COMMENT_FOLDS = "comments";
+    public static final String IMPORT_FOLDS = "imports";
+    
+    private Configuration config = new Configuration(false, true);
+    
     @Override
     public List<? extends StructureItem> scan(ParserResult pr) {
-        FanParser.FanParserResult res = (FanParser.FanParserResult)pr;
+        FanParserResult res = (FanParserResult)pr;
         CompilationUnit unit = res.getCUnit();
         List<StructureItem> list =  new ArrayList<>();
         for (int i=0; i<unit.types().size(); ++i) {
@@ -42,10 +50,30 @@ public class FanStructureScanner implements StructureScanner {
     }
     @Override
     public Map<String, List<OffsetRange>> folds(ParserResult pr) {
-        return new HashMap<>();
+        Map<String, List<OffsetRange>> folds = new HashMap<String, List<OffsetRange>>();
+        
+//        FanParser.FanParserResult res = (FanParser.FanParserResult)pr;
+//        CompilationUnit unit = res.getCUnit();
+//        for (int i=0; i<unit.types().size(); ++i) {
+//            TypeDef type = (TypeDef)unit.types().get(i);
+//            List<OffsetRange> fold = folds.get(CODE_FOLDS);
+//            if (fold == null) {
+//                fold = new ArrayList<OffsetRange>();
+//                folds.put(CODE_FOLDS, fold);
+//            }
+//            fold.add(new OffsetRange((int)type.loc.offset, (int)type.loc.end()));
+//            
+//            
+//            for (int j=0; j<type.slotDefs().size(); ++j) {
+//                SlotDef slot = (SlotDef)type.slotDefs().get(j);
+//                if (slot.isGetter() || slot.isSetter() || slot.isOverload()) continue;
+//                fold.add(new OffsetRange((int)slot.loc.offset, (int)slot.loc.end()));
+//            }
+//        }
+        return folds;
     }
     @Override
     public Configuration getConfiguration() {
-        return null;
+        return config;
     }
 }

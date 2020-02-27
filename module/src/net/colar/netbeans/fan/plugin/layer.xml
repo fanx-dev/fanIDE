@@ -53,14 +53,14 @@
                         <attr name="position" intvalue="1200"/>
                     </file>
                 </folder>
-                <folder name="Factories">
+<!--                <folder name="Factories">
                     <file name="DummyDataLoader.instance">
                         <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/net/colar/netbeans/fan/resources/fanFile.png"/>
-                        <attr name="dataObjectClass" stringvalue="net.colar.netbeans.fan.FanDataObject"/>
+                        <attr name="dataObjectClass" stringvalue="net.colar.netbeans.fan.plugin.FanDataObject"/>
                         <attr name="instanceCreate" methodvalue="org.openide.loaders.DataLoaderPool.factory"/>
                         <attr name="mimeType" stringvalue="text/x-fan"/>
                     </file>
-                </folder>
+                </folder>-->
             </folder>
         </folder>
     </folder>
@@ -103,9 +103,9 @@
     <folder name="CslPlugins">
         <folder name="text">
             <folder name="x-fan">
-                <file name="language.instance">
-                    <attr name="instanceClass" stringvalue="net.colar.netbeans.fan.FanLanguage"/>
-                </file>
+<!--                <file name="language.instance">
+                    <attr name="instanceClass" stringvalue="net.colar.netbeans.fan.plugin.FanLanguage"/>
+                </file>-->
                 <file name="structure.instance">
                     <attr name="instanceClass" stringvalue="net.colar.netbeans.fan.structure.FanStructureScanner"/>
                 </file>
@@ -140,7 +140,7 @@
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="net.colar.netbeans.fan.plugin.Bundle"/>
                 <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/net/colar/netbeans/fan/resources/fan.png"/>
                 <attr name="templateWizardURL" urlvalue="nbresloc:/net/colar/netbeans/fan/templates/FanBuildDesc.html"/>
-                <attr name="instantiatingIterator" newvalue="net.colar.netbeans.fan.wizard.NewTestWizardIterator"/>
+                <!--<attr name="instantiatingIterator" newvalue="net.colar.netbeans.fan.wizard.NewFileWizardIterator"/>-->
                 <!--Use this line only if your template makes use of the FreeMarker template language:-->
             </file>
         </folder>

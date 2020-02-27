@@ -7,7 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.Set;
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.Breakpoint;

@@ -7,6 +7,8 @@ package net.colar.netbeans.fan.utils;
 import java.io.File;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
+import javax.swing.text.Document;
+import net.colar.netbeans.fan.fantom.FanPlatformSettings;
 import net.colar.netbeans.fan.project.FanProjectFactory;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -145,5 +147,10 @@ public class FanUtilities
             folder = folder.getParentFile();
         }
         return null;
+    }
+    
+    public static int getIndentSize(Document document)
+    {
+        return new Integer(FanPlatformSettings.getInstance().get(FanPlatformSettings.PREF_FMT_IDENT_SIZE, "2")).intValue();
     }
 }

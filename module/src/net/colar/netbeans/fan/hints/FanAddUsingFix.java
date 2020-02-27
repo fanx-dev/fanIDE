@@ -7,7 +7,7 @@ package net.colar.netbeans.fan.hints;
 
 import fan.parser.CompilationUnit;
 import fan.parser.Node;
-import net.colar.netbeans.fan.parser.FanParser.FanParserResult;
+import net.colar.netbeans.fan.parser.FanParserResult;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.RuleContext;
@@ -46,7 +46,7 @@ public class FanAddUsingFix implements HintFix
         if(unit.usings().size() > 0)
         {
             Node node = (Node)unit.usings().get(0);
-            insertIndex = node.loc().offset().intValue();
+            insertIndex = (int)node.loc().offset;
             doc.insertString(insertIndex, "using "+using+"\n", null);
             return;
         }
@@ -54,7 +54,7 @@ public class FanAddUsingFix implements HintFix
         // no existing using, then add before first typedef
         if (unit.types().size() > 0) {
             Node node = (Node)unit.types().get(0);
-            insertIndex = node.loc().offset().intValue();
+            insertIndex = (int)node.loc().offset;
             doc.insertString(insertIndex, "using "+using+"\n", null);
             return;
         }

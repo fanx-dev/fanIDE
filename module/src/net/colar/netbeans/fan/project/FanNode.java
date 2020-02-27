@@ -6,6 +6,7 @@ package net.colar.netbeans.fan.project;
 
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
 import org.openide.util.lookup.Lookups;
 import org.openide.actions.*;
+import org.openide.filesystems.*;
 import org.openide.nodes.FilterNode;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -168,10 +170,23 @@ public class FanNode extends FilterNode {
 
     @Override
     public Image getIcon(int type) {
+        java.awt.Image img;
         if (icon == null) {
-            return super.getIcon(type);
+            img = super.getIcon(type);
         }
-        return ImageUtilities.loadImage(icon);
+        else {
+            img =  ImageUtilities.loadImage(icon);
+        }
+
+        if(file != null) {
+            try {
+                img = FileUIUtils.getImageDecorator(file.getFileSystem())
+                        .annotateIcon(img, type, Collections.singleton(file));
+            } catch (FileStateInvalidException e) {
+                // no fs, do nothing
+            }
+        }
+        return img;
     }
 
     @Override

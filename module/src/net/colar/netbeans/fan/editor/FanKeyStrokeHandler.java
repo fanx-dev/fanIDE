@@ -11,7 +11,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
@@ -34,13 +35,13 @@ public class FanKeyStrokeHandler implements KeystrokeHandler {
 
     @Override
     public boolean beforeCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException {
-        System.out.println("beforeBreak");
+        //System.out.println("beforeCharInserted");
         return false;
     }
 
     @Override
     public boolean afterCharInserted(Document document, int caretOffset, JTextComponent target, char car) throws BadLocationException {
-        System.out.println("beforeBreak");
+        //System.out.println("afterCharInserted");
         return false;
     }
 
@@ -51,17 +52,33 @@ public class FanKeyStrokeHandler implements KeystrokeHandler {
 
     @Override
     public int beforeBreak(Document document, int caretOffset, JTextComponent target) throws BadLocationException {
-        System.out.println("beforeBreak");
+        //System.out.println("beforeBreak");
 
         // Deal with indentation
         BaseDocument doc = (BaseDocument) document;
 
         int lineBegin = Utilities.getRowStart(doc, caretOffset);
-//        int lineEnd = Utilities.getRowEnd(doc, caretOffset);
+        int lineEnd = Utilities.getRowEnd(doc, caretOffset);
+        int indentSize = FanUtilities.getIndentSize(document);
 //        String line = null;
-//        if (lineBegin > -1 && lineEnd > lineBegin) {
+//        if (lineBegin > -1 && lineEnd > lineBegin)
+//        {
 //            line = doc.getText(lineBegin, lineEnd - lineBegin);
 //        }
+        String lineHead = doc.getText(lineBegin, caretOffset - lineBegin);
+        String lineTail = doc.getText(caretOffset, lineEnd - caretOffset);
+        if (lineHead.endsWith("{") && lineTail.startsWith("}")) {
+            int indent = 0;
+            if (lineBegin > 0) {
+                indent = IndentUtils.lineIndent(document, lineBegin);
+            }
+            String indentStr = createIndentString(document, indent+indentSize);
+            indentStr += "\n" + createIndentString(document, indent);
+            doc.insertString(caretOffset, indentStr, null);
+            Caret caret = target.getCaret();
+            caret.setDot(caretOffset);
+            return caretOffset + indent+indentSize + 1;
+        }
 
         // standard indent (same as the line we pressed return on)
         int indent = 0;

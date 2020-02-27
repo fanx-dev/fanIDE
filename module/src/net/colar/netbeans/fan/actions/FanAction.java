@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
 import javax.swing.JOptionPane;
-import net.colar.netbeans.fan.FanLanguage;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.fantom.FanPlatform;
 import net.colar.netbeans.fan.project.FanProjectFactory;
@@ -82,7 +82,7 @@ public abstract class FanAction {
     }
 
     protected FanExecution testPodAction(Lookup lookup) {
-        return buildAction(lookup, "test");
+        return testFileAction(lookup, null);
     }
 
     protected FanExecution customBuildAction(Lookup lookup, String buildTarget) {

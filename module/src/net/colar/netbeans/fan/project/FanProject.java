@@ -4,6 +4,7 @@
  */
 package net.colar.netbeans.fan.project;
 
+import fan.parser.IncCompiler;
 import java.beans.PropertyChangeListener;
 import java.util.Properties;
 import javax.swing.Icon;
@@ -43,6 +44,8 @@ public class FanProject implements Project, ProjectInformation {
     private final RequestProcessor rp;
     private final Properties props = new Properties();
     private String name;
+    
+    public IncCompiler compiler = null;
 
     public FanProject(FileObject dir, ProjectState state) {
         // Most projects "services" are registered through the lookup.

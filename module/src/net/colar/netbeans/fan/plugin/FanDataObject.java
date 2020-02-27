@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.colar.netbeans.fan;
+package net.colar.netbeans.fan.plugin;
 
 import java.io.IOException;
 import org.openide.filesystems.FileObject;

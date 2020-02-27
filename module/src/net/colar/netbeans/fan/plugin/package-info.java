@@ -9,7 +9,7 @@
     iconBase="net/colar/netbeans/fan/resources/fantom_options.png",
     position=799
 )
-package net.colar.netbeans.fan;
+package net.colar.netbeans.fan.plugin;
 
 import org.netbeans.spi.options.OptionsPanelController;
 import net.colar.netbeans.fan.wizard.FanMainSettingsController;

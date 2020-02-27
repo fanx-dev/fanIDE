@@ -5,9 +5,11 @@
  */
 package net.colar.netbeans.fan.structure;
 
+import fan.parser.Loc;
 import fan.sys.FanObj;
 import java.util.HashSet;
 import java.util.Set;
+import net.colar.netbeans.fan.plugin.FanLanguage;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.Modifier;
@@ -23,18 +25,22 @@ import org.openide.filesystems.FileObject;
  */
 public class FanElementHandle implements ElementHandle {
 
-    private Source source;
+    private FileObject file;
     private fan.parser.CNode node;
     private ElementKind kind;
     private OffsetRange offsetRange;
     private Set<Modifier> modifiers = new HashSet<Modifier>();
     private String name;
+    private String doc;
 
-    public FanElementHandle(ElementKind kind, fan.parser.CNode node, ParserResult result, OffsetRange range) {
+    public FanElementHandle(ElementKind kind, fan.parser.CNode node, FileObject file) {
         this.node = node;
-        this.source = result.getSnapshot().getSource();
+        this.file = file;
         this.kind = kind;
-        this.offsetRange = range;
+        
+        int start = (int)node.loc().offset;
+        int stop = start + (int)node.loc().len;
+        this.offsetRange = new OffsetRange(start, stop);
         this.name = (String)FanObj.trap(node, "name");
     }
     
@@ -42,15 +48,23 @@ public class FanElementHandle implements ElementHandle {
         this.kind = kind;
         this.name = name;
     }
+    
+    public String getDoc() {
+        return doc;
+    }
+
+    public void setDoc(String doc) {
+        this.doc = doc;
+    }
 
     @Override
     public FileObject getFileObject() {
-        return source.getFileObject();
+        return file;
     }
 
     @Override
     public String getMimeType() {
-        return source.getMimeType();
+        return FanLanguage.FAN_MIME_TYPE;
     }
 
     @Override

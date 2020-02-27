@@ -96,7 +96,7 @@ class FanLexer implements Lexer<FanTokenId> {
             fkind = FanTokenId.TokenKind.symbol;
         }
         
-        int offset = token.loc.offset.intValue() + token.loc.len.intValue();
+        int offset = (int)(token.loc.offset + token.loc.len);
         int len = offset - lastPos;
         
         org.netbeans.api.lexer.Token<FanTokenId> ftoken = info.tokenFactory().createToken(

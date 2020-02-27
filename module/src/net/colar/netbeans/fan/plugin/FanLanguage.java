@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.colar.netbeans.fan;
+package net.colar.netbeans.fan.plugin;
 
 import net.colar.netbeans.fan.lexer.FanTokenId;
 import net.colar.netbeans.fan.utils.FanUtilities;
@@ -77,7 +77,7 @@ public class FanLanguage extends DefaultLanguageConfig
     @Override
     public boolean hasStructureScanner()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -91,12 +91,12 @@ public class FanLanguage extends DefaultLanguageConfig
     {
         return new FanKeyStrokeHandler();
     }
-
-    @Override
-    public SemanticAnalyzer getSemanticAnalyzer()
-    {
-        return new FanSemanticAnalyzer();
-    }
+//
+//    @Override
+//    public SemanticAnalyzer getSemanticAnalyzer()
+//    {
+//        return new FanSemanticAnalyzer();
+//    }
 
     @Override
     public Set<String> getBinaryLibraryPathIds()
@@ -110,36 +110,36 @@ public class FanLanguage extends DefaultLanguageConfig
         return Collections.singleton(ClassPath.SOURCE);
     }
 
-    @Override
-    public Formatter getFormatter()
-    {
-        return new FanFormatter();
-    }
-
+//    @Override
+//    public Formatter getFormatter()
+//    {
+//        return new FanFormatter();
+//    }
+//
     @Override
     public CodeCompletionHandler getCompletionHandler()
     {
         return new FanCompletionHandler();
     }
-
-    @Override
-    public boolean hasFormatter()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean hasHintsProvider()
-    {
-        return true;
-    }
-
-    @Override
-    public HintsProvider getHintsProvider()
-    {
-        return new FanHintsProvider();
-    }
-
+//
+//    @Override
+//    public boolean hasFormatter()
+//    {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean hasHintsProvider()
+//    {
+//        return true;
+//    }
+//
+//    @Override
+//    public HintsProvider getHintsProvider()
+//    {
+//        return new FanHintsProvider();
+//    }
+//
     @Override
     public DeclarationFinder getDeclarationFinder()
     {
