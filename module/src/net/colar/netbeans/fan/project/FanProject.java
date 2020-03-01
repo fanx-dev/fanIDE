@@ -6,6 +6,9 @@ package net.colar.netbeans.fan.project;
 
 import fan.parser.IncCompiler;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -15,12 +18,15 @@ import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
+import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.PrivilegedTemplates;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
 import org.netbeans.spi.project.ui.RecommendedTemplates;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
@@ -42,10 +48,13 @@ public class FanProject implements Project, ProjectInformation {
     private final FileObject dir;
     private final Lookup lkp;
     private final RequestProcessor rp;
-    private final Properties props = new Properties();
+    //private final Properties props = new Properties();
     private String name;
     
     public IncCompiler compiler = null;
+    
+    private Map<FileObject, List<ErrorDescription> > curErrors;
+    public Map<FileObject, List<ErrorDescription> > nextErrors;
 
     public FanProject(FileObject dir, ProjectState state) {
         // Most projects "services" are registered through the lookup.
@@ -161,6 +170,48 @@ public class FanProject implements Project, ProjectInformation {
         @Override
         public String[] getPrivilegedTemplates() {
             return PRIVILEGED_NAMES;
+        }
+    }
+    
+    public void updateIcon() {
+        try {
+            Map<FileObject, List<ErrorDescription> > lastErrors = this.curErrors;
+            Map<FileObject, List<ErrorDescription> > errors = this.nextErrors;
+            
+            if (errors == null) {
+                this.curErrors = null;
+                return;
+            }
+            
+            FanLogicalView view = (FanLogicalView)getLookup().lookup(FanLogicalView.class);
+            Map<FileObject, Boolean > errorFiles = new HashMap<>();
+            
+            if (lastErrors != null) {
+                for (Map.Entry<FileObject, List<ErrorDescription>> entry : lastErrors.entrySet()) {
+                    FileObject key = (FileObject)entry.getKey();
+                    errorFiles.put(key, false);
+                }
+            }
+            
+            for (Map.Entry<FileObject, List<ErrorDescription>> entry : errors.entrySet()) {
+                FileObject key = (FileObject)entry.getKey();
+                errorFiles.put(key, true);
+            }
+            
+            for (Map.Entry<FileObject, Boolean> entry : errorFiles.entrySet()) {
+                FileObject key = (FileObject)entry.getKey();
+                Boolean val = entry.getValue();
+                Node node = view.findPath(view.root, key);
+                if (node != null && node instanceof FanNode) {
+                    ((FanNode)node).setError(val.booleanValue());
+                }
+            }
+            
+            this.curErrors = this.nextErrors;
+            this.nextErrors = null;
+
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 }

@@ -23,6 +23,7 @@ import net.colar.netbeans.fan.actions.RunFanShellAction;
 import net.colar.netbeans.fan.actions.RunFanTest;
 import org.netbeans.api.annotations.common.StaticResource;
 import org.netbeans.api.project.Project;
+import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.netbeans.spi.project.ui.support.ProjectSensitiveActions;
@@ -31,6 +32,7 @@ import org.openide.nodes.Node;
 import org.openide.util.lookup.Lookups;
 import org.openide.actions.*;
 import org.openide.filesystems.*;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.FilterNode;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -58,13 +60,16 @@ public class FanNode extends FilterNode {
     private String icon;
     private String desc;
     private List<Action> actions;
+    private FanProject project;
+    private boolean error = false;
 
-    public FanNode(Project project, Node originalNode, org.openide.nodes.Children children, FileObject file) {
+    public FanNode(FanProject project, Node originalNode, org.openide.nodes.Children children, FileObject file) {
         super(originalNode, children, new ProxyLookup(new Lookup[]{
             Lookups.singleton(project),
             originalNode.getLookup()
         }));
         this.file = file;
+        this.project = project;
         // customize the node
         if (!file.isFolder()) {
             if (file.getExt().equalsIgnoreCase("fan")) {
@@ -170,12 +175,22 @@ public class FanNode extends FilterNode {
 
     @Override
     public Image getIcon(int type) {
-        java.awt.Image img;
+        java.awt.Image img = null;
         if (icon == null) {
             img = super.getIcon(type);
         }
         else {
-            img =  ImageUtilities.loadImage(icon);
+            img = ImageUtilities.loadImage(icon);
+        }
+        
+        if (error) {
+            try {
+                Image badge = ImageUtilities.loadImage("org/netbeans/modules/parsing/ui/resources/error-badge.gif");
+                img = ImageUtilities.mergeImages(ImageUtilities.addToolTipToImage(img, "Error!"),
+                    badge, 16, 0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if(file != null) {
@@ -187,6 +202,14 @@ public class FanNode extends FilterNode {
             }
         }
         return img;
+    }
+    
+    public void setError(boolean error) {
+       //if (this.error == error) return;
+       this.error = error;
+       this.fireIconChange();
+       this.fireOpenedIconChange();
+       //this.setDisplayName(getDisplayName());
     }
 
     @Override
@@ -266,9 +289,9 @@ public class FanNode extends FilterNode {
      */
     public static class FanNodeChildren extends FilterNode.Children {
 
-        private final Project project;
+        private final FanProject project;
 
-        FanNodeChildren(Project project, Node projectNode) {
+        FanNodeChildren(FanProject project, Node projectNode) {
             super(projectNode);
             this.project = project;
         }
@@ -292,7 +315,7 @@ public class FanNode extends FilterNode {
                     }
                 }
 
-                FanNode nd = new FanNode(project,
+                FanNode nd = new FanNode(this.project,
                         origChild,
                         children,
                         fob);

@@ -36,13 +36,15 @@ public class FanParser extends Parser {
         
         this.snapshot = snapshot;
         String code = snapshot.getText().toString();
+        FanProject proj = null;
         try {
             IncCompiler compiler = null;
             FileObject fo = snapshot.getSource().getFileObject();
             if (fo != null) {
                 Project prj = FileOwnerQuery.getOwner(fo);
                 if (prj != null && (prj instanceof FanProject)) {
-                    compiler = ((FanProject)prj).compiler;
+                    proj = (FanProject)prj;
+                    compiler = proj.compiler;
                 }
             }
             
@@ -51,7 +53,7 @@ public class FanParser extends Parser {
                 compiler.updateSource(file.osPath(), code);
                 fan.parser.CompilationUnit unit = (fan.parser.CompilationUnit)compiler.compiler.cunits().last();
                 compiler.resolveAll();
-                IndexerHelper.reportErrors(compiler.compiler.log());
+                IndexerHelper.reportErrors(proj, compiler.compiler.log());
                 result = new FanParserResult(snapshot, unit, compiler.compiler.log());
                 return;
             }
@@ -62,7 +64,7 @@ public class FanParser extends Parser {
         try {
             fan.parser.Parser fanParser = fan.parser.Parser.makeSimple(code, "podName");
             fanParser.parse();
-            IndexerHelper.reportErrors(fanParser.log());
+            IndexerHelper.reportErrors(proj, fanParser.log());
             result = new FanParserResult (snapshot, fanParser.unit(), fanParser.log());
         } catch (Exception ex) {
             Logger.getLogger(FanParser.class.getName()).log(Level.WARNING, null, ex);

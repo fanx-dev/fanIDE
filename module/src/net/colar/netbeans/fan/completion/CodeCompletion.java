@@ -154,7 +154,8 @@ public class CodeCompletion {
         type = ((FanResolvedGenericType)type).getPhysicalType();
         }*/
         // Not using a cache here.
-        fan.sys.List slots = type.slots().vals();
+        fan.std.Map slotMap = type.slots();
+        fan.sys.List slots = slotMap.vals();
         for (int i = 0; i < slots.size(); ++i) {
             CSlot slot = (CSlot) slots.get(i);
             if (slot.isPrivate() || slot.isSynthetic()) continue;

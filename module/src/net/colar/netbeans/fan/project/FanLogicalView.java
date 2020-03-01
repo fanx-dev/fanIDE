@@ -30,6 +30,8 @@ public class FanLogicalView implements LogicalViewProvider {
             = "Projects/net-colar-netbeans-fan-project-FanProject/Nodes";
     private final FanProject project;
 
+    public Node root;
+    
     public FanLogicalView(FanProject project) {
         this.project = project;
     }
@@ -47,14 +49,15 @@ public class FanLogicalView implements LogicalViewProvider {
             Node originalObj = dobj.getNodeDelegate();
 
             //This FilterNode will be our project node:
-            return new FanProjectNode(project, originalObj, dir);
-
+            root = new FanProjectNode(project, originalObj, dir);
+            
         } catch (DataObjectNotFoundException donfe) {
             Exceptions.printStackTrace(donfe);
             //Fallback: the directory couldn't be created -
             //read-only filesystem or something evil happened:
-            return new AbstractNode(Children.LEAF);
+            root = new AbstractNode(Children.LEAF);
         }
+        return root;
     }
 
     /**

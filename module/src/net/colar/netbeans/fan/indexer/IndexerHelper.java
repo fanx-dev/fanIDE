@@ -15,10 +15,14 @@ import fan.parser.Loc;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import net.colar.netbeans.fan.fantom.FanPlatform;
+import net.colar.netbeans.fan.project.FanLogicalView;
+import net.colar.netbeans.fan.project.FanNode;
 import net.colar.netbeans.fan.project.FanProject;
 import static net.colar.netbeans.fan.project.FanProjectFactory.BUILD_FILE;
 import net.colar.netbeans.fan.utils.FanUtilities;
@@ -28,8 +32,13 @@ import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.netbeans.spi.editor.hints.Severity;
+import org.netbeans.spi.project.ui.LogicalViewProvider;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileStateInvalidException;
+import org.openide.filesystems.FileStatusEvent;
 import org.openide.filesystems.FileUtil;
+import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -96,7 +105,7 @@ public class IndexerHelper {
         return true;
     }
     
-    public static void reportErrors(CompilerLog log) {
+    public static void reportErrors(FanProject proj, CompilerLog log) {
         Map<FileObject, List<ErrorDescription> > errorMap = new HashMap<>();
         for (int i=0; i<log.errs().size(); ++i) {
             CompilerErr err = (CompilerErr)log.errs().get(i);
@@ -108,6 +117,11 @@ public class IndexerHelper {
                 int end = (int)err.loc.end();
                 if (start == -1) start = 0;
                 if (end == -1) end = 0;
+                
+                if (err.loc.file == null || err.loc.file.equals("Unknown")) {
+                    continue;
+                }
+                
                 FileObject fo = FileUtil.toFileObject(new File(err.loc.file));
                 ErrorDescription errorDescription = ErrorDescriptionFactory.createErrorDescription(
                         Severity.ERROR,
@@ -133,6 +147,15 @@ public class IndexerHelper {
             FileObject key = (FileObject)entry.getKey();
             List<ErrorDescription> value = entry.getValue();
             HintsController.setErrors (key, "Fan", value);
+        }
+        
+        if (proj != null) {
+            try {
+                proj.nextErrors = errorMap;
+                proj.updateIcon();
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 }
