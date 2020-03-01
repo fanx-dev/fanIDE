@@ -7,6 +7,7 @@ package net.colar.netbeans.fan.structure;
 //import fanx.util.FileUtil;
 import fan.parser.CNode;
 import fan.parser.CNode$;
+import fan.parser.CTypeDef;
 import fan.parser.FieldDef;
 import fan.parser.Loc;
 import fan.parser.MethodDef;
@@ -70,7 +71,7 @@ public class FanDeclarationFinder implements DeclarationFinder {
         else if (node instanceof  fan.parser.CType) {
             fan.parser.CType expr = (fan.parser.CType)node;
             if (expr.isResolved()) {
-                TypeDef type = (TypeDef)expr.typeDef();
+                CTypeDef type = (CTypeDef)expr.typeDef();
                 String file = type.loc().file;
                 FileObject fo = FileUtil.toFileObject(new File(file));
                 return new DeclarationLocation(fo, (int)type.loc().offset);

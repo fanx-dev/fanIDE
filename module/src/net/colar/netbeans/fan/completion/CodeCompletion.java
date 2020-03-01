@@ -59,7 +59,7 @@ public class CodeCompletion {
 
     public ArrayList<CompletionProposal> propose() {
         try {
-            FanUtilities.logger.info("complete caretOffset: " + caretOffset + " prefix:" + prefix);
+            FanUtilities.logger.info("complete caretOffset: " + caretOffset + ", prefix:" + prefix);
 
             FanParserResult result = (FanParserResult) context.getParserResult();
             path = fan.sys.List.make(10);
@@ -67,13 +67,18 @@ public class CodeCompletion {
             Loc loc = Loc.make(null, 0l, 0l, caretOffset, 0l);
             curNode = CNode$.findAt(result.getCUnit(), loc, path);
 
-            FanUtilities.logger.info("complete node: " + FanType.typeof(curNode) + " prefix:" + prefix);
+            FanUtilities.logger.info("complete node: " + FanType.typeof(curNode) + ", prefix:" + prefix);
 
             if (curNode instanceof fan.parser.Using) {
                 proposeUsing();
-            } else if (curNode instanceof fan.parser.CallExpr) {
+            }
+            else if (curNode instanceof fan.parser.ShortcutExpr) {
+                proposeVars();
+            }
+            else if (curNode instanceof fan.parser.CallExpr) {
                 proposeChain();
-            } else if (curNode instanceof fan.parser.NameExpr) {
+            }
+            else if (curNode instanceof fan.parser.NameExpr) {
                 if (!proposeChain()) {
                     proposeVars();
                 }

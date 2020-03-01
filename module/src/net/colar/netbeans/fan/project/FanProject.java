@@ -53,8 +53,7 @@ public class FanProject implements Project, ProjectInformation {
     
     public IncCompiler compiler = null;
     
-    private Map<FileObject, List<ErrorDescription> > curErrors;
-    public Map<FileObject, List<ErrorDescription> > nextErrors;
+    public Map<FileObject, List<ErrorDescription> > curErrors;
 
     public FanProject(FileObject dir, ProjectState state) {
         // Most projects "services" are registered through the lookup.
@@ -170,48 +169,6 @@ public class FanProject implements Project, ProjectInformation {
         @Override
         public String[] getPrivilegedTemplates() {
             return PRIVILEGED_NAMES;
-        }
-    }
-    
-    public void updateIcon() {
-        try {
-            Map<FileObject, List<ErrorDescription> > lastErrors = this.curErrors;
-            Map<FileObject, List<ErrorDescription> > errors = this.nextErrors;
-            
-            if (errors == null) {
-                this.curErrors = null;
-                return;
-            }
-            
-            FanLogicalView view = (FanLogicalView)getLookup().lookup(FanLogicalView.class);
-            Map<FileObject, Boolean > errorFiles = new HashMap<>();
-            
-            if (lastErrors != null) {
-                for (Map.Entry<FileObject, List<ErrorDescription>> entry : lastErrors.entrySet()) {
-                    FileObject key = (FileObject)entry.getKey();
-                    errorFiles.put(key, false);
-                }
-            }
-            
-            for (Map.Entry<FileObject, List<ErrorDescription>> entry : errors.entrySet()) {
-                FileObject key = (FileObject)entry.getKey();
-                errorFiles.put(key, true);
-            }
-            
-            for (Map.Entry<FileObject, Boolean> entry : errorFiles.entrySet()) {
-                FileObject key = (FileObject)entry.getKey();
-                Boolean val = entry.getValue();
-                Node node = view.findPath(view.root, key);
-                if (node != null && node instanceof FanNode) {
-                    ((FanNode)node).setError(val.booleanValue());
-                }
-            }
-            
-            this.curErrors = this.nextErrors;
-            this.nextErrors = null;
-
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
         }
     }
 }

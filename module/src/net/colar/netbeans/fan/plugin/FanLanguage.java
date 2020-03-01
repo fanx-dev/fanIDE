@@ -155,8 +155,8 @@ public class FanLanguage extends DefaultLanguageConfig
      * A Indexer for this language, or null if none is available
      * @return the indexer
      */
-    @Override
-    public EmbeddingIndexerFactory getIndexerFactory() {
-        return new FanIndexerFactory();
-    }
+//    @Override
+//    public EmbeddingIndexerFactory getIndexerFactory() {
+//        return new FanIndexerFactory();
+//    }
 }

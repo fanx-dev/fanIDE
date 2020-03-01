@@ -9,6 +9,7 @@ import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
+import org.netbeans.modules.parsing.spi.indexing.CustomIndexerFactory;
 import org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexer;
 import org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
@@ -17,20 +18,9 @@ import org.openide.filesystems.FileObject;
 /**
  *
  */
-public class FanIndexerFactory extends EmbeddingIndexerFactory{
+public class FanIndexerFactory extends CustomIndexerFactory{
 
-    private FanEmbeddingIndexer embeddingIndexer = new FanEmbeddingIndexer();
-    
-    /**
-     * Creates  new {@link Indexer}.
-     * @param indexing for which the indexer should be created
-     * @param snapshot for which the indexer should be created
-     * @return an indexer
-     */
-    public EmbeddingIndexer createIndexer (final Indexable indexable, final Snapshot snapshot) {
-        FanUtilities.logger.info("createIndexer");
-        return embeddingIndexer;
-    }
+    private FanIndexer indexer = new FanIndexer();
     
     public static final String NAME = "FanIndexer";
     public static final int VERSION = 4;
@@ -78,6 +68,17 @@ public class FanIndexerFactory extends EmbeddingIndexerFactory{
         FileObject root = context.getRoot();
         IndexerHelper.index(root);
         return true;
+    }
+
+    @Override
+    public CustomIndexer createIndexer() {
+        FanUtilities.logger.info("createIndexer");
+        return indexer;
+    }
+
+    @Override
+    public boolean supportsEmbeddedIndexers() {
+        return false;
     }
     
 }

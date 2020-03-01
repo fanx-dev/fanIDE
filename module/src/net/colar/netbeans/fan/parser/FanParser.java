@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import net.colar.netbeans.fan.indexer.IndexerHelper;
+import net.colar.netbeans.fan.project.ErrorReport;
 import net.colar.netbeans.fan.project.FanProject;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.project.FileOwnerQuery;
@@ -53,7 +54,7 @@ public class FanParser extends Parser {
                 compiler.updateSource(file.osPath(), code);
                 fan.parser.CompilationUnit unit = (fan.parser.CompilationUnit)compiler.compiler.cunits().last();
                 compiler.resolveAll();
-                IndexerHelper.reportErrors(proj, compiler.compiler.log());
+                ErrorReport.reportErrors(proj, compiler.compiler.log());
                 result = new FanParserResult(snapshot, unit, compiler.compiler.log());
                 return;
             }
@@ -64,7 +65,7 @@ public class FanParser extends Parser {
         try {
             fan.parser.Parser fanParser = fan.parser.Parser.makeSimple(code, "podName");
             fanParser.parse();
-            IndexerHelper.reportErrors(proj, fanParser.log());
+            ErrorReport.reportErrors(proj, fanParser.log());
             result = new FanParserResult (snapshot, fanParser.unit(), fanParser.log());
         } catch (Exception ex) {
             Logger.getLogger(FanParser.class.getName()).log(Level.WARNING, null, ex);

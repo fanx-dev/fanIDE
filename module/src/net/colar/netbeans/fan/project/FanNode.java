@@ -209,7 +209,7 @@ public class FanNode extends FilterNode {
        this.error = error;
        this.fireIconChange();
        this.fireOpenedIconChange();
-       //this.setDisplayName(getDisplayName());
+       this.fireDisplayNameChange(null, null);
     }
 
     @Override
