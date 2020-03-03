@@ -71,7 +71,7 @@ public class IndexerHelper {
         
         FanUtilities.logger.fine("do compiler:"+podFile.getPath());
         
-        fan.std.File file = fan.std.File.fromPath(podFile.getPath());
+        fan.std.File file = fan.std.File.os(podFile.getPath());
         IncCompiler compiler = IncCompiler.fromProps(file, getNamespace());
         
         
