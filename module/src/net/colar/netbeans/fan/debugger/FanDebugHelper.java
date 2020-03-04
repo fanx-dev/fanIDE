@@ -52,8 +52,8 @@ public class FanDebugHelper {
             } else {
                 String filter = getClassFilter(pod, name);
                 bp.setPreferredClassName(filter);
-                //bp.setSourcePath("fan/" + pod + "/" + name);
-                bp.setSourcePath(path);
+                bp.setSourcePath("fan/" + pod + "/" + name);
+                //bp.setSourcePath(path);
                 bp.setPrintText(path);
                 /*
                  * SourcePath is required to match path in jar (LineBreakPointImpl check this)

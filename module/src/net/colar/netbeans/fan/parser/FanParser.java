@@ -49,6 +49,17 @@ public class FanParser extends Parser {
                 }
             }
             
+            if (compiler != null && compiler.srcDirs() != null) {
+                String dir = proj.getProjectDirectory().getPath();
+                String file = fo.getPath();
+                fan.std.File fdir = fan.std.File.os(dir);
+                fan.std.File ffile = fan.std.File.os(file);
+                fan.std.Uri rel = ffile.uri().relTo(fdir.uri()).parent();
+                if (!compiler.srcDirs().contains(rel)) {
+                    compiler = null;
+                }
+            }
+            
             if (compiler != null) {
                 fan.std.File file = fan.std.File.os(fo.getPath());
                 compiler.updateSource(file.osPath(), code);

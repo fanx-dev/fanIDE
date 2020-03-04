@@ -23,7 +23,7 @@ import org.openide.loaders.DataObjectNotFoundException;
 public class FanUtilities
 {
 
-    public static final Logger logger = Logger.getLogger("Generic (FanUtilities)");
+    public static final Logger logger = Logger.getLogger("FanIDE");
 
     public static boolean isWindowsOS() {
         String os = System.getProperty("os.name");

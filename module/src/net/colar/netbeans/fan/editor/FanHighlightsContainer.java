@@ -13,7 +13,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
-import net.colar.netbeans.fan.utils.FantomConstants;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.editor.settings.AttributesUtilities;
 import org.netbeans.api.editor.settings.FontColorSettings;
@@ -34,6 +33,8 @@ import org.openide.util.WeakListeners;
  */
 public class FanHighlightsContainer extends AbstractHighlightsContainer implements TokenHierarchyListener
 {
+    public static final String COLORING_JAVASCRIPT="embedded-js";
+    public static final String COLORING_SQL="embedded-sql";
 
     private final AttributeSet javascriptBackground;
     private final AttributeSet sqlBackground;
@@ -51,12 +52,12 @@ public class FanHighlightsContainer extends AbstractHighlightsContainer implemen
         FontColorSettings fcs = MimeLookup.getLookup(FanLanguage.FAN_MIME_TYPE).lookup(FontColorSettings.class);
         Color jsBC = null;
         Color sqlBC = null;
-        AttributeSet as = fcs.getTokenFontColors(FantomConstants.COLORING_JAVASCRIPT);
+        AttributeSet as = fcs.getTokenFontColors(COLORING_JAVASCRIPT);
         if (as != null)
         {
             jsBC = (Color) as.getAttribute(StyleConstants.Background);
         }
-        AttributeSet asSql = fcs.getTokenFontColors(FantomConstants.COLORING_SQL);
+        AttributeSet asSql = fcs.getTokenFontColors(COLORING_SQL);
         if (asSql != null)
         {
             sqlBC = (Color) asSql.getAttribute(StyleConstants.Background);

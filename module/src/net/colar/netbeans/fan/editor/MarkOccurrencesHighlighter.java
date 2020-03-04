@@ -17,6 +17,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleConstants;
+import net.colar.netbeans.fan.utils.FanUtilities;
 import org.netbeans.api.editor.settings.AttributesUtilities;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.spi.editor.highlighting.support.OffsetsBag;
@@ -57,7 +58,9 @@ public class MarkOccurrencesHighlighter implements CaretListener {
     @Override
     public void caretUpdate(CaretEvent e) {
         bag.clear();
-        setupAutoRefresh();
+        if (!FanUtilities.isWindowsOS()) {
+            setupAutoRefresh();
+        }
     }
 
     public void setupAutoRefresh() {
@@ -67,7 +70,7 @@ public class MarkOccurrencesHighlighter implements CaretListener {
                 public void run() {
                     try {
                         String selection = comp.getSelectedText();
-                        if (selection != null && selection.length() < 128) {
+                        if (selection != null && selection.length() < 128 && selection.length() > 0) {
                             int pos = 0;
                             int len = selection.length();
                             String text = comp.getText();
@@ -76,7 +79,7 @@ public class MarkOccurrencesHighlighter implements CaretListener {
                                 if (startOffset == -1) break;
                                 int endOffset = startOffset+len;
                                 bag.addHighlight(startOffset, endOffset, defaultColors);
-                                pos += len;
+                                pos = endOffset;
                             }
                         }
                     } catch (Exception e) {
