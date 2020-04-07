@@ -136,7 +136,7 @@
             </file>
             <file name="FantomBuild" url="nbresloc:/net/colar/netbeans/fan/templates/FanBuild.html">
                 <!--<attr name="SystemFileSystem.localizingBundle" stringvalue="net.colar.netbeans.fan.plugin.Bundle"/>-->
-                <attr name="template" boolvalue="true"/>
+                <attr name="template" boolvalue="false"/>
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="net.colar.netbeans.fan.plugin.Bundle"/>
                 <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/net/colar/netbeans/fan/resources/fan.png"/>
                 <attr name="templateWizardURL" urlvalue="nbresloc:/net/colar/netbeans/fan/templates/FanBuildDesc.html"/>

@@ -39,7 +39,11 @@ public final class NewTestWizardIterator implements WizardDescriptor.Instantiati
 	{
 		if (panels == null)
 		{
-			String folder = Templates.getTargetFolder(wizard).getPath();
+			FileObject targetFolder = Templates.getTargetFolder(wizard);
+                        if (targetFolder == null) {
+                            targetFolder = Templates.getProject(wizard).getProjectDirectory();
+                        }
+                        String folder = targetFolder.getPath();
 			panels = new WizardDescriptor.Panel[]
 				{
 					new NewTestWizardPanel1(folder)
