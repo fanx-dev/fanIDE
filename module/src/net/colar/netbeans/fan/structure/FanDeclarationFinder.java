@@ -38,7 +38,7 @@ public class FanDeclarationFinder implements DeclarationFinder {
         FanParserResult task = (FanParserResult) result;
         fan.parser.CompilationUnit unit = task.getCUnit();
         
-        CNode node = CNode$.findAt(unit, Loc.make("", 0l, 0l, caretOffset, 0l));
+        CNode node = CNode$.findAt(unit, Loc.make("", 0l, 0l, caretOffset));
         
         FanUtilities.logger.fine("findDeclaration:"+caretOffset + ", node:" + FanType.typeof(node) +
                 node.loc().toStr());

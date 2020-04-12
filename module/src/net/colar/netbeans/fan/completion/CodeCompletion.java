@@ -64,7 +64,7 @@ public class CodeCompletion {
             FanParserResult result = (FanParserResult) context.getParserResult();
             path = fan.sys.List.make(10);
             
-            Loc loc = Loc.make(null, 0l, 0l, caretOffset, 0l);
+            Loc loc = Loc.make(null, 0l, 0l, caretOffset);
             curNode = CNode$.findAt(result.getCUnit(), loc, path);
 
             FanUtilities.logger.info("complete node: " + FanType.typeof(curNode) + ", prefix:" + prefix);

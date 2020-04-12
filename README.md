@@ -34,7 +34,7 @@ Apache Netbeans > Tools > Options > Appearance > Look and Feel > FlatLaf Light.
 Depends to 'https://github.com/fanx-dev/fanx/tree/master/src/parser'.
 ```
 fanb pod.props
-fan build.fan dist
+fan build::JarDistMain parser parser::IncCompiler.main
 ```
 copy parser.jar to module/release/modules/ext/
 

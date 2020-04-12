@@ -39,9 +39,30 @@ public class FanElementHandle implements ElementHandle {
         this.kind = kind;
         
         int start = (int)node.loc().offset;
-        int stop = start + (int)node.loc().len;
+        int stop = start + (int)(node.loc().offset + node.len());
         this.offsetRange = new OffsetRange(start, stop);
         this.name = (String)FanObj.trap(node, "name");
+        
+        if (node instanceof fan.parser.CSlot) {
+            fan.parser.CSlot s = (fan.parser.CSlot)node;
+            if (s.isStatic())
+            {
+               modifiers.add(Modifier.STATIC);
+            }
+            
+            if (s.isPrivate())
+            {
+                modifiers.add(Modifier.PRIVATE);
+            }
+            else if (s.isPublic())
+            {
+                modifiers.add(Modifier.PUBLIC);
+            }
+            else if (s.isProtected())
+            {
+                modifiers.add(Modifier.PROTECTED);
+            }
+        }
     }
     
     public FanElementHandle(String name, ElementKind kind) {

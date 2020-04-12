@@ -29,16 +29,16 @@ import org.openide.util.Exceptions;
 public class ErrorReport {
     public static void reportErrors(FanProject proj, CompilerLog log) {
         Map<FileObject, List<ErrorDescription> > errorMap = new HashMap<>();
-        for (int i=0; i<log.errs().size(); ++i) {
+        for (int i=(int)log.errs().size()-1; i>=0; --i) {
             CompilerErr err = (CompilerErr)log.errs().get(i);
             
             try {
                 FanUtilities.logger.fine("reportErrors:"+err.toStr());
 
                 int start = (int)err.loc.offset;
-                int end = (int)err.loc.end();
+                int end = start;
                 if (start == -1) start = 0;
-                if (end == -1) end = 0;
+                //if (end == -1) end = 0;
                 
                 if (err.loc.file == null || err.loc.file.equals("Unknown")) {
                     continue;

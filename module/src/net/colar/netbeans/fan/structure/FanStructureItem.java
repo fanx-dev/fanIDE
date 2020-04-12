@@ -50,7 +50,7 @@ public class FanStructureItem implements StructureItem {
         // from that we can find start and end location of struct. text in source file.
         Loc range = node.loc();
         start = (int)range.offset;
-        stop = start + (int)range.len;
+        stop = start + (int)node.len();
         
         FileObject file = null;
         if (result.getSnapshot().getSource() != null) {

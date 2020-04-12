@@ -55,7 +55,22 @@ public class IndexerHelper {
     }
     
     private static void indexProject(FanProject proj) {
+        
+        CPod oldPod = null;
+        if (proj.compiler != null) {
+            oldPod = proj.compiler.compiler.pod;
+        }
+        
         if (!compile(proj)) return;
+        
+        if (oldPod != null) {
+            fan.sys.List types = oldPod.types();
+            for (int j=0; j<types.size(); ++j) {
+                CTypeDef type = (CTypeDef)types.get(j);
+                FanIndex.get().remove(type);
+            }
+        }
+        
         CPod pod = proj.compiler.compiler.pod;
         fan.sys.List types = pod.types();
         for (int j=0; j<types.size(); ++j) {

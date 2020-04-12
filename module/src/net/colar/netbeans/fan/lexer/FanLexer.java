@@ -60,7 +60,7 @@ class FanLexer implements Lexer<FanTokenId> {
         
         if (false) {
             System.out.println("=== token:"+ token.kind() +
-                    ", offset:"+token.loc.offset+ ", len:" + token.loc.len +
+                    ", offset:"+token.loc.offset+ ", len:" + token.len() +
                     ", lastPos:" + lastPos + ", codeLength:"+codeLength + ", val:" + token.val);
         }
         
@@ -96,7 +96,7 @@ class FanLexer implements Lexer<FanTokenId> {
             fkind = FanTokenId.TokenKind.symbol;
         }
         
-        int offset = (int)(token.loc.offset + token.loc.len);
+        int offset = (int)(token.loc.offset + token.len());
         int len = offset - lastPos;
         
         org.netbeans.api.lexer.Token<FanTokenId> ftoken = info.tokenFactory().createToken(
