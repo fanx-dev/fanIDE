@@ -69,7 +69,7 @@ public class FanExecutionGroup implements Callable<Process> {
         private volatile boolean done = false;
         // Using Piped Streams to append each subprocess output into one common
         // output for the whole execution group
-        private ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        private ByteArrayOutputStream bos = new ByteArrayOutputStream();
         private PipedInputStream globalInput = new PipedInputStream();
         private PipedOutputStream globalOutput;
         // Whole procfess (all commands)
@@ -131,25 +131,25 @@ public class FanExecutionGroup implements Callable<Process> {
                 }
             }
             // Try to close all the streams properly
-            if (bos != null) {
-                try {
-                    bos.flush();
-                    bos.close();
-                } catch (Exception e) {
-                }
-            }
-            if (globalInput != null) {
-                try {
-                    globalInput.close();
-                } catch (Exception e) {
-                }
-            }
-            if (globalOutput != null) {
-                try {
-                    globalOutput.close();
-                } catch (Exception e) {
-                }
-            }
+//            if (bos != null) {
+//                try {
+//                    bos.flush();
+//                    bos.close();
+//                } catch (Exception e) {
+//                }
+//            }
+//            if (globalInput != null) {
+//                try {
+//                    globalInput.close();
+//                } catch (Exception e) {
+//                }
+//            }
+//            if (globalOutput != null) {
+//                try {
+//                    globalOutput.close();
+//                } catch (Exception e) {
+//                }
+//            }
             done = true;
         }
 
@@ -201,12 +201,12 @@ public class FanExecutionGroup implements Callable<Process> {
                     curSubprocess.destroy();
                 }
                 // also try cleaning up all streams just in case
-                if (bos != null) {
-                    try {
-                        bos.close();
-                    } catch (Exception e) {
-                    }
-                }
+//                if (bos != null) {
+//                    try {
+//                        bos.close();
+//                    } catch (Exception e) {
+//                    }
+//                }
                 if (globalInput != null) {
                     try {
                         globalInput.close();
