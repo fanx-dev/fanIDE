@@ -84,7 +84,7 @@ public class FanIndex
                             for (int j=0; j<types.size(); ++j) {
                                 CTypeDef type = (CTypeDef)types.get(j);
                                 if (fan.parser.TypeMixin$.isSynthetic(type)) continue;
-                                FanIndex.get().put(type);
+                                FanIndex.get().putType(type);
                             }
                         }
                     } catch (Exception e) {
@@ -156,9 +156,9 @@ public class FanIndex
         return res;
     }
     
-    public synchronized void put(CTypeDef type) {
+    public synchronized void putType(CTypeDef type) {
         String name = type.name();
-        for (int i=1; i<name.length(); ++i) {
+        for (int i=1; i<name.length()+1; ++i) {
             String key = name.substring(0, i);
             List<CTypeDef> list = prefixMap.get(key);
             if (list == null) {
@@ -169,13 +169,18 @@ public class FanIndex
         }
     }
     
-    public synchronized void remove(CTypeDef type) {
+    public synchronized void removeType(CTypeDef type) {
         String name = type.name();
-        for (int i=1; i<name.length(); ++i) {
+        for (int i=1; i<name.length()+1; ++i) {
             String key = name.substring(0, i);
             List<CTypeDef> list = prefixMap.get(key);
             if (list != null) {
-                list.remove(type);
+                for (int j=0; j<list.size(); ++j) {
+                    if (list.get(j).qname().equals(type.qname())) {
+                        list.remove(j);
+                        --j;
+                    }
+                }
             }
         }
     }

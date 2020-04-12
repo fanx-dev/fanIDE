@@ -67,7 +67,7 @@ public class IndexerHelper {
             fan.sys.List types = oldPod.types();
             for (int j=0; j<types.size(); ++j) {
                 CTypeDef type = (CTypeDef)types.get(j);
-                FanIndex.get().remove(type);
+                FanIndex.get().removeType(type);
             }
         }
         
@@ -75,7 +75,7 @@ public class IndexerHelper {
         fan.sys.List types = pod.types();
         for (int j=0; j<types.size(); ++j) {
             CTypeDef type = (CTypeDef)types.get(j);
-            FanIndex.get().put(type);
+            FanIndex.get().putType(type);
         }
     }
     
