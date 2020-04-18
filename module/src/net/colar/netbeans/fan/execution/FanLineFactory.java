@@ -20,9 +20,9 @@ public final class FanLineFactory implements LineConvertorFactory
 {
     // See the traceback module for details
 
-    static final Pattern FANTOM_STACKTRACE_PATTERN = Pattern.compile("^  File \"(.+\\.fan)\", line (\\d+).*");
+    static final Pattern LINE_PATTERN = Pattern.compile("(/.+\\.fan)\\((\\d+),\\d\\).*");
     /** Regexp. for extensions. */
-    public static final Pattern EXT_RE = Pattern.compile(".*\\.(fan|fwt)"); // NOI18N
+    //public static final Pattern EXT_RE = Pattern.compile(".*\\.(fan|fwt)"); // NOI18N
     private final FileLocator locator;
     private final LineConvertor[] convertors;
     private final boolean stdConvertors;
@@ -72,7 +72,7 @@ public final class FanLineFactory implements LineConvertorFactory
     public static List<LineConvertor> getStandardConvertors(FileLocator locator)
     {
 	List<LineConvertor> result = new ArrayList<LineConvertor>(4);
-	result.add(LineConvertors.filePattern(locator, FANTOM_STACKTRACE_PATTERN, EXT_RE, 1, 2));
+	result.add(LineConvertors.filePattern(locator, LINE_PATTERN, null, 1, 2));
 	return result;
     }
 

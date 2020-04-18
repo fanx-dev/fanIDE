@@ -53,6 +53,7 @@ public class FanExecution {
     private Runnable postExecutionHook;
 
     public FanExecution() {
+        addStandardRecognizers();
     }
 
     @Override
