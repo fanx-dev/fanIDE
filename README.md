@@ -26,13 +26,17 @@ https://netbeans.apache.org/download/index.html
 #### Install as plugin
 Apache Netbeans > Tools > Plugins > Downloaded > Add Plugins
 
+#### Config Fanx/Fantom Env Path
+Apache Netbeans > Tools > Preferences > Fantom
+
 #### Set the theme
 Apache Netbeans > Tools > Options > Appearance > Look and Feel > FlatLaf Light.
 
 
-### Build from source
-Depends to 'https://github.com/fanx-dev/fanx/tree/master/src/parser'.
+### Build from Source
+clone 'https://github.com/fanx-dev/fanx.git'.
 ```
+cd fanx/src/parser
 fanb pod.props
 fan build::JarDistMain parser parser::IncCompiler.main
 ```
