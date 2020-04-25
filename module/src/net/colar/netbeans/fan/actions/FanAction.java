@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
 import javax.swing.JOptionPane;
+import net.colar.netbeans.fan.execution.FanLineFactory;
 import net.colar.netbeans.fan.plugin.FanLanguage;
 import net.colar.netbeans.fan.utils.FanUtilities;
 import net.colar.netbeans.fan.fantom.FanPlatform;
@@ -19,6 +20,8 @@ import net.colar.netbeans.fan.project.FanProjectProperties;
 import org.netbeans.api.debugger.jpda.DebuggerStartException;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
+import org.netbeans.api.extexecution.print.LineConvertor;
+import org.netbeans.api.extexecution.print.LineConvertors;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.openide.awt.HtmlBrowser;
@@ -36,7 +39,7 @@ import org.openide.windows.TopComponent;
  */
 public abstract class FanAction {
 
-    public final ExecutionDescriptor descriptor = new ExecutionDescriptor().frontWindow(true).controllable(true).inputVisible(true).showProgress(true).showSuspended(true);
+    public final ExecutionDescriptor descriptor;
     private final FanProject project;
 //    private FanJpdaThread jpdaThread = null;
 //    protected static Future<Integer> talesHandle;
@@ -44,6 +47,13 @@ public abstract class FanAction {
     public FanAction(FanProject project) {
         this.project = project;
         assert project != null;
+        
+        ExecutionDescriptor descriptor = new ExecutionDescriptor().frontWindow(true).controllable(true).inputVisible(true).showProgress(true).showSuspended(true);
+        LineConvertors.FileLocator fileLocator = null;
+        LineConvertor[] convertorArray = new LineConvertor[0];
+        FanLineFactory convertorFactory = FanLineFactory.withStandardConvertors(fileLocator, convertorArray);
+        descriptor = descriptor.outConvertorFactory(convertorFactory);
+        this.descriptor = descriptor;
     }
 
     public abstract String getCommandId();
