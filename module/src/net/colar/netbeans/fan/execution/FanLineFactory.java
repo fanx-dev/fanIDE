@@ -20,7 +20,7 @@ public final class FanLineFactory implements LineConvertorFactory
 {
     // See the traceback module for details
 
-    static final Pattern LINE_PATTERN = Pattern.compile("(/.+\\.fan)\\((\\d+),\\d+\\).*");
+    static final Pattern LINE_PATTERN = Pattern.compile("(.+\\.fan)\\((\\d+),\\d+\\).*");
     /** Regexp. for extensions. */
     //public static final Pattern EXT_RE = Pattern.compile(".*\\.(fan|fwt)"); // NOI18N
     private final FileLocator locator;
