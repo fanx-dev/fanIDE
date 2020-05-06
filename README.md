@@ -42,3 +42,8 @@ fan build::JarDistMain parser parser::IncCompiler.main
 ```
 copy parser.jar to module/release/modules/ext/
 
+### Limit
+- Some features is invalid in Fantom runtime
+- JavaFFI is not yet supported
+
+
